@@ -39,21 +39,23 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
   }
 
   function generateImage(image: HTMLImageElement, canvasTarget: HTMLCanvasElement) {
-      canvasTarget.width = image.width * tileSize;
-      canvasTarget.height = image.height * tileSize;
+    canvasTarget.width = image.width * tileSize;
+    canvasTarget.height = image.height * tileSize;
 
-      const canvasBuffer = createCanvasBuffer(image);
-      const contextBuffer = getContext(canvasBuffer);
-      const contextTarget = getContext(canvasTarget);
+    const canvasBuffer = createCanvasBuffer(image);
+    const contextBuffer = getContext(canvasBuffer);
+    const contextTarget = getContext(canvasTarget);
 
-      console.log("(", canvasTarget.width, ", ", canvasTarget.height, ")");
+    console.log("(", canvasTarget.width, ", ", canvasTarget.height, ")");
 
-      for(let y = 0; y < image.height; ++y) {
+     for(let y = 0; y < image.height; ++y) {
         for(let x = 0; x < image.width; ++x) {
           const color = fromColorToDominantRubikColor(fromPixelToColor(contextBuffer, x,y));
           contextTarget.fillStyle = color;
+          contextTarget.beginPath();
           contextTarget.rect(x, y, tileSize, tileSize);
           contextTarget.fill();
+          contextTarget.closePath();
         }
       }
   }
@@ -68,12 +70,16 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
       const contextTarget = getContext(canvasTarget);
       resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
+      console.log("( ", tileSize, " ", expectedWidth, ", ", expectedHeight, ")");
+
       for(let y = 0; y < canvasBuffer.height; y += tileSize) {
         for(let x = 0; x < canvasBuffer.width; x += tileSize) {
           const color = fromColorToDominantRubikColor(interpolateArea(contextBuffer, tileSize, x,y));
           contextTarget.fillStyle = color;
+          contextTarget.beginPath();
           contextTarget.rect(x, y, tileSize, tileSize);
           contextTarget.fill();
+          contextTarget.closePath();
         }
       }
     }
