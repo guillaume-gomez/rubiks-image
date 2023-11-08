@@ -38,6 +38,14 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
     return canvasBuffer;
   }
 
+  function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number, tileSize: number) {
+    context.fillStyle = color;
+    context.beginPath();
+    context.rect(x, y, tileSize, tileSize);
+    context.fill();
+    context.closePath();
+  }
+
   function generateImage(image: HTMLImageElement, canvasTarget: HTMLCanvasElement) {
     canvasTarget.width = image.width * tileSize;
     canvasTarget.height = image.height * tileSize;
@@ -51,11 +59,7 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
      for(let y = 0; y < image.height; ++y) {
         for(let x = 0; x < image.width; ++x) {
           const color = fromColorToDominantRubikColor(fromPixelToColor(contextBuffer, x,y));
-          contextTarget.fillStyle = color;
-          contextTarget.beginPath();
-          contextTarget.rect(x, y, tileSize, tileSize);
-          contextTarget.fill();
-          contextTarget.closePath();
+          renderSquare(contextTarget, color, x, y, tileSize);
         }
       }
   }
@@ -70,16 +74,12 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
       const contextTarget = getContext(canvasTarget);
       resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
-      console.log("( ", tileSize, " ", expectedWidth, ", ", expectedHeight, ")");
+      console.log("( ", expectedWidth, ", ", expectedHeight, ")");
 
       for(let y = 0; y < canvasBuffer.height; y += tileSize) {
         for(let x = 0; x < canvasBuffer.width; x += tileSize) {
           const color = fromColorToDominantRubikColor(interpolateArea(contextBuffer, tileSize, x,y));
-          contextTarget.fillStyle = color;
-          contextTarget.beginPath();
-          contextTarget.rect(x, y, tileSize, tileSize);
-          contextTarget.fill();
-          contextTarget.closePath();
+          renderSquare(contextTarget, color, x, y, tileSize);
         }
       }
     }
