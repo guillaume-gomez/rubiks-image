@@ -90,7 +90,7 @@ function App() {
       <span>The image could be wider than your screen. That is why we display the preview at first</span>
       <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
       <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
-        <canvas className={ fullscreen ? "absolute" : " absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
+        <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
       </div>
       <Footer/>
     </div>

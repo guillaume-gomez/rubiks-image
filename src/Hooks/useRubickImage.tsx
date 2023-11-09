@@ -16,6 +16,8 @@ interface RubickFace {
 
 interface RubickImageProps {
   tileSize?: number;
+  hasBorder?: boolean;
+  noise?: number;
 }
 
 const rubickFaces : RubickFace[] = [
@@ -27,7 +29,7 @@ const rubickFaces : RubickFace[] = [
   { name: "blue", color: {red: 44, green: 93, blue:166} }
 ];
 
-export default function useRubickImage({ tileSize = tileSizeDefault } : RubickImageProps) {
+export default function useRubickImage({ tileSize = tileSizeDefault, hasBorder = false, noise = 0.0 } : RubickImageProps) {
   function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
     const canvasBuffer = document.createElement("canvas");
     canvasBuffer.width = image.width;
@@ -38,10 +40,18 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
     return canvasBuffer;
   }
 
-  function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number, tileSize: number) {
+  function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number) {
     context.fillStyle = color;
+
+    if(hasBorder) {
+      context.lineWidth = 2;
+    }
+
     context.beginPath();
     context.rect(x, y, tileSize, tileSize);
+    if(hasBorder) {
+      context.stroke();
+    }
     context.fill();
     context.closePath();
   }
@@ -59,7 +69,7 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
      for(let y = 0; y < image.height; ++y) {
         for(let x = 0; x < image.width; ++x) {
           const color = fromColorToDominantRubikColor(fromPixelToColor(contextBuffer, x,y));
-          renderSquare(contextTarget, color, x, y, tileSize);
+          renderSquare(contextTarget, color, x, y);
         }
       }
   }
@@ -79,7 +89,7 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
       for(let y = 0; y < canvasBuffer.height; y += tileSize) {
         for(let x = 0; x < canvasBuffer.width; x += tileSize) {
           const color = fromColorToDominantRubikColor(interpolateArea(contextBuffer, tileSize, x,y));
-          renderSquare(contextTarget, color, x, y, tileSize);
+          renderSquare(contextTarget, color, x, y);
         }
       }
     }
