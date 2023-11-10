@@ -1,4 +1,5 @@
-import { minBy } from "lodash";
+import { useState } from "react";
+import { minBy, sample } from "lodash";
 import { getContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
 
 interface Color {
@@ -8,6 +9,7 @@ interface Color {
 }
 
 export const tileSizeDefault = 32;
+type OptionType = "hasBorder" | "noise";
 
 interface RubickFace {
   name: string;
@@ -16,8 +18,6 @@ interface RubickFace {
 
 interface RubickImageProps {
   tileSize?: number;
-  hasBorder?: boolean;
-  noise?: number;
 }
 
 const rubickFaces : RubickFace[] = [
@@ -29,7 +29,10 @@ const rubickFaces : RubickFace[] = [
   { name: "blue", color: {red: 44, green: 93, blue:166} }
 ];
 
-export default function useRubickImage({ tileSize = tileSizeDefault, hasBorder = false, noise = 0.0 } : RubickImageProps) {
+export default function useRubickImage({ tileSize = tileSizeDefault } : RubickImageProps) {
+  const [hasBorder, setBorder] = useState<boolean>(false);
+  const [noise, setNoise] = useState<number>(0);
+
   function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
     const canvasBuffer = document.createElement("canvas");
     canvasBuffer.width = image.width;
@@ -56,7 +59,10 @@ export default function useRubickImage({ tileSize = tileSizeDefault, hasBorder =
     context.closePath();
   }
 
-  function generateImage(image: HTMLImageElement, canvasTarget: HTMLCanvasElement) {
+  function generateImage(
+    image: HTMLImageElement,
+    canvasTarget: HTMLCanvasElement
+  ) {
     canvasTarget.width = image.width * tileSize;
     canvasTarget.height = image.height * tileSize;
 
@@ -68,13 +74,18 @@ export default function useRubickImage({ tileSize = tileSizeDefault, hasBorder =
 
      for(let y = 0; y < image.height; ++y) {
         for(let x = 0; x < image.width; ++x) {
-          const color = fromColorToDominantRubikColor(fromPixelToColor(contextBuffer, x,y));
+          const color = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y));
           renderSquare(contextTarget, color, x, y);
         }
       }
   }
 
-  function optimizedGenerateImage(image: HTMLImageElement, canvasTarget: HTMLCanvasElement, expectedWidth: number, expectedHeight: number) {
+  function optimizedGenerateImage(
+    image: HTMLImageElement,
+    canvasTarget: HTMLCanvasElement,
+    expectedWidth: number,
+    expectedHeight: number
+  ) {
       canvasTarget.width = expectedWidth;
       canvasTarget.height = expectedHeight;
 
@@ -88,12 +99,12 @@ export default function useRubickImage({ tileSize = tileSizeDefault, hasBorder =
 
       for(let y = 0; y < canvasBuffer.height; y += tileSize) {
         for(let x = 0; x < canvasBuffer.width; x += tileSize) {
-          const color = fromColorToDominantRubikColor(interpolateArea(contextBuffer, tileSize, x,y));
+          const color = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y));
+          console.log(color)
           renderSquare(contextTarget, color, x, y);
         }
       }
     }
-
 
   function fromPixelToColor(context: CanvasRenderingContext2D, x: number, y: number) : Color {
     const pixel = context.getImageData(x, y, 1, 1);
@@ -130,6 +141,31 @@ export default function useRubickImage({ tileSize = tileSizeDefault, hasBorder =
     return fromColorArrayToStringCSS(foundPixel.color);
   }
 
+  function fromColorToDominantRubikColorWithRandom(color: Color) : string {
 
-  return { generateImage, optimizedGenerateImage };
+    if(Math.random() < (noise)/100) {
+      const pickedColor = sample(rubickFaces);
+      return fromColorToDominantRubikColor(pickedColor.color);
+    }
+
+    return fromColorToDominantRubikColor(color);
+  }
+
+  function setOption(optionName: OptionType, value: unknown) {
+    switch(optionName) {
+      case "hasBorder": {
+        setBorder(value as boolean);
+        break;
+      }
+      case "noise": {
+        setNoise(value as number);
+        break;
+      }
+      default:
+        return;
+    }
+  }
+
+
+  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise };
 }

@@ -1,5 +1,3 @@
-
-
 interface ToggleProps {
   label: string;
   value: boolean;

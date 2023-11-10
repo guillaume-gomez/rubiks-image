@@ -7,6 +7,7 @@ import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
+import Range from "./Components/Range";
 import { resizeImageCanvas, fromColorArrayToStringCSS } from "./tools";
 
 
@@ -20,6 +21,7 @@ function App() {
   const [algorithmType, setAlgorithmType] = useState<AlgorithmType>("optimized");
   const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [image, setImage] = useState<HTMLImageElement>();
+  const [border, setBorder] = useState<boolean>(false)
 
   const canvasFinal = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
@@ -37,7 +39,7 @@ function App() {
     setBestProportion,
   } = useImageSizes(tileSize);
 
-  const { generateImage, optimizedGenerateImage } = useRubickImage({ tileSize });
+  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ tileSize });
 
   useEffect(() => {
     if(image) {
@@ -69,6 +71,7 @@ function App() {
     }
   }
 
+console.log(noise)
 
   return (
     <div className="container">
@@ -82,6 +85,18 @@ function App() {
         onClick={generateImagesInImage}>
           Generate
       </button>
+      <div>
+        <Toggle
+          label="has border"
+          value={hasBorder}
+          toggle={() => setOption("hasBorder", !hasBorder)}
+        />
+        <Range
+          label="noise"
+          value={noise}
+          onChange={(value) => setOption("noise", value)}
+        />
+      </div>
       <Toggle
         label="Show real result"
         value={fullscreen}
