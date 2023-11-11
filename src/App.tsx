@@ -71,43 +71,101 @@ function App() {
     }
   }
 
-console.log(noise)
+    function renderPreview() {
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex gap-3">
+          <span>Width : {possibleWidth}</span>
+          <span>Height : {possibleHeight}</span>
+        </div>
+        <div className="overflow-auto">
+          <canvas className="bg-accent w-full" style={{maxWidth: possibleWidth, maxHeight: possibleHeight}} />
+        </div>
+      </div>)
+  }
 
   return (
-    <div className="container">
-      <Header/>
-      <InputFileWithPreview
-        onChange={uploadImage}
-        value={image}
-      />
-      <button
-        className="btn btn-primary"
-        onClick={generateImagesInImage}>
-          Generate
-      </button>
-      <div>
+    <div className="container mx-auto">
+      <div className="flex flex-col gap-4">
+        <Header/>
+        <InputFileWithPreview
+          onChange={uploadImage}
+          value={image}
+        />
+        <button
+          className="btn btn-primary"
+          onClick={generateImagesInImage}>
+            Generate
+        </button>
+        <div>
+          <Toggle
+            label="has border"
+            value={hasBorder}
+            toggle={() => setOption("hasBorder", !hasBorder)}
+          />
+          <Range
+            label="noise"
+            value={noise}
+            max={50}
+            onChange={(value) => setOption("noise", value)}
+          />
+        </div>
+        <div>
+          <select
+            value={algorithmType}
+            onChange={(event) => setAlgorithmType(event.target.value as AlgorithmType)}
+            className="select select-primary w-full max-w-xs">
+              <option key="0" disabled >Select the algorithm</option>
+              <option key="1" value="optimized">Optimised</option>
+              <option key="2" value="biggestImage"> Biggest Image</option>
+          </select>
+          <div>
+            {
+              algorithmType === "optimized" ?
+                (
+                  <div>
+                    <Toggle
+                      label="Allow resize (will impact the proportions)"
+                      value={allowResize}
+                      toggle={() => setAllowResize(!allowResize)}
+                    />
+                    <Toggle
+                      label="Best proportion"
+                      value={bestProportion}
+                      toggle={() => setBestProportion(!bestProportion)}
+                    />
+                    <div>
+                      <label>Ratio</label>
+                      <input
+                        disabled={bestProportion}
+                        type="range"
+                        min="1"
+                        max={20}
+                        value={ratio}
+                        onChange={(e) => setRatio(parseInt(e.target.value))}
+                        className={`range ${bestProportion ? "range-error" : "range-primary"}`}
+                        />
+                      <span>{ratio}</span>
+                    </div>
+
+                  </div>
+                ) :
+                <></>
+            }
+          </div>
+        </div>
         <Toggle
-          label="has border"
-          value={hasBorder}
-          toggle={() => setOption("hasBorder", !hasBorder)}
+          label="Show real result"
+          value={fullscreen}
+          toggle={() => setFullscreen(!fullscreen)}
         />
-        <Range
-          label="noise"
-          value={noise}
-          onChange={(value) => setOption("noise", value)}
-        />
+        <span>The image could be wider than your screen. That is why we display the preview at first</span>
+        <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
+        <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
+          <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
+        </div>
+        <Footer/>
       </div>
-      <Toggle
-        label="Show real result"
-        value={fullscreen}
-        toggle={() => setFullscreen(!fullscreen)}
-      />
-      <span>The image could be wider than your screen. That is why we display the preview at first</span>
-      <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
-      <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
-        <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
-      </div>
-      <Footer/>
     </div>
   )
 }
