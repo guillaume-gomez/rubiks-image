@@ -5,6 +5,7 @@ import useRubickImage from "./Hooks/useRubickImage";
 
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
+import Card from "./Components/Card";
 import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
@@ -84,84 +85,97 @@ function App() {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto md:px-0 px-5">
       <div className="flex flex-col gap-4">
         <Header/>
-        <InputFileWithPreview
-          onChange={uploadImage}
-          value={image}
-        />
-        <button
-          className="btn btn-accent"
-          onClick={generateImagesInImage}>
-            Generate
-        </button>
-        <div>
-          <Toggle
-            label="has border"
-            value={hasBorder}
-            toggle={() => setOption("hasBorder", !hasBorder)}
-          />
-          <Range
-            label="noise"
-            value={noise}
-            max={50}
-            onChange={(value) => setOption("noise", value)}
-          />
-        </div>
-        <div>
-          <select
-            value={algorithmType}
-            onChange={(event) => setAlgorithmType(event.target.value as AlgorithmType)}
-            className="select select-primary w-full max-w-xs">
-              <option key="0" disabled >Select the algorithm</option>
-              <option key="1" value="optimized">Optimised</option>
-              <option key="2" value="biggestImage"> Biggest Image</option>
-          </select>
-          <div>
-            {
-              algorithmType === "optimized" ?
-                (
-                  <div>
-                    <Toggle
-                      label="Allow resize (will impact the proportions)"
-                      value={allowResize}
-                      toggle={() => setAllowResize(!allowResize)}
-                    />
-                    <Toggle
-                      label="Best proportion"
-                      value={bestProportion}
-                      toggle={() => setBestProportion(!bestProportion)}
-                    />
-                    <div>
-                      <label>Ratio</label>
-                      <input
-                        disabled={bestProportion}
-                        type="range"
-                        min="1"
-                        max={20}
-                        value={ratio}
-                        onChange={(e) => setRatio(parseInt(e.target.value))}
-                        className={`range ${bestProportion ? "range-error" : "range-primary"}`}
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col gap-3">
+            <Card title="Upload your image">
+              <InputFileWithPreview
+                onChange={uploadImage}
+                value={image}
+              />
+            </Card>
+            <Card title="Image Settings">
+              <div>
+                <Toggle
+                  label="has border"
+                  value={hasBorder}
+                  toggle={() => setOption("hasBorder", !hasBorder)}
+                />
+                <Range
+                  label="noise"
+                  value={noise}
+                  max={50}
+                  onChange={(value) => setOption("noise", value)}
+                />
+              </div>
+            </Card>
+            <Card title="Image Size">
+              <select
+                value={algorithmType}
+                onChange={(event) => setAlgorithmType(event.target.value as AlgorithmType)}
+                className="select select-primary w-full max-w-xs">
+                  <option key="0" disabled >Select the algorithm</option>
+                  <option key="1" value="optimized">Optimised</option>
+                  <option key="2" value="biggestImage"> Biggest Image</option>
+              </select>
+              <div>
+                {
+                  algorithmType === "optimized" ?
+                    (
+                      <div>
+                        <Toggle
+                          label="Allow resize (will impact the proportions)"
+                          value={allowResize}
+                          toggle={() => setAllowResize(!allowResize)}
                         />
-                      <span>{ratio}</span>
-                    </div>
+                        <Toggle
+                          label="Best proportion"
+                          value={bestProportion}
+                          toggle={() => setBestProportion(!bestProportion)}
+                        />
+                        <div>
+                          <label>Ratio</label>
+                          <input
+                            disabled={bestProportion}
+                            type="range"
+                            min="1"
+                            max={20}
+                            value={ratio}
+                            onChange={(e) => setRatio(parseInt(e.target.value))}
+                            className={`range ${bestProportion ? "range-error" : "range-primary"}`}
+                            />
+                          <span>{ratio}</span>
+                        </div>
 
-                  </div>
-                ) :
-                <></>
-            }
+                      </div>
+                    ) :
+                    <></>
+                }
+              </div>
+            </Card>
+            <button
+              className="btn btn-accent"
+              onClick={generateImagesInImage}
+            >
+              Generate
+            </button>
           </div>
-        </div>
-        <Toggle
-          label="Show real result"
-          value={fullscreen}
-          toggle={() => setFullscreen(!fullscreen)}
-        />
-        <span>The image could be wider than your screen. That is why we display the preview at first</span>
-        <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
-        <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
-          <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
+          <div className="basis-3/4">
+            <Card title="Result">
+                <Toggle
+                label="Show real result"
+                value={fullscreen}
+                toggle={() => setFullscreen(!fullscreen)}
+              />
+              <span>The image could be wider than your screen. That is why we display the preview at first</span>
+              <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
+              <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
+                <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
+              </div>
+            </Card>
+          </div>
         </div>
         <Footer/>
       </div>
