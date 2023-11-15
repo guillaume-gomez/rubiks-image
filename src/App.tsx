@@ -93,7 +93,7 @@ function App() {
           value={image}
         />
         <button
-          className="btn btn-primary"
+          className="btn btn-accent"
           onClick={generateImagesInImage}>
             Generate
         </button>
