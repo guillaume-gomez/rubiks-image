@@ -8,7 +8,7 @@ import Footer from "./Components/Footer";
 import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
-import { resizeImageCanvas, fromColorArrayToStringCSS } from "./tools";
+import { resizeImageCanvas } from "./tools";
 
 
 import './App.css';
@@ -21,7 +21,6 @@ function App() {
   const [algorithmType, setAlgorithmType] = useState<AlgorithmType>("optimized");
   const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [image, setImage] = useState<HTMLImageElement>();
-  const [border, setBorder] = useState<boolean>(false)
 
   const canvasFinal = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
@@ -39,7 +38,7 @@ function App() {
     setBestProportion,
   } = useImageSizes(tileSize);
 
-  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ tileSize });
+  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize: tileSize });
 
   useEffect(() => {
     if(image) {

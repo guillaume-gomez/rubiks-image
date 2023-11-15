@@ -9,7 +9,7 @@ interface Color {
 }
 
 export const tileSizeDefault = 32;
-type OptionType = "hasBorder" | "noise";
+type OptionType = "hasBorder" | "noise" | "tileSize";
 
 interface RubickFace {
   name: string;
@@ -17,7 +17,7 @@ interface RubickFace {
 }
 
 interface RubickImageProps {
-  tileSize?: number;
+  initialTileSize?: number;
 }
 
 const rubickFaces : RubickFace[] = [
@@ -29,9 +29,10 @@ const rubickFaces : RubickFace[] = [
   { name: "blue", color: {red: 44, green: 93, blue:166} }
 ];
 
-export default function useRubickImage({ tileSize = tileSizeDefault } : RubickImageProps) {
+export default function useRubickImage({ initialTileSize = tileSizeDefault } : RubickImageProps) {
   const [hasBorder, setBorder] = useState<boolean>(false);
   const [noise, setNoise] = useState<number>(0);
+  const [tileSize, setTileSize] = useState<number>(initialTileSize);
 
   function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
     const canvasBuffer = document.createElement("canvas");
@@ -145,7 +146,7 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
 
     if(Math.random() < (noise)/100) {
       const pickedColor = sample(rubickFaces);
-      return fromColorToDominantRubikColor(pickedColor.color);
+      return fromColorToDominantRubikColor(pickedColor!.color);
     }
 
     return fromColorToDominantRubikColor(color);
@@ -161,6 +162,11 @@ export default function useRubickImage({ tileSize = tileSizeDefault } : RubickIm
         setNoise(value as number);
         break;
       }
+      case "tileSize": {
+        setTileSize(value as number);
+        break;
+      }
+
       default:
         return;
     }
