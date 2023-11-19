@@ -11,7 +11,7 @@ interface RangeProps {
 function Range({ label, value, onChange, min = 0, max = 100 } : RangeProps) {
   return (
     <div className="form-control">
-      <label className="label cursor-pointer">
+      <label className="label cursor-pointer flex flex-row gap-1">
         <span className="label-text">{label}</span>
         <input
           type="range"
