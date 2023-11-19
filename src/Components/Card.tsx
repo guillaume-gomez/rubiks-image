@@ -7,7 +7,7 @@ interface CardProps {
 
 function Card({ title, children } : CardProps) {
   return (
-    <div className="card w-full bg-base-200 shadow-xl">
+    <div className="card bg-base-200 shadow-xl">
       <div className="card-body">
         <h2 className="card-title">{title}</h2>
         {children}
