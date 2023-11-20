@@ -2,11 +2,16 @@ import { useState } from 'react';
 import { minBy } from "lodash";
 import { pgcd } from "../tools";
 
-function useImageSizes(dominantImageSize: number) {
+interface useImageSizesProps {
+  initialTileSize: number;
+}
+
+function useImageSizes({ initialTileSize = tileSizeDefault }: useImageSizesProps) {
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
   const [allowResize, setAllowResize] = useState<boolean>(false);
   const [bestProportion, setBestProportion] = useState<boolean>(true);
+  const [tileSize, setTileSize] = useState<number>(initialTileSize);
   const [ratio, setRatio] = useState<number>(1);
 
   function setPossibleSize(width: number, height: number) {
@@ -14,13 +19,13 @@ function useImageSizes(dominantImageSize: number) {
     setHeight(height);
   }
 
-  function optimizedScaleBasic(imageWidth: number, imageHeight: number, dominantImageSize: number, bestProportion: boolean) : [number, number] {
+  function optimizedScaleBasic(imageWidth: number, imageHeight: number, tileSize: number, bestProportion: boolean) : [number, number] {
     const pgcdBetweenWidthAndHeight = pgcd(imageWidth, imageHeight);
     const minWidth = imageWidth/pgcdBetweenWidthAndHeight;
     const minHeight = imageHeight/pgcdBetweenWidthAndHeight;
 
-    const minWidthPixelSize = minWidth * dominantImageSize;
-    const minHeightPixelSize = minHeight * dominantImageSize;
+    const minWidthPixelSize = minWidth * tileSize;
+    const minHeightPixelSize = minHeight * tileSize;
 
     if(bestProportion) {
       // this ratio is the same on the width and height
@@ -38,7 +43,7 @@ function useImageSizes(dominantImageSize: number) {
     if(allowResize) {
         return findBestCombinaisonTruncatedBy(imageWidth, imageHeight);
     } else {
-      return optimizedScaleBasic(imageWidth, imageHeight, dominantImageSize, bestProportion);
+      return optimizedScaleBasic(imageWidth, imageHeight, tileSize, bestProportion);
     }
   }
 
@@ -52,7 +57,7 @@ function useImageSizes(dominantImageSize: number) {
     for(let truncate = 2; truncate <= 12; truncate++) {
       const truncatedWidth = imageWidth + (imageWidth % truncate);
       const truncatedHeight = imageHeight + (imageHeight % truncate);
-      const combinaison = optimizedScaleBasic(truncatedWidth, truncatedHeight, dominantImageSize, bestProportion);
+      const combinaison = optimizedScaleBasic(truncatedWidth, truncatedHeight, tileSize, bestProportion);
       combinaisons.push(combinaison);
     }
     const bestCombinaison = minBy(combinaisons, (combinaison: [number, number]) => combinaison[0] * combinaison[1]);
@@ -73,6 +78,8 @@ function useImageSizes(dominantImageSize: number) {
     setRatio,
     bestProportion,
     setBestProportion,
+    tileSize,
+    setTileSize
   }
 }
 
