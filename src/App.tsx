@@ -37,7 +37,7 @@ function App() {
     setRatio,
     bestProportion,
     setBestProportion,
-  } = useImageSizes(initialTileSize);
+  } = useImageSizes({initialTileSize });
 
   const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize });
 
@@ -50,7 +50,7 @@ function App() {
 
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
-    //setError("");
+    setError("");
     setPossibleSize(newImage.width, newImage.height);
   }
 
