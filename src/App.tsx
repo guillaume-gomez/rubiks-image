@@ -37,7 +37,7 @@ function App() {
     setRatio,
     bestProportion,
     setBestProportion,
-  } = useImageSizes({initialTileSize });
+  } = useImageSizes({ initialTileSize });
 
   const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize });
 
