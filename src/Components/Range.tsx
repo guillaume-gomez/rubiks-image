@@ -5,10 +5,12 @@ interface RangeProps {
   value: boolean;
   onChange: (value: number) => void;
   min?: number;
-  max?: number
+  max?: number;
+  step?: number
 }
 
-function Range({ label, value, onChange, min = 0, max = 100 } : RangeProps) {
+function Range({ label, value, onChange, min = 0, max = 100, step = 16 } : RangeProps) {
+  console.log(value)
   return (
     <div className="form-control">
       <label className="label cursor-pointer flex flex-row gap-1">
@@ -17,6 +19,7 @@ function Range({ label, value, onChange, min = 0, max = 100 } : RangeProps) {
           type="range"
           min={min}
           max={max}
+          step={step}
           value={value}
           className="range"
           onChange={(event) => onChange(parseInt(event.target.value, 10))}
