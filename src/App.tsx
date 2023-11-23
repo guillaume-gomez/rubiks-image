@@ -14,9 +14,9 @@ import { resizeImageCanvas } from "./tools";
 
 import './App.css';
 
-
-const tileSize = 32;
 type AlgorithmType = "optimized" | "biggestImage";
+
+const initialTileSize = 32;
 
 function App() {
   const [algorithmType, setAlgorithmType] = useState<AlgorithmType>("optimized");
