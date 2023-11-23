@@ -9,8 +9,12 @@ import Card from "./Components/Card";
 import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
+import Error from "./Components/Error";
 import { resizeImageCanvas } from "./tools";
 
+import worker from './webWorker/app.worker';
+import WebWorker from './webWorker/webWorker';
+import { fetchUsers } from './webWorker/userService';
 
 import './App.css';
 
@@ -21,10 +25,15 @@ const initialTileSize = 32;
 function App() {
   const [algorithmType, setAlgorithmType] = useState<AlgorithmType>("optimized");
   const [fullscreen, setFullscreen] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const canvasFinal = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
+
+  const [users, setUsers] = useState([]);
+  const webWorker = new WebWorker(worker);
 
   const {
     computePossibleSize,
@@ -37,52 +46,87 @@ function App() {
     setRatio,
     bestProportion,
     setBestProportion,
-  } = useImageSizes(tileSize);
+    setTileSize
+  } = useImageSizes({ initialTileSize });
 
-  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize: tileSize });
+  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize } = useRubickImage({ initialTileSize });
 
   useEffect(() => {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
-  }, [image, allowResize, bestProportion, ratio])
+  }, [image, allowResize, bestProportion, ratio, tileSize]);
+
+  useEffect(() => {
+      fetchUsers().then(users => {
+            setUsers(users);
+            setLoading(false);
+        });
+        return () => {
+            webWorker.terminate();
+        }
+    }, []
+  );
+
 
 
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
-    //setError("");
+    setError("");
     setPossibleSize(newImage.width, newImage.height);
   }
 
   function generateImagesInImage() {
     if(!image) {
-      //setError("Error! Please upload an image");
-      //moveTo("choose-image");
+      setError("Error! Please upload an image");
+      return;
     }
+    setLoading(true);
+
     if(image && canvasFinal.current && canvasPreview.current) {
-      if(algorithmType === "optimized") {
-        optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight);
-      } else {
-        generateImage(image, canvasFinal.current);
-      }
-      // generate preview
-      resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
-      //moveTo("result");
+      setTimeout(() => {
+        if(algorithmType === "optimized") {
+          optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight).then(
+            () => setLoading(false)
+          );
+        } else {
+          generateImage(image, canvasFinal.current).then(
+            () => setLoading(false)
+          );
+        }
+        // generate preview
+        resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
+
+      }, [500])
     }
   }
 
-    function renderPreview() {
-    return (
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex gap-3">
-          <span>Width : {possibleWidth}</span>
-          <span>Height : {possibleHeight}</span>
-        </div>
-        <div className="overflow-auto">
-          <canvas className="bg-accent w-full" style={{maxWidth: possibleWidth, maxHeight: possibleHeight}} />
-        </div>
-      </div>)
+  function sortAscending() {
+    webWorker.postMessage({ users, type: "asc"});
+    setLoading(true);
+
+    webWorker.addEventListener('message', (event) => {
+        const sortedList = event.data;
+        setUsers(sortedList);
+        setLoading(false);
+    });
   }
+
+    function renderPreview() {
+      if(!image) {
+        return <></>;
+      }
+
+      const width = algorithmType === "optimized" ? possibleWidth : (image.width * tileSize);
+      const height = algorithmType === "optimized" ? possibleHeight : (image.width * tileSize);
+
+      return (
+        <div className="flex flex-row gap-3 w-full">
+            <span>Width : {width}</span>
+            <span>Height : {height}</span>
+        </div>
+      )
+    }
 
   return (
     <div className="container mx-auto md:px-0 px-5">
@@ -91,13 +135,43 @@ function App() {
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex flex-col gap-3">
             <Card title="Upload your image">
+              {
+                error !== "" && <Error errorMessage={error} />
+              }
               <InputFileWithPreview
                 onChange={uploadImage}
                 value={image}
               />
+              <button
+                  onClick={sortAscending}
+                  type="button"
+                  disabled={loading}
+                  className="btn btn-primary">
+                  {
+                    loading ?
+                      <span className="loading loading-spinner loading-lg"></span> :
+                      "Generate"
+                  }
+              </button>
+              <ul>
+              {
+                users.map(user => <li>{user.name}</li>)
+              }
+              </ul>
             </Card>
             <Card title="Image Settings">
               <div>
+                <Range
+                  label="tileSize"
+                  value={tileSize}
+                  max={128}
+                  min={16}
+                  step={8}
+                  onChange={(value) => {
+                    setOption("tileSize", value)
+                    setTileSize(value);
+                  }}
+                />
                 <Toggle
                   label="has border"
                   value={hasBorder}
@@ -148,18 +222,22 @@ function App() {
                             />
                           <span>{ratio}</span>
                         </div>
-
                       </div>
                     ) :
                     <></>
                 }
+                {renderPreview()}
               </div>
             </Card>
             <button
               className="btn btn-accent"
               onClick={generateImagesInImage}
             >
-              Generate
+              {
+                loading ?
+                  <span className="loading loading-spinner loading-lg"></span> :
+                  "Generate"
+              }
             </button>
           </div>
           <div className="basis-3/4">
