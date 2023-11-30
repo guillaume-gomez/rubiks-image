@@ -12,9 +12,6 @@ import Range from "./Components/Range";
 import Error from "./Components/Error";
 import { resizeImageCanvas } from "./tools";
 
-import worker from './webWorker/app.worker';
-import WebWorker from './webWorker/webWorker';
-import { fetchUsers } from './webWorker/userService';
 
 import './App.css';
 
@@ -32,9 +29,6 @@ function App() {
   const canvasFinal = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
 
-  const [users, setUsers] = useState([]);
-  const webWorker = new WebWorker(worker);
-
   const {
     computePossibleSize,
     setPossibleSize,
@@ -49,25 +43,21 @@ function App() {
     setTileSize
   } = useImageSizes({ initialTileSize });
 
-  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize } = useRubickImage({ initialTileSize });
+  const {
+    generateImage,
+    optimizedGenerateImage,
+    setOption,
+    hasBorder,
+    noise,
+    tileSize,
+    users
+  } = useRubickImage({ initialTileSize });
 
   useEffect(() => {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
   }, [image, allowResize, bestProportion, ratio, tileSize]);
-
-  useEffect(() => {
-      fetchUsers().then(users => {
-            setUsers(users);
-            setLoading(false);
-        });
-        return () => {
-            webWorker.terminate();
-        }
-    }, []
-  );
-
 
 
   function uploadImage(newImage: HTMLImageElement) {
@@ -101,32 +91,21 @@ function App() {
     }
   }
 
-  function sortAscending() {
-    webWorker.postMessage({ users, type: "asc"});
-    setLoading(true);
-
-    webWorker.addEventListener('message', (event) => {
-        const sortedList = event.data;
-        setUsers(sortedList);
-        setLoading(false);
-    });
-  }
-
-    function renderPreview() {
-      if(!image) {
-        return <></>;
-      }
-
-      const width = algorithmType === "optimized" ? possibleWidth : (image.width * tileSize);
-      const height = algorithmType === "optimized" ? possibleHeight : (image.width * tileSize);
-
-      return (
-        <div className="flex flex-row gap-3 w-full">
-            <span>Width : {width}</span>
-            <span>Height : {height}</span>
-        </div>
-      )
+  function renderPreview() {
+    if(!image) {
+      return <></>;
     }
+
+    const width = algorithmType === "optimized" ? possibleWidth : (image.width * tileSize);
+    const height = algorithmType === "optimized" ? possibleHeight : (image.width * tileSize);
+
+    return (
+      <div className="flex flex-row gap-3 w-full">
+          <span>Width : {width}</span>
+          <span>Height : {height}</span>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto md:px-0 px-5">
@@ -143,7 +122,7 @@ function App() {
                 value={image}
               />
               <button
-                  onClick={sortAscending}
+                  onClick={generateImagesInImage}
                   type="button"
                   disabled={loading}
                   className="btn btn-primary">

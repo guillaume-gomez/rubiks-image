@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { minBy, sample } from "lodash";
 import { getContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
+
+
+import worker from '../webWorker/app.worker';
+import WebWorker from '../webWorker/webWorker';
+import { fetchUsers } from '../webWorker/userService';
+
 
 interface Color {
   red: number;
@@ -33,6 +39,19 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   const [hasBorder, setBorder] = useState<boolean>(false);
   const [noise, setNoise] = useState<number>(0);
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
+  const [users, setUsers] = useState([]);
+  const webWorker = new WebWorker(worker);
+
+  useEffect(() => {
+      fetchUsers().then(users => {
+            setUsers(users);
+        });
+        return () => {
+            webWorker.terminate();
+        }
+    }, []
+  );
+
 
   function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
     const canvasBuffer = document.createElement("canvas");
@@ -60,7 +79,8 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
     context.closePath();
   }
 
-  function generateImage(
+  // promise resolve nothing
+  async function generateImage(
     image: HTMLImageElement,
     canvasTarget: HTMLCanvasElement
   ) {
@@ -71,8 +91,6 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
     const contextBuffer = getContext(canvasBuffer);
     const contextTarget = getContext(canvasTarget);
 
-    console.log("(", canvasTarget.width, ", ", canvasTarget.height, ")");
-
      for(let y = 0; y < image.height; ++y) {
         for(let x = 0; x < image.width; ++x) {
           const color = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y));
@@ -81,31 +99,47 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
       }
   }
 
-  function optimizedGenerateImage(
+  // promise resolve nothing
+  async function optimizedGenerateImage(
     image: HTMLImageElement,
     canvasTarget: HTMLCanvasElement,
     expectedWidth: number,
     expectedHeight: number
   ) {
+
+
       canvasTarget.width = expectedWidth;
       canvasTarget.height = expectedHeight;
 
       const canvasBuffer = createCanvasBuffer(image);
-
       const contextBuffer = getContext(canvasBuffer);
-      const contextTarget = getContext(canvasTarget);
+
+      //const contextTarget = getContext(canvasTarget);
       resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
-      console.log("( ", expectedWidth, ", ", expectedHeight, ")");
+      const offscreenCanvas = canvasTarget.transferControlToOffscreen();
+      webWorker.postMessage({
+        users,
+        type: "asc",
+        expectedWidth,
+        expectedHeight,
+        offscreenCanvas,
+        pixels: contextBuffer.getImageData(0,0, expectedWidth, expectedHeight)
+      }, [offscreenCanvas]);
 
-      for(let y = 0; y < canvasBuffer.height; y += tileSize) {
+      /*for(let y = 0; y < canvasBuffer.height; y += tileSize) {
         for(let x = 0; x < canvasBuffer.width; x += tileSize) {
           const color = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y));
-          console.log(color)
           renderSquare(contextTarget, color, x, y);
         }
-      }
-    }
+      }*/
+
+      webWorker.addEventListener('message', (event) => {
+        const sortedList = event.data;
+        setUsers(sortedList);
+
+    });
+  }
 
   function fromPixelToColor(context: CanvasRenderingContext2D, x: number, y: number) : Color {
     const pixel = context.getImageData(x, y, 1, 1);
@@ -173,5 +207,5 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   }
 
 
-  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise };
+  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize, users };
 }

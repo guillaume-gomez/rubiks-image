@@ -88,8 +88,32 @@ export function resizeImageCanvas(originCanvas: HTMLCanvasElement, targetCanvas:
   );
 }
 
+export function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
+  const canvasBuffer = document.createElement("canvas");
+  canvasBuffer.width = image.width;
+  canvasBuffer.height = image.height;
 
+  const context = getContext(canvasBuffer);
+  context.drawImage(image, 0, 0, canvasBuffer.width, canvasBuffer.height);
+  return canvasBuffer;
+}
 
 export function fromColorArrayToStringCSS(color: Color) : string {
   return `rgb(${color.red}, ${color.green}, ${color.blue})`;
+}
+
+export function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number) {
+    context.fillStyle = color;
+
+    if(hasBorder) {
+      context.lineWidth = 2;
+    }
+
+    context.beginPath();
+    context.rect(x, y, tileSize, tileSize);
+    if(hasBorder) {
+      context.stroke();
+    }
+    context.fill();
+    context.closePath();
 }
