@@ -37,9 +37,9 @@ function App() {
     setRatio,
     bestProportion,
     setBestProportion,
-  } = useImageSizes(tileSize);
+  } = useImageSizes(initialTileSize);
 
-  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize: tileSize });
+  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize });
 
   useEffect(() => {
     if(image) {
@@ -78,10 +78,8 @@ function App() {
           <span>Width : {possibleWidth}</span>
           <span>Height : {possibleHeight}</span>
         </div>
-        <div className="overflow-auto">
-          <canvas className="bg-accent w-full" style={{maxWidth: possibleWidth, maxHeight: possibleHeight}} />
-        </div>
-      </div>)
+      </div>
+    )
   }
 
   return (
@@ -140,7 +138,8 @@ function App() {
                           <input
                             disabled={bestProportion}
                             type="range"
-                            min="1"
+                            step={1}
+                            min={1}
                             max={20}
                             value={ratio}
                             onChange={(e) => setRatio(parseInt(e.target.value))}
@@ -148,11 +147,11 @@ function App() {
                             />
                           <span>{ratio}</span>
                         </div>
-
                       </div>
                     ) :
                     <></>
                 }
+                {renderPreview()}
               </div>
             </Card>
             <button
