@@ -9,6 +9,7 @@ import Card from "./Components/Card";
 import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
+import Error from "./Components/Error";
 import { resizeImageCanvas } from "./tools";
 
 
@@ -21,6 +22,7 @@ const initialTileSize = 32;
 function App() {
   const [algorithmType, setAlgorithmType] = useState<AlgorithmType>("optimized");
   const [fullscreen, setFullscreen] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
 
   const canvasFinal = useRef<HTMLCanvasElement>(null);
@@ -37,15 +39,23 @@ function App() {
     setRatio,
     bestProportion,
     setBestProportion,
+    setTileSize
   } = useImageSizes({ initialTileSize });
 
-  const { generateImage, optimizedGenerateImage, setOption, hasBorder, noise } = useRubickImage({ initialTileSize });
+  const {
+    generateImage,
+    optimizedGenerateImage,
+    setOption,
+    hasBorder,
+    noise,
+    tileSize
+  } = useRubickImage({ initialTileSize });
 
   useEffect(() => {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
-  }, [image, allowResize, bestProportion, ratio])
+  }, [image, allowResize, bestProportion, ratio, tileSize]);
 
 
   function uploadImage(newImage: HTMLImageElement) {
@@ -56,28 +66,33 @@ function App() {
 
   function generateImagesInImage() {
     if(!image) {
-      //setError("Error! Please upload an image");
-      //moveTo("choose-image");
+      setError("Error! Please upload an image");
+      return;
     }
+
     if(image && canvasFinal.current && canvasPreview.current) {
-      if(algorithmType === "optimized") {
-        optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight);
-      } else {
-        generateImage(image, canvasFinal.current);
-      }
-      // generate preview
-      resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
-      //moveTo("result");
+        if(algorithmType === "optimized") {
+          optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight);
+        } else {
+          generateImage(image, canvasFinal.current);
+        }
+        // generate preview
+        resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
     }
   }
 
-    function renderPreview() {
+  function renderPreview() {
+    if(!image) {
+      return <></>;
+    }
+
+    const width = algorithmType === "optimized" ? possibleWidth : (image.width * tileSize);
+    const height = algorithmType === "optimized" ? possibleHeight : (image.width * tileSize);
+
     return (
-      <div className="flex flex-col gap-4 w-full">
-        <div className="flex gap-3">
-          <span>Width : {possibleWidth}</span>
-          <span>Height : {possibleHeight}</span>
-        </div>
+      <div className="flex flex-row gap-3 w-full">
+          <span>Width : {width}</span>
+          <span>Height : {height}</span>
       </div>
     )
   }
@@ -89,6 +104,9 @@ function App() {
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex flex-col gap-3">
             <Card title="Upload your image">
+              {
+                error !== "" && <Error errorMessage={error} />
+              }
               <InputFileWithPreview
                 onChange={uploadImage}
                 value={image}
@@ -96,6 +114,17 @@ function App() {
             </Card>
             <Card title="Image Settings">
               <div>
+                <Range
+                  label="tileSize"
+                  value={tileSize}
+                  max={128}
+                  min={16}
+                  step={8}
+                  onChange={(value) => {
+                    setOption("tileSize", value)
+                    setTileSize(value);
+                  }}
+                />
                 <Toggle
                   label="has border"
                   value={hasBorder}
@@ -138,8 +167,7 @@ function App() {
                           <input
                             disabled={bestProportion}
                             type="range"
-                            step={1}
-                            min={1}
+                            min="1"
                             max={20}
                             value={ratio}
                             onChange={(e) => setRatio(parseInt(e.target.value))}
