@@ -180,5 +180,5 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   }
 
 
-  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise };
+  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize };
 }
