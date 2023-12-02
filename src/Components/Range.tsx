@@ -9,7 +9,7 @@ interface RangeProps {
   step?: number
 }
 
-function Range({ label, value, onChange, min = 0, max = 100, step = 16 } : RangeProps) {
+function Range({ label, value, onChange, min = 0, max = 100, step = 1 } : RangeProps) {
   return (
     <div className="form-control">
       <label className="label cursor-pointer flex flex-row gap-1">
