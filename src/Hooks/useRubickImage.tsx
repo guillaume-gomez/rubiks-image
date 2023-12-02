@@ -46,11 +46,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
 
   function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number) {
     context.fillStyle = color;
-
-    context.beginPath();
-    context.rect(x, y, tileSize, tileSize);
-    context.fill();
-    context.closePath();
+    context.fillRect(x,y, tileSize, tileSize);
   }
 
   function generateImage(
@@ -69,6 +65,9 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
           const color = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y));
           renderSquare(contextTarget, color, x, y);
         }
+      }
+      if(hasBorder) {
+        renderBorder(contextTarget, image.width, image.height);
       }
   }
 
@@ -93,7 +92,27 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
           renderSquare(contextTarget, color, x, y);
         }
       }
+      if(hasBorder) {
+        renderBorder(contextTarget, expectedWidth, expectedHeight);
+      }
+  }
+
+  function renderBorder(context: CanvasRenderingContext2D, width: number, height: number) {
+    context.fillStyle = "black";
+    context.lineWidth = 2;
+    for(let x=0; x < width; x += tileSize) {
+      for(let y=0; y < height; y+= tileSize) {
+        context.strokeRect(x, y, tileSize, tileSize);
+      }
     }
+
+    context.lineWidth = 4;
+    for(let x=0; x < width; x += 3*tileSize) {
+      for(let y=0; y < height; y+= 3*tileSize) {
+        context.strokeRect(x, y, tileSize*3, tileSize*3);
+      }
+    }
+  }
 
   function fromPixelToColor(context: CanvasRenderingContext2D, x: number, y: number) : Color {
     const pixel = context.getImageData(x, y, 1, 1);
