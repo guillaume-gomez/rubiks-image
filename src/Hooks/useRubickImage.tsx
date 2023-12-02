@@ -11,16 +11,22 @@ interface Color {
 export const tileSizeDefault = 32;
 type OptionType = "hasBorder" | "noise" | "tileSize";
 
-interface RubickFace {
+interface RubickTile {
   name: string;
   color: Color;
+}
+
+interface RubickFace {
+  x: number;
+  y: number;
+  rubickPixels: [string, string, string, string, string, string, string, string, string];
 }
 
 interface RubickImageProps {
   initialTileSize?: number;
 }
 
-const rubickFaces : RubickFace[] = [
+const RubickTiles : RubickTile[] = [
   { name: "white", color: {red: 255, green: 255, blue:255} },
   { name: "green", color: {red: 124, green: 178, blue:87} },
   { name: "yellow", color: {red: 238, green: 207, blue:78} },
@@ -33,6 +39,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   const [hasBorder, setBorder] = useState<boolean>(false);
   const [noise, setNoise] = useState<number>(0);
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
+  const [rubickFaces, setRubickFaces] = useState<RubickFace[]>([]);
 
   function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
     const canvasBuffer = document.createElement("canvas");
@@ -60,15 +67,46 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
     const contextBuffer = getContext(canvasBuffer);
     const contextTarget = getContext(canvasTarget);
 
-     for(let y = 0; y < image.height; ++y) {
-        for(let x = 0; x < image.width; ++x) {
-          const color = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y));
-          renderSquare(contextTarget, color, x, y);
+    let newRubicksPixels : RubickFace[] = [];
+
+     for(let x = 0; x < image.width; x +=3) {
+        for(let y = 0; y < image.height; y+=3) {
+
+          const color11 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y));
+          renderSquare(contextTarget, color11, x, y);
+          const color12 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+1,y));
+          renderSquare(contextTarget, color12, x+1, y);
+          const color13 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+2,y));
+          renderSquare(contextTarget, color13, x+2, y);
+
+          const color21 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y +1));
+          renderSquare(contextTarget, color21, x, y+1);
+          const color22 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+1,y+1));
+          renderSquare(contextTarget, color22, x+1, y+1);
+          const color23 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+2,y+1));
+          renderSquare(contextTarget, color23, x+2, y+1);
+
+          const color31 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y+2));
+          renderSquare(contextTarget, color31, x, y+2);
+          const color32 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+1,y+2));
+          renderSquare(contextTarget, color32, x+1, y+2);
+          const color33 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+2,y+2));
+          renderSquare(contextTarget, color33, x+2, y+2);
+
+          const rubickFace : RubickFace = {
+            x,
+            y,
+            rubickPixels: [color11, color12, color13, color21, color22, color23, color31, color32, color33 ]
+          };
+          newRubicksPixels.push(rubickFace);
         }
+
       }
       if(hasBorder) {
         renderBorder(contextTarget, image.width, image.height);
       }
+
+      setRubickFaces(newRubicksPixels);
   }
 
   function optimizedGenerateImage(
@@ -86,15 +124,44 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
       const contextTarget = getContext(canvasTarget);
       resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
-      for(let y = 0; y < canvasBuffer.height; y += tileSize) {
-        for(let x = 0; x < canvasBuffer.width; x += tileSize) {
-          const color = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y));
-          renderSquare(contextTarget, color, x, y);
+      let newRubicksPixels : RubickFace[] = []
+
+      for(let y = 0; y < canvasBuffer.height; y += (3*tileSize)) {
+        for(let x = 0; x < canvasBuffer.width; x += (3*tileSize)) {
+
+          const color11 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y));
+          renderSquare(contextTarget, color11, x, y);
+          const color12 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+tileSize,y));
+          renderSquare(contextTarget, color12, x+tileSize, y);
+          const color13 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y));
+          renderSquare(contextTarget, color13, x+(2*tileSize), y);
+
+          const color21 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y+tileSize));
+          renderSquare(contextTarget, color21, x, y+tileSize);
+          const color22 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+tileSize,y+tileSize));
+          renderSquare(contextTarget, color22, x+tileSize, y+tileSize);
+          const color23 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y+tileSize));
+          renderSquare(contextTarget, color23, x+(2*tileSize), y+tileSize);
+
+          const color31 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y+(2*tileSize)));
+          renderSquare(contextTarget, color31, x, y+(2*tileSize));
+          const color32 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+tileSize,y+(2*tileSize)));
+          renderSquare(contextTarget, color32, x+tileSize, y+(2*tileSize));
+          const color33 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y+(2*tileSize)));
+          renderSquare(contextTarget, color33, x+(2*tileSize), y+(2*tileSize));
+
+          const rubickFace : RubickFace = {
+            x,
+            y,
+            rubickPixels: [color11, color12, color13, color21, color22, color23, color31, color32, color33 ]
+          };
+          newRubicksPixels.push(rubickFace);
         }
       }
       if(hasBorder) {
         renderBorder(contextTarget, expectedWidth, expectedHeight);
       }
+      setRubickFaces(newRubicksPixels);
   }
 
   function renderBorder(context: CanvasRenderingContext2D, width: number, height: number) {
@@ -140,7 +207,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
 
 
   function fromColorToDominantRubikColor(color: Color) : string {
-    const comparaisonValues = rubickFaces.map(rubickFace => ({ ...rubickFace, value: colorDistance(color, rubickFace.color)}) );
+    const comparaisonValues = RubickTiles.map(RubickTile => ({ ...RubickTile, value: colorDistance(color, RubickTile.color)}) );
     const foundPixel = minBy(comparaisonValues, 'value');
     if(!foundPixel) {
       throw `No sprite found for the pixel with the value ${color}`;
@@ -152,7 +219,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   function fromColorToDominantRubikColorWithRandom(color: Color) : string {
 
     if(Math.random() < (noise)/100) {
-      const pickedColor = sample(rubickFaces);
+      const pickedColor = sample(RubickTiles);
       return fromColorToDominantRubikColor(pickedColor!.color);
     }
 
