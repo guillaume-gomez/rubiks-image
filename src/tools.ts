@@ -38,11 +38,8 @@ export function colorDistance(color1: Color, color2: Color) : number {
 }
 
 export function resizeImage(image: HTMLImageElement, expectedWidth: number, expectedHeight : number) : HTMLImageElement {
-  const canvasBuffer = document.createElement("canvas");
+  const canvasBuffer =  new OffscreenCanvas(image.width, image.height);
   const contextBuffer = getContext(canvasBuffer);
-
-  canvasBuffer.width = image.width;
-  canvasBuffer.height = image.height;
 
   contextBuffer.drawImage(image, 0, 0, image.width, image.height);
 
@@ -59,15 +56,12 @@ export function resizeImage(image: HTMLImageElement, expectedWidth: number, expe
 
 
 export function resizeImageCanvas(originCanvas: HTMLCanvasElement, targetCanvas: HTMLCanvasElement, expectedWidth: number, expectedHeight: number) {
-  // resize image
-  const canvasBuffer = document.createElement("canvas");
+  // resize to 50%
+  const canvasBuffer =  new OffscreenCanvas(originCanvas.width * 0.5,  originCanvas.height * 0.5);
   const contextBuffer = getContext(canvasBuffer);
 
-  // resize to 50%
-  canvasBuffer.width = originCanvas.width * 0.5;
-  canvasBuffer.height = originCanvas.height * 0.5;
+  // resize image
   contextBuffer.drawImage(originCanvas, 0, 0, canvasBuffer.width, canvasBuffer.height);
-
   contextBuffer.drawImage(canvasBuffer, 0, 0, canvasBuffer.width * 0.5, canvasBuffer.height * 0.5);
 
   const contextTarget = getContext(targetCanvas);

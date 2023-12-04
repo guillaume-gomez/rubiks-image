@@ -7,6 +7,7 @@ interface CanvasRenderingProps {
   height: number;
   tileSize: number;
   rubickFaces: RubickFace[];
+  hasBorder: boolean;
   toggleFullScreen: (target: EventTarget) => void;
 }
 
@@ -14,7 +15,13 @@ export interface ExternalActionInterface {
   getImage: () => string |null ;
 }
 
-const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps>(({width, height, tileSize, rubickFaces, toggleFullScreen}, ref) => {
+const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps>(({
+  width,
+  height,
+  tileSize,
+  rubickFaces,
+  hasBorder,
+  toggleFullScreen}, ref) => {
   const refCanvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -22,10 +29,12 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       const context = refCanvas.current.getContext("2d");
       if(context) {
         renderRubickFaces(context, rubickFaces)
-        renderBorder(context, width, height);
+        if(hasBorder) {
+          renderBorder(context, width, height);
+        }
       }
     }
-  }, [refCanvas, rubickFaces]);
+  }, [refCanvas, rubickFaces, hasBorder, tileSize]);
 
   useImperativeHandle(ref, () => ({
     getImage() {

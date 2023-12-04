@@ -38,9 +38,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   const [rubickFaces, setRubickFaces] = useState<RubickFace[]>([]);
 
   function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
-    const canvasBuffer = document.createElement("canvas");
-    canvasBuffer.width = image.width;
-    canvasBuffer.height = image.height;
+    const canvasBuffer =  new OffscreenCanvas(image.width, image.height);
 
     const context = getContext(canvasBuffer);
     context.drawImage(image, 0, 0, canvasBuffer.width, canvasBuffer.height);
@@ -214,5 +212,5 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   }
 
 
-  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize, rubickFaces };
+  return { optimizedGenerateImage, setOption, hasBorder, noise, tileSize, rubickFaces };
 }

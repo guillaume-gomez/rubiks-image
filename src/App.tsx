@@ -188,6 +188,7 @@ function App() {
                 width={possibleWidth}
                 height={possibleHeight}
                 tileSize={tileSize}
+                hasBorder={hasBorder}
                 rubickFaces={rubickFaces}
                 toggleFullScreen={() => {}}
               />
