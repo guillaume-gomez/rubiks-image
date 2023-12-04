@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import useImageSizes from "./Hooks/useImageSizes";
 import useRubickImage from "./Hooks/useRubickImage";
@@ -11,7 +11,6 @@ import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
 import Error from "./Components/Error";
 import CanvasRendering from "./Components/CanvasRendering";
-import { resizeImageCanvas } from "./tools";
 
 
 import './App.css';

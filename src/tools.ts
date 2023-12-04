@@ -21,8 +21,15 @@ export function pgcd(a: number, b: number) : number {
     }
 }
 
-
 export function getContext(canvas:  HTMLCanvasElement) : CanvasRenderingContext2D {
+  const context = canvas.getContext("2d");
+  if(!context) {
+      throw new Error("cannot find the context 2d for the canvas");
+  }
+  return context;
+}
+
+export function getOffscreenContext(canvas:  OffscreenCanvas) : OffscreenCanvasRenderingContext2D {
   const context = canvas.getContext("2d");
   if(!context) {
       throw new Error("cannot find the context 2d for the canvas");
@@ -37,28 +44,10 @@ export function colorDistance(color1: Color, color2: Color) : number {
   return (redDiff * redDiff) + (greenDiff * greenDiff) + (blueDiff * blueDiff);
 }
 
-export function resizeImage(image: HTMLImageElement, expectedWidth: number, expectedHeight : number) : HTMLImageElement {
-  const canvasBuffer =  new OffscreenCanvas(image.width, image.height);
-  const contextBuffer = getContext(canvasBuffer);
-
-  contextBuffer.drawImage(image, 0, 0, image.width, image.height);
-
-  const canvasTarget = document.createElement("canvas");
-
-  // mutate canvasTarget
-  resizeImageCanvas(canvasBuffer, canvasTarget, expectedWidth, expectedHeight);
-
-  const resizedImage = new Image();
-  resizedImage.onload = () => {};
-  resizedImage.src = canvasTarget.toDataURL();
-  return resizedImage;
-}
-
-
 export function resizeImageCanvas(originCanvas: HTMLCanvasElement, targetCanvas: HTMLCanvasElement, expectedWidth: number, expectedHeight: number) {
   // resize to 50%
   const canvasBuffer =  new OffscreenCanvas(originCanvas.width * 0.5,  originCanvas.height * 0.5);
-  const contextBuffer = getContext(canvasBuffer);
+  const contextBuffer = getOffscreenContext(canvasBuffer);
 
   // resize image
   contextBuffer.drawImage(originCanvas, 0, 0, canvasBuffer.width, canvasBuffer.height);

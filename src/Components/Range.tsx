@@ -2,7 +2,7 @@
 
 interface RangeProps {
   label: string;
-  value: boolean;
+  value: number;
   onChange: (value: number) => void;
   min?: number;
   max?: number;

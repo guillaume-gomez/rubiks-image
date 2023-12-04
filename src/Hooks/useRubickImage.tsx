@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { minBy, sample } from "lodash";
-import { getContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
+import { getOffscreenContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
 import { RubickFace } from "../types";
 
 interface Color {
@@ -37,10 +37,10 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
   const [rubickFaces, setRubickFaces] = useState<RubickFace[]>([]);
 
-  function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
+  function createCanvasBuffer(image: HTMLImageElement) : OffscreenCanvas {
     const canvasBuffer =  new OffscreenCanvas(image.width, image.height);
 
-    const context = getContext(canvasBuffer);
+    const context = getOffscreenContext(canvasBuffer);
     context.drawImage(image, 0, 0, canvasBuffer.width, canvasBuffer.height);
     return canvasBuffer;
   }
@@ -52,7 +52,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   ) {
       const canvasBuffer = createCanvasBuffer(image);
 
-      const contextBuffer = getContext(canvasBuffer);
+      const contextBuffer = getOffscreenContext(canvasBuffer);
       resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
       let newRubicksPixels : RubickFace[] = []
@@ -107,13 +107,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
       setRubickFaces(newRubicksPixels);
   }
 
-  function fromPixelToColor(context: CanvasRenderingContext2D, x: number, y: number) : Color {
-    const pixel = context.getImageData(x, y, 1, 1);
-    const { data } = pixel;
-    return { red: data[0], green: data[1], blue: data[2] };
-  }
-
-  function interpolateArea(context: CanvasRenderingContext2D, tileSize: number, x: number, y: number) : Color {
+  function interpolateArea(context: OffscreenCanvasRenderingContext2D, tileSize: number, x: number, y: number) : Color {
     const pixels = context.getImageData(x,y, tileSize, tileSize);
     const { data } = pixels;
     const numberOfPixels = tileSize * tileSize;
