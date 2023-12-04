@@ -16,12 +16,10 @@ import { resizeImageCanvas } from "./tools";
 
 import './App.css';
 
-type AlgorithmType = "optimized" | "biggestImage";
 
 const initialTileSize = 32;
 
 function App() {
-  const [algorithmType, setAlgorithmType] = useState<AlgorithmType>("optimized");
   const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
@@ -44,7 +42,6 @@ function App() {
   } = useImageSizes({ initialTileSize });
 
   const {
-    generateImage,
     optimizedGenerateImage,
     setOption,
     hasBorder,
@@ -73,11 +70,7 @@ function App() {
     }
 
     if(image && canvasFinal.current && canvasPreview.current) {
-        if(algorithmType === "optimized") {
-          optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight);
-        } else {
-          generateImage(image, canvasFinal.current);
-        }
+        optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight);
         // generate preview
         resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
     }
@@ -88,8 +81,8 @@ function App() {
       return <></>;
     }
 
-    const width = algorithmType === "optimized" ? possibleWidth : (image.width * tileSize);
-    const height = algorithmType === "optimized" ? possibleHeight : (image.width * tileSize);
+    const width =  possibleWidth;
+    const height = possibleHeight;
 
     return (
       <div className="flex flex-row gap-3 w-full">
@@ -141,46 +134,32 @@ function App() {
               </div>
             </Card>
             <Card title="Image Size">
-              <select
-                value={algorithmType}
-                onChange={(event) => setAlgorithmType(event.target.value as AlgorithmType)}
-                className="select select-primary w-full max-w-xs">
-                  <option key="0" disabled >Select the algorithm</option>
-                  <option key="1" value="optimized">Optimised</option>
-                  <option key="2" value="biggestImage"> Biggest Image</option>
-              </select>
               <div>
-                {
-                  algorithmType === "optimized" ?
-                    (
-                      <div>
-                        <Toggle
-                          label="Allow resize (will impact the proportions)"
-                          value={allowResize}
-                          toggle={() => setAllowResize(!allowResize)}
-                        />
-                        <Toggle
-                          label="Best proportion"
-                          value={bestProportion}
-                          toggle={() => setBestProportion(!bestProportion)}
-                        />
-                        <div>
-                          <label>Ratio</label>
-                          <input
-                            disabled={bestProportion}
-                            type="range"
-                            min="1"
-                            max={20}
-                            value={ratio}
-                            onChange={(e) => setRatio(parseInt(e.target.value))}
-                            className={`range ${bestProportion ? "range-error" : "range-primary"}`}
-                            />
-                          <span>{ratio}</span>
-                        </div>
-                      </div>
-                    ) :
-                    <></>
-                }
+                <div>
+                  <Toggle
+                    label="Allow resize (will impact the proportions)"
+                    value={allowResize}
+                    toggle={() => setAllowResize(!allowResize)}
+                  />
+                  <Toggle
+                    label="Best proportion"
+                    value={bestProportion}
+                    toggle={() => setBestProportion(!bestProportion)}
+                  />
+                  <div>
+                    <label>Ratio</label>
+                    <input
+                      disabled={bestProportion}
+                      type="range"
+                      min="1"
+                      max={20}
+                      value={ratio}
+                      onChange={(e) => setRatio(parseInt(e.target.value))}
+                      className={`range ${bestProportion ? "range-error" : "range-primary"}`}
+                      />
+                    <span>{ratio}</span>
+                  </div>
+                </div>
                 {renderPreview()}
               </div>
             </Card>
