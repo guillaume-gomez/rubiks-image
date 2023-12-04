@@ -10,6 +10,7 @@ import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
 import Error from "./Components/Error";
+import CanvasRendering from "./Components/CanvasRendering";
 import { resizeImageCanvas } from "./tools";
 
 
@@ -48,7 +49,8 @@ function App() {
     setOption,
     hasBorder,
     noise,
-    tileSize
+    tileSize,
+    rubickFaces
   } = useRubickImage({ initialTileSize });
 
   useEffect(() => {
@@ -201,6 +203,15 @@ function App() {
               <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
                 <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
               </div>
+            </Card>
+            <Card title="experiment">
+              <CanvasRendering
+                width={possibleWidth}
+                height={possibleHeight}
+                tileSize={tileSize}
+                rubickFaces={rubickFaces}
+                toggleFullScreen={() => {}}
+              />
             </Card>
           </div>
         </div>

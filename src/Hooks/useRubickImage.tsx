@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { minBy, sample } from "lodash";
 import { getContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
+import { RubickFace } from "../types";
 
 interface Color {
   red: number;
@@ -16,11 +17,6 @@ interface RubickTile {
   color: Color;
 }
 
-interface RubickFace {
-  x: number;
-  y: number;
-  rubickPixels: [string, string, string, string, string, string, string, string, string];
-}
 
 interface RubickImageProps {
   initialTileSize?: number;
@@ -93,11 +89,35 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
           const color33 = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x+2,y+2));
           renderSquare(contextTarget, color33, x+2, y+2);
 
-          const rubickFace : RubickFace = {
-            x,
-            y,
-            rubickPixels: [color11, color12, color13, color21, color22, color23, color31, color32, color33 ]
-          };
+          const rubickFace : RubickFace = [
+            {
+              color: color11, x, y
+            },
+            {
+              color: color12, x: (x+1), y
+            },
+            {
+              color: color13, x: (x+2), y
+            },
+            {
+              color: color21, x, y: (y+1)
+            },
+            {
+              color: color22, x: (x+1), y: (y+1)
+            },
+            {
+              color: color23, x: (x+2), y: (y+1)
+            },
+            {
+              color: color31, x, y: (y+2)
+            },
+            {
+              color: color32, x: (x+1), y: (y+2)
+            },
+            {
+              color: color33, x: (x+2), y: (y+2)
+            }
+          ]
           newRubicksPixels.push(rubickFace);
         }
 
@@ -150,11 +170,35 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
           const color33 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y+(2*tileSize)));
           renderSquare(contextTarget, color33, x+(2*tileSize), y+(2*tileSize));
 
-          const rubickFace : RubickFace = {
-            x,
-            y,
-            rubickPixels: [color11, color12, color13, color21, color22, color23, color31, color32, color33 ]
-          };
+          const rubickFace : RubickFace = [
+            {
+              color: color11, x, y
+            },
+            {
+              color: color12, x: (x+tileSize), y
+            },
+            {
+              color: color13, x: (x+(2*tileSize)), y
+            },
+            {
+              color: color21, x, y: (y+tileSize)
+            },
+            {
+              color: color22, x: (x+tileSize), y: (y+tileSize)
+            },
+            {
+              color: color23, x: (x+(2*tileSize)), y: (y+tileSize)
+            },
+            {
+              color: color31, x, y: (y+(2*tileSize))
+            },
+            {
+              color: color32, x: (x+tileSize), y: (y+(2*tileSize))
+            },
+            {
+              color: color33, x: (x+(2*tileSize)), y: (y+(2*tileSize))
+            }
+          ];
           newRubicksPixels.push(rubickFace);
         }
       }
@@ -247,5 +291,5 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   }
 
 
-  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize };
+  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize, rubickFaces };
 }

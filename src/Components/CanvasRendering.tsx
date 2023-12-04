@@ -1,10 +1,12 @@
-import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { RubickFace } from "../types";
 
 
 interface CanvasRenderingProps {
   width: number;
   height: number;
   tileSize: number;
+  rubickFaces: RubickFace[];
   toggleFullScreen: (target: EventTarget) => void;
 }
 
@@ -12,17 +14,18 @@ export interface ExternalActionInterface {
   getImage: () => string |null ;
 }
 
-const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps>(({width, height, tileSize, toggleFullScreen}, ref) => {
+const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps>(({width, height, tileSize, rubickFaces, toggleFullScreen}, ref) => {
   const refCanvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if(refCanvas.current) {
       const context = refCanvas.current.getContext("2d");
       if(context) {
+        renderRubickFaces(context, rubickFaces)
         renderBorder(context, width, height);
       }
     }
-  }, [refCanvas, rects]);
+  }, [refCanvas, rubickFaces]);
 
   useImperativeHandle(ref, () => ({
     getImage() {
@@ -49,6 +52,19 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
         context.strokeRect(x, y, tileSize*3, tileSize*3);
       }
     }
+  }
+
+  function renderRubickFaces(context: CanvasRenderingContext2D, rubickFaces: RubickFace[]) {
+    rubickFaces.forEach(rubickFace => renderRubickFace(context, rubickFace));
+  }
+
+  function renderRubickFace(context: CanvasRenderingContext2D, rubickFace: RubickFace) {
+    rubickFace.forEach(({x, y, color}) => renderSquare(context, color, x, y))
+  }
+
+  function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number) {
+    context.fillStyle = color;
+    context.fillRect(x,y, tileSize, tileSize);
   }
 
   return (
