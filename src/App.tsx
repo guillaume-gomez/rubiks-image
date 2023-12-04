@@ -20,12 +20,8 @@ import './App.css';
 const initialTileSize = 32;
 
 function App() {
-  const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
-
-  const canvasFinal = useRef<HTMLCanvasElement>(null);
-  const canvasPreview = useRef<HTMLCanvasElement>(null);
 
   const {
     computePossibleSize,
@@ -68,12 +64,7 @@ function App() {
       setError("Error! Please upload an image");
       return;
     }
-
-    if(image && canvasFinal.current && canvasPreview.current) {
-        optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight);
-        // generate preview
-        resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
-    }
+    optimizedGenerateImage(image, possibleWidth, possibleHeight);
   }
 
   function renderPreview() {
@@ -172,18 +163,6 @@ function App() {
           </div>
           <div className="basis-3/4">
             <Card title="Result">
-                <Toggle
-                label="Show real result"
-                value={fullscreen}
-                toggle={() => setFullscreen(!fullscreen)}
-              />
-              <span>The image could be wider than your screen. That is why we display the preview at first</span>
-              <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
-              <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
-                <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
-              </div>
-            </Card>
-            <Card title="experiment">
               <CanvasRendering
                 width={possibleWidth}
                 height={possibleHeight}

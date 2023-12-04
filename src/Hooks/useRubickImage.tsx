@@ -45,24 +45,14 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
     return canvasBuffer;
   }
 
-  function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number) {
-    context.fillStyle = color;
-    context.fillRect(x,y, tileSize, tileSize);
-  }
-
   function optimizedGenerateImage(
     image: HTMLImageElement,
-    canvasTarget: HTMLCanvasElement,
     expectedWidth: number,
     expectedHeight: number
   ) {
-      canvasTarget.width = expectedWidth;
-      canvasTarget.height = expectedHeight;
-
       const canvasBuffer = createCanvasBuffer(image);
 
       const contextBuffer = getContext(canvasBuffer);
-      const contextTarget = getContext(canvasTarget);
       resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
       let newRubicksPixels : RubickFace[] = []
@@ -71,25 +61,16 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
         for(let x = 0; x < canvasBuffer.width; x += (3*tileSize)) {
 
           const color11 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y));
-          renderSquare(contextTarget, color11, x, y);
           const color12 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+tileSize,y));
-          renderSquare(contextTarget, color12, x+tileSize, y);
           const color13 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y));
-          renderSquare(contextTarget, color13, x+(2*tileSize), y);
 
           const color21 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y+tileSize));
-          renderSquare(contextTarget, color21, x, y+tileSize);
           const color22 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+tileSize,y+tileSize));
-          renderSquare(contextTarget, color22, x+tileSize, y+tileSize);
           const color23 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y+tileSize));
-          renderSquare(contextTarget, color23, x+(2*tileSize), y+tileSize);
 
           const color31 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y+(2*tileSize)));
-          renderSquare(contextTarget, color31, x, y+(2*tileSize));
           const color32 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+tileSize,y+(2*tileSize)));
-          renderSquare(contextTarget, color32, x+tileSize, y+(2*tileSize));
           const color33 = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x+(2*tileSize),y+(2*tileSize)));
-          renderSquare(contextTarget, color33, x+(2*tileSize), y+(2*tileSize));
 
           const rubickFace : RubickFace = [
             {
@@ -123,27 +104,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
           newRubicksPixels.push(rubickFace);
         }
       }
-      if(hasBorder) {
-        renderBorder(contextTarget, expectedWidth, expectedHeight);
-      }
       setRubickFaces(newRubicksPixels);
-  }
-
-  function renderBorder(context: CanvasRenderingContext2D, width: number, height: number) {
-    context.fillStyle = "black";
-    context.lineWidth = 2;
-    for(let x=0; x < width; x += tileSize) {
-      for(let y=0; y < height; y+= tileSize) {
-        context.strokeRect(x, y, tileSize, tileSize);
-      }
-    }
-
-    context.lineWidth = 4;
-    for(let x=0; x < width; x += 3*tileSize) {
-      for(let y=0; y < height; y+= 3*tileSize) {
-        context.strokeRect(x, y, tileSize*3, tileSize*3);
-      }
-    }
   }
 
   function fromPixelToColor(context: CanvasRenderingContext2D, x: number, y: number) : Color {
