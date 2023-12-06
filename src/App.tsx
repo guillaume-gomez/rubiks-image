@@ -141,8 +141,9 @@ function App() {
                     <input
                       disabled={bestProportion}
                       type="range"
-                      min="1"
-                      max={20}
+                      min="3"
+                      max={24}
+                      step={3}
                       value={ratio}
                       onChange={(e) => setRatio(parseInt(e.target.value))}
                       className={`range ${bestProportion ? "range-error" : "range-primary"}`}
