@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { minBy, sample } from "lodash";
-import { getOffscreenContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
+import { getOffscreenContext, colorDistance, resizeImageCanvas } from "../tools";
 import { RubickFace } from "../types";
 
 interface Color {
@@ -15,6 +15,7 @@ type OptionType = "hasBorder" | "noise" | "tileSize";
 interface RubickTile {
   name: string;
   color: Color;
+  hexColor: string
 }
 
 
@@ -23,12 +24,12 @@ interface RubickImageProps {
 }
 
 const RubickTiles : RubickTile[] = [
-  { name: "white", color: {red: 255, green: 255, blue:255} },
-  { name: "green", color: {red: 124, green: 178, blue:87} },
-  { name: "yellow", color: {red: 238, green: 207, blue:78} },
-  { name: "orange", color: {red: 236, green: 112, blue:45} },
-  { name: "red", color: {red: 189, green: 40, blue:39} },
-  { name: "blue", color: {red: 44, green: 93, blue:166} }
+  { name: "white", color: {red: 255, green: 255, blue:255}, hexColor: "#FFFFFF" },
+  { name: "green", color: {red: 124, green: 178, blue:87}, hexColor: "#7CCF57" },
+  { name: "yellow", color: {red: 238, green: 207, blue:78}, hexColor: "#EECF4E" },
+  { name: "orange", color: {red: 236, green: 112, blue:45}, hexColor: "#EC702D" },
+  { name: "red", color: {red: 189, green: 40, blue:39}, hexColor: "#BD2827" },
+  { name: "blue", color: {red: 44, green: 93, blue:166}, hexColor: "#2C5DA6" }
 ];
 
 export default function useRubickImage({ initialTileSize = tileSizeDefault } : RubickImageProps) {
@@ -133,7 +134,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
       throw `No sprite found for the pixel with the value ${color}`;
     }
 
-    return fromColorArrayToStringCSS(foundPixel.color);
+    return foundPixel.hexColor;
   }
 
   function fromColorToDominantRubikColorWithRandom(color: Color) : string {

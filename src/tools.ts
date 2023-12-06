@@ -70,9 +70,3 @@ export function resizeImageCanvas(originCanvas: HTMLCanvasElement, targetCanvas:
     expectedHeight
   );
 }
-
-
-
-export function fromColorArrayToStringCSS(color: Color) : string {
-  return `rgb(${color.red}, ${color.green}, ${color.blue})`;
-}
