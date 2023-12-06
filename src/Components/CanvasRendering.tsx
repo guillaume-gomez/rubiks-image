@@ -46,7 +46,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       // generate preview
       resizeImageCanvas(refCanvas.current, canvasPreview.current, refCanvas.current.width, refCanvas.current.height);
     }
-  }, [refCanvas, canvasPreview, rubickFaces, hasBorder, tileSize]);
+  }, [refCanvas, canvasPreview, rubickFaces]);
 
   useImperativeHandle(ref, () => ({
     getImage() {

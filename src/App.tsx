@@ -11,7 +11,7 @@ import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
 import Error from "./Components/Error";
 import CanvasRendering from "./Components/CanvasRendering";
-
+import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
 
 import './App.css';
 
@@ -21,6 +21,7 @@ const initialTileSize = 32;
 function App() {
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
+  const [view3d, setView3d] = useState<boolean>(true);
 
   const {
     computePossibleSize,
@@ -163,14 +164,30 @@ function App() {
           </div>
           <div className="basis-3/4">
             <Card title="Result">
-              <CanvasRendering
-                width={possibleWidth}
-                height={possibleHeight}
-                tileSize={tileSize}
-                hasBorder={hasBorder}
-                rubickFaces={rubickFaces}
-                toggleFullScreen={() => {}}
-              />
+             <Toggle
+                  label="3D views"
+                  value={view3d}
+                  toggle={() => setView3d(!view3d)}
+                />
+              { view3d ?
+                <ThreeJsRendering
+                  width={possibleWidth}
+                  height={possibleHeight}
+                  tileSize={tileSize}
+                  hasBorder={hasBorder}
+                  rubickFaces={rubickFaces}
+                  toggleFullScreen={() => {}}
+                />
+                :
+                <CanvasRendering
+                  width={possibleWidth}
+                  height={possibleHeight}
+                  tileSize={tileSize}
+                  hasBorder={hasBorder}
+                  rubickFaces={rubickFaces}
+                  toggleFullScreen={() => {}}
+                />
+              }
             </Card>
           </div>
         </div>
