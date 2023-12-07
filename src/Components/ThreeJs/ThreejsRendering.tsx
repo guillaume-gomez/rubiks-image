@@ -62,6 +62,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
                     const topLeft = rubickFace[0];
                     return (
                       <RubickCube
+                        key={index}
                         position={[topLeft.x / tileSize + (x * spaceBetweenRubick), -((topLeft.y / tileSize) + (y * spaceBetweenRubick)), 0]}
                         tileSize={tileSize}
                         rubickFace={rubickFace}
