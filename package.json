@@ -13,6 +13,7 @@
     "@react-three/drei": "^9.90.0",
     "@react-three/fiber": "^8.15.12",
     "@types/lodash": "^4.14.200",
+    "@types/three": "^0.159.0",
     "last": "^1.1.0",
     "lodash": "^4.17.21",
     "react": "^18.2.0",

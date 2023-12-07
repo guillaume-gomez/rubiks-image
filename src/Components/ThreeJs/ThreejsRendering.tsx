@@ -1,4 +1,4 @@
-import React, { useRef , useState } from 'react';
+import { useRef , useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stage, Stats } from '@react-three/drei';
 import { RubickFace } from "../../types";
@@ -15,7 +15,7 @@ interface ThreejsRenderingProps {
 }
 
 
-const spaceBetweenRubick = 0.2;
+const spaceBetweenRubick = 0.1;
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, toggleFullScreen } : ThreejsRenderingProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -64,9 +64,9 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
                       <RubickCube
                         key={index}
                         position={[topLeft.x / tileSize + (x * spaceBetweenRubick), -((topLeft.y / tileSize) + (y * spaceBetweenRubick)), 0]}
-                        tileSize={tileSize}
                         rubickFace={rubickFace}
                         hideOtherFaces={hideOtherFaces}
+                        hasBorder={hasBorder}
                       />
                     )
                   }

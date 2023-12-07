@@ -4,10 +4,10 @@ import RubickTile from "./RubickTile";
 interface RubickFaceProps {
   rubickFace: RubickFace;
   position: [number, number, number]
-  isMiddle: boolean
+  isMiddleFace?: boolean
 }
 
-function RubickFace({ rubickFace, position, isMiddle } : RubickFaceProps) {
+function RubickFace({ rubickFace, position, isMiddleFace = false } : RubickFaceProps) {
   return (
     <group
       position={position}
@@ -16,7 +16,7 @@ function RubickFace({ rubickFace, position, isMiddle } : RubickFaceProps) {
       rubickFace.map(({color}, index) => {
         const x = index % 3;
         const y = Math.floor(index / 3);
-        if(x === 1 && y === 1 && isMiddle) {
+        if(x === 1 && y === 1 && isMiddleFace) {
           return <></>;
         }
         return (
