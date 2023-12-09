@@ -1,12 +1,8 @@
 import { useRef , useEffect } from 'react';
-import {Object3D, InstancedMesh, MeshStandardMaterial, BoxGeometry } from 'three';
+import { Object3D, InstancedMesh, MeshStandardMaterial, BoxGeometry } from 'three';
 import { RubickFace } from "../../types";
-import RubickTile from "./RubickTile";
-import Toggle from "../Toggle";
 
 interface InstancedMeshProps {
-  width: number;
-  height: number;
   tileSize: number;
   rubickFaces: RubickFace[];
   hasBorder?: boolean;
@@ -44,7 +40,7 @@ function fromColorToRotation(color: string) : string {
 }
 
 
-function Cubes({ width, height, tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
+function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>();
   const tempObject = new Object3D();
 
@@ -57,7 +53,7 @@ function Cubes({ width, height, tileSize, rubickFaces, hasBorder } : InstancedMe
       for(let z = 0; z < 3; z++) {
         rubickFace.forEach( ({x, y, color}) => {
             id++;
-            tempObject.position.set((x/tileSize) - (width/2/tileSize), -(y/tileSize) + (height/2/tileSize), z);
+            tempObject.position.set((x/tileSize), -(y/tileSize), z);
             tempObject.rotation.set(...fromColorToRotation(color));
             tempObject.updateMatrix();
             meshRef.current.setMatrixAt(id, tempObject.matrix);

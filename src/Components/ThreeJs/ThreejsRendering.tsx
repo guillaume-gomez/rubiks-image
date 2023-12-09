@@ -41,10 +41,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
     }
   }
 
-  if(rubickFaces.length === 0) {
-    return <div></div>;
-  }
-
   return (
     <div>
       <Toggle
@@ -66,9 +62,9 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
           <directionalLight position={[0, 0, 5]} intensity={0.5} />
             <group
               position={[
-              0, 0, 0]}
+              -(width/2/tileSize), (height/2/tileSize), 0]}
             >
-              <CubesInstanceMesh width={width} height={height} tileSize={tileSize} rubickFaces={rubickFaces} />
+              <CubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
 
             </group>
             <CameraControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault  maxDistance={250} ref={cameraControlRef} />
