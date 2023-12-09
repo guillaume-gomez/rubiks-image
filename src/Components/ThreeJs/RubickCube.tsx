@@ -73,7 +73,7 @@ function RubickCube({ hideOtherFaces, rubickFace, position, hasBorder } : Rubick
         position={[1,-1,1]}
       />}
       <RubickFaceThree
-        rubickFace={oppositeFace}
+        rubickFace={rubickFace}
         position={[0, 0, 0]}
       />
       <RubickFaceThree

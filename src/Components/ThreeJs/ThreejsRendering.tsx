@@ -2,8 +2,8 @@ import { useRef , useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stage, Stats } from '@react-three/drei';
 import { RubickFace } from "../../types";
-import RubickCube from "./RubickCube";
 import Toggle from "../Toggle";
+import CubesInstanceMesh from "./CubesInstanceMesh";
 
 interface ThreejsRenderingProps {
   width: number;
@@ -36,7 +36,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
       />
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
-          camera={{ position: [0, 0.0, 1], fov: 35, far: 5 }}
+          camera={{ position: [0, 0.0, 1], fov: 35, far: 300 }}
           dpr={window.devicePixelRatio}
           //onDoubleClick={toggleFullscreen}
           ref={canvasRef}
@@ -44,38 +44,16 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
         >
           <color attach="background" args={['skyblue']} />
           <Stats/>
-          <Stage
-            intensity={0.5}
-            preset="rembrandt"
-            shadows={{ type: 'accumulative', color: 'skyblue', colorBlend: 2, opacity: 1 }}
-            adjustCamera={1}
-            environment="city">
+          <ambientLight args={[0xffffff]} intensity={0.5} position={[0, 0.5, 0.5]} />
+          <directionalLight position={[0, 0, 5]} intensity={0.5} />
             <group
               position={[
               0, 0, 0]}
             >
-              {
-                rubickFaces.map((rubickFace, index) => {
-
-                    const x = index % numberOfRubickCubeWidth;
-                    const y = Math.floor(index / numberOfRubickCubeWidth);
-                    const topLeft = rubickFace[0];
-                    return (
-                      <RubickCube
-                        key={index}
-                        position={[topLeft.x / tileSize + (x * spaceBetweenRubick), -((topLeft.y / tileSize) + (y * spaceBetweenRubick)), 0]}
-                        rubickFace={rubickFace}
-                        hideOtherFaces={hideOtherFaces}
-                        hasBorder={hasBorder}
-                      />
-                    )
-                  }
-                )
-              }
+              <CubesInstanceMesh width={width} height={height} tileSize={tileSize} rubickFaces={rubickFaces} />
 
             </group>
-            <OrbitControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault />
-          </Stage>
+            <OrbitControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault  maxDistance={250} />
         </Canvas>
       </div>
     </div>
