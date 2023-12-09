@@ -24,15 +24,26 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
 
   useEffect(() => {
     if(cameraControlRef && cameraControlRef.current) {
-      cameraControlRef.current.dollyTo(height/tileSize * 2 , true);
+      recenterCamera();
     }
   }, [rubickFaces.length, cameraControlRef]);
+
+
+  function recenterCamera() {
+    if(cameraControlRef.current) {
+      // position
+      // target
+      cameraControlRef.current.setLookAt(
+            0, 0, height/tileSize * 2,
+            0,0, 0,
+            true
+          );
+    }
+  }
 
   if(rubickFaces.length === 0) {
     return <div></div>;
   }
-
-  const numberOfRubickCubeWidth = width/(tileSize * 3);
 
   return (
     <div>
