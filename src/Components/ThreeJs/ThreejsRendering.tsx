@@ -1,6 +1,6 @@
-import { useRef , useState } from 'react';
+import { useRef , useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stage, Stats } from '@react-three/drei';
+import { CameraControls, Stage, Stats } from '@react-three/drei';
 import { RubickFace } from "../../types";
 import Toggle from "../Toggle";
 import CubesInstanceMesh from "./CubesInstanceMesh";
@@ -18,8 +18,15 @@ interface ThreejsRenderingProps {
 const spaceBetweenRubick = 0.1;
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, toggleFullScreen } : ThreejsRenderingProps) {
+  const cameraControlRef = useRef<CameraControls|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(cameraControlRef && cameraControlRef.current) {
+      cameraControlRef.current.dollyTo(height/tileSize * 2 , true);
+    }
+  }, [rubickFaces.length, cameraControlRef]);
 
   if(rubickFaces.length === 0) {
     return <div></div>;
@@ -53,7 +60,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
               <CubesInstanceMesh width={width} height={height} tileSize={tileSize} rubickFaces={rubickFaces} />
 
             </group>
-            <OrbitControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault  maxDistance={250} />
+            <CameraControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault  maxDistance={250} ref={cameraControlRef} />
         </Canvas>
       </div>
     </div>
