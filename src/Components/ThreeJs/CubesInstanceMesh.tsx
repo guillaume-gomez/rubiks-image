@@ -1,5 +1,6 @@
 import { useRef , useEffect } from 'react';
-import { Object3D, InstancedMesh, MeshStandardMaterial, BoxGeometry } from 'three';
+import { useFrame } from "@react-three/fiber";
+import { Object3D, Matrix4, InstancedMesh, MeshStandardMaterial, BoxGeometry } from 'three';
 import { RubickFace } from "../../types";
 
 interface InstancedMeshProps {
@@ -17,14 +18,10 @@ const colorsMaterialsArray = [
   new MeshStandardMaterial({color: "#FFFFFF"}), //white -> back
 ]
 
-const truc = new MeshStandardMaterial({color: "#FF00FF"})
 
 const BORDER_SIZE = 0.1;
 const SIZE = 1 - BORDER_SIZE;
 const boxGeometry = new BoxGeometry(SIZE, SIZE, SIZE);
-
-const spaceBetweenRubick = 0.1;
-
 
 function fromColorToRotation(color: string) : string {
   switch(color) {
@@ -39,33 +36,94 @@ function fromColorToRotation(color: string) : string {
   }
 }
 
+const colors = ["#2C5DA6", "#7CCF57", "#BD2827", "#EC702D", "#EECF4E", "#FFFFFF"];
+
 
 function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>();
+  const elapsedTimeAdded = useRef<number>(0);
+  const animationFinish = useRef<boolean>(false);
   const tempObject = new Object3D();
+  const numberOfCubes = rubickFaces.length * 9 * 3;
+
+  function finalResult() {
+    let id = 0;
+    rubickFaces.forEach(rubickFace => {
+      for(let z = 0; z < 3; z++) {
+        rubickFace.forEach( ({x, y, color}) => {
+            tempObject.position.set((x/tileSize), -(y/tileSize), z);
+            tempObject.rotation.set(...fromColorToRotation(color));
+            tempObject.updateMatrix();
+            meshRef.current.setMatrixAt(id, tempObject.matrix);
+            id++;
+        })
+      }
+    })
+  }
+
+  function init() {
+    let id = 0;
+    rubickFaces.forEach(rubickFace => {
+      for(let z = 0; z < 3; z++) {
+        rubickFace.forEach( ({x, y, color}) => {
+            const indexColor = Math.floor(Math.random() * 6);
+
+            tempObject.position.set((x/tileSize), -(y/tileSize), z);
+            tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
+            tempObject.updateMatrix();
+            meshRef.current.setMatrixAt(id, tempObject.matrix);
+            id++;
+        })
+      }
+    })
+  }
+
+  function random(elapsedTime: number) {
+    for(let id = 0; id < numberOfCubes; id++) {
+      const indexColor = Math.floor(Math.random() * 6);
+      let tempObject = new Object3D();
+      let matrix = new Matrix4();
+
+      meshRef.current.getMatrixAt(id, matrix);
+      matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
+      tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
+      //tempObject.rotateY(2.0 *  elapsedTime);
+      tempObject.updateMatrix();
+
+      meshRef.current.setMatrixAt(id, tempObject.matrix);
+    }
+  }
 
   useEffect(() => {
     if (meshRef == null) return;
     if (meshRef.current == null) return;
 
-    let id = -1;
-    rubickFaces.forEach(rubickFace => {
-      for(let z = 0; z < 3; z++) {
-        rubickFace.forEach( ({x, y, color}) => {
-            id++;
-            tempObject.position.set((x/tileSize), -(y/tileSize), z);
-            tempObject.rotation.set(...fromColorToRotation(color));
-            tempObject.updateMatrix();
-            meshRef.current.setMatrixAt(id, tempObject.matrix);
-        })
-      }
-    })
+    elapsedTimeAdded.current = 0.0;
+    animationFinish.current = false;
+
+    init();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
 
+  useFrame((state, elapsedTime) => {
+    if(animationFinish.current) {
+      return;
+    }
+
+    elapsedTimeAdded.current += elapsedTime;
+    if(elapsedTimeAdded.current < 10.0) {
+      random(elapsedTime);
+    } else {
+      finalResult();
+      animationFinish.current = true;
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+
+  });
+
   return (
-    <instancedMesh ref={meshRef} args={[boxGeometry, colorsMaterialsArray, rubickFaces.length * 9 * 3 ]} />
+    <instancedMesh ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
 }
 
