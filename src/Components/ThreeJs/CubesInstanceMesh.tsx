@@ -1,6 +1,7 @@
 import { useRef , useEffect } from 'react';
 import { useFrame } from "@react-three/fiber";
-import { Object3D, Matrix4, InstancedMesh, MeshStandardMaterial, BoxGeometry } from 'three';
+import { Object3D, Matrix4, Vector3, InstancedMesh, MeshStandardMaterial, Euler, Quaternion } from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { RubickFace } from "../../types";
 
 interface InstancedMeshProps {
@@ -21,7 +22,7 @@ const colorsMaterialsArray = [
 
 const BORDER_SIZE = 0.1;
 const SIZE = 1 - BORDER_SIZE;
-const boxGeometry = new BoxGeometry(SIZE, SIZE, SIZE);
+const boxGeometry = new RoundedBoxGeometry(SIZE, SIZE, SIZE);
 
 function fromColorToRotation(color: string) : string {
   switch(color) {
@@ -66,10 +67,10 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     rubickFaces.forEach(rubickFace => {
       for(let z = 0; z < 3; z++) {
         rubickFace.forEach( ({x, y, color}) => {
-            const indexColor = Math.floor(Math.random() * 6);
+            //const indexColor = Math.floor(Math.random() * 6);
 
             tempObject.position.set((x/tileSize), -(y/tileSize), z);
-            tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
+            //tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
             tempObject.updateMatrix();
             meshRef.current.setMatrixAt(id, tempObject.matrix);
             id++;
@@ -77,6 +78,81 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
       }
     })
   }
+
+  function initTest() {
+    if(rubickFaces.length <= 0) {
+      return;
+    }
+
+    let id = 0;
+    for(let z = -1; z <= 1; z++) {
+      rubickFaces[0].forEach( ({x, y, color}) => {
+          const indexColor = Math.floor(Math.random() * 6);
+          tempObject.position.set((x/tileSize), -(y/tileSize), z);
+          //tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
+          tempObject.updateMatrix();
+          meshRef.current.setMatrixAt(id, tempObject.matrix);
+          id++;
+      })
+    }
+  }
+
+  function rotateRubickCubes() {
+    console.log(numberOfCubes)
+    rubickFaces.forEach((rubickFace, index) => {
+      const face = Math.floor(Math.random() * 3);
+      const angle = Math.floor(Math.random() * 4);
+      rotate("Y", index * 3 * 9, face, angle * Math.PI/2)
+       rotate("X", index * 3 * 9, face, angle * Math.PI/2)
+    })
+
+
+  }
+
+  function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, angleInRadian: number) {
+    const ids = getIdsFromRotationAxis(rotationAxis, rubickCubeIndex, face);
+    console.log(ids)
+    ids.forEach(id => {
+      let tempObject = new Object3D();
+      let matrix = new Matrix4();
+
+      meshRef.current.getMatrixAt(id, matrix);
+      matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
+
+      matrix.makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, angleInRadian));
+      matrix.setPosition(tempObject.position.x, tempObject.position.y, tempObject.position.z);
+      meshRef.current.setMatrixAt(id, matrix);
+    });
+  }
+
+  function getIdsFromRotationAxis(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number) : array {
+    let iterator = 0;
+    switch(rotationAxis) {
+      case "X":
+      default:
+        iterator = face * 1;
+        return [0, 3, 6, 9, 12, 15, 18, 21, 24].map(id => (id + iterator) + (rubickCubeIndex));
+      case "Y":
+       iterator = face * 3;
+        return [0, 1, 2, 9, 10, 11, 18,19, 20].map(id => (id + iterator) + (rubickCubeIndex));
+      case "Z":
+         iterator = face * 9;
+        return [0, 1, 2, 3, 4, 5, 6, 7, 8].map(id => (id + iterator)  + (rubickCubeIndex));
+    }
+  }
+
+  function getEulerFromRotationAxis(rotationAxis: "X"|"Y"|"Z", angleInRadian: number): Euler {
+    switch(rotationAxis) {
+      case "X":
+      default:
+        return new Euler(angleInRadian, 0, 0);
+      case "Y":
+        return new Euler(0, angleInRadian, 0);
+      case "Z":
+        return new Euler(0, 0, angleInRadian);
+    }
+  }
+
 
   function random(elapsedTime: number) {
     for(let id = 0; id < numberOfCubes; id++) {
@@ -87,7 +163,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
       meshRef.current.getMatrixAt(id, matrix);
       matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
       tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
-      //tempObject.rotateY(2.0 *  elapsedTime);
+      //tempObject.rotateX(2.0 *  elapsedTime);
       tempObject.updateMatrix();
 
       meshRef.current.setMatrixAt(id, tempObject.matrix);
@@ -102,22 +178,31 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     animationFinish.current = false;
 
     init();
+    if(rubickFaces.length > 0) {
+      rotateRubickCubes();
+    }
+    //initTest();
+
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
 
   useFrame((state, elapsedTime) => {
-    if(animationFinish.current) {
+    /*if(animationFinish.current) {
       return;
     }
 
     elapsedTimeAdded.current += elapsedTime;
-    if(elapsedTimeAdded.current < 10.0) {
+    if(elapsedTimeAdded.current < 5.0) {
       random(elapsedTime);
-    } else {
-      finalResult();
-      animationFinish.current = true;
-    }
+    } else {*/
+      //finalResult();
+      /*animationFinish.current = true;
+    }*/
+
+
+    //rotate(elapsedTime)
+
     meshRef.current.instanceMatrix.needsUpdate = true;
 
   });
