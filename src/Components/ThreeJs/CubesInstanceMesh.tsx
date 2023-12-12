@@ -44,8 +44,9 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>();
   const elapsedTimeAdded = useRef<number>(0);
   const animationFinish = useRef<boolean>(false);
+  const origin = useRef<Vector3>(new Vector3());
   const tempObject = new Object3D();
-  const numberOfCubes = rubickFaces.length * 9 * 3;
+  const numberOfCubes =  27//rubickFaces.length * 9 * 3;
 
   function finalResult() {
     let id = 0;
@@ -63,9 +64,11 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   }
 
   function init() {
+    origin.current.set(-3, -4, 5);
+
     let id = 0;
     rubickFaces.forEach(rubickFace => {
-      for(let z = 0; z < 3; z++) {
+      for(let z = -1; z <= 1; z++) {
         rubickFace.forEach( ({x, y, color}) => {
             //const indexColor = Math.floor(Math.random() * 6);
 
@@ -84,11 +87,12 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
       return;
     }
 
+    origin.current.set(-7, -2, 3);
     let id = 0;
     for(let z = -1; z <= 1; z++) {
       rubickFaces[0].forEach( ({x, y, color}) => {
           const indexColor = Math.floor(Math.random() * 6);
-          tempObject.position.set((x/tileSize), -(y/tileSize), z);
+          tempObject.position.set((x/tileSize) + origin.current.x, (y/tileSize) + origin.current.y, z + origin.current.z);
           //tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
           tempObject.updateMatrix();
           meshRef.current.setMatrixAt(id, tempObject.matrix);
@@ -97,21 +101,18 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     }
   }
 
-  function rotateRubickCubes() {
-    console.log(numberOfCubes)
+  function rotateRubickCubes(elapsedTime) {
     rubickFaces.forEach((rubickFace, index) => {
       const face = Math.floor(Math.random() * 3);
       const angle = Math.floor(Math.random() * 4);
-      rotate("Y", index * 3 * 9, face, angle * Math.PI/2)
-       rotate("X", index * 3 * 9, face, angle * Math.PI/2)
+      rotate('X', index * 3 * 9, 0, elapsedTime)
     })
 
 
   }
 
-  function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, angleInRadian: number) {
+  function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, elapsedTime: number) {
     const ids = getIdsFromRotationAxis(rotationAxis, rubickCubeIndex, face);
-    console.log(ids)
     ids.forEach(id => {
       let tempObject = new Object3D();
       let matrix = new Matrix4();
@@ -119,10 +120,42 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
       meshRef.current.getMatrixAt(id, matrix);
       matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
 
-      matrix.makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, angleInRadian));
-      matrix.setPosition(tempObject.position.x, tempObject.position.y, tempObject.position.z);
-      meshRef.current.setMatrixAt(id, matrix);
+      //const translation = new Matrix4().setPosition(getTranslationFromRotationAxis(rotationAxis, elapsedTime,tempObject.position));
+      //console.log(tempObject.position)
+
+
+      const [translation, translationInverse] = getTranslationFromRotationAxis(rotationAxis, origin.current);
+      console.log(translation, translationInverse)
+
+
+      const rotate = new Matrix4().makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, elapsedTime));
+      //tempObject.matrix = rotate.multiply(translation);
+      //tempObject.matrix = translation.multiply(rotate);
+      tempObject.applyMatrix4(translation.multiply(rotate).multiply(translationInverse));
+      meshRef.current.setMatrixAt(id, tempObject.matrix);
     });
+  }
+
+  function getTranslationFromRotationAxis(rotationAxis: "X"|"Y"|"Z", origin: Vector3) : [Matrix4, Matrix4] {
+
+    switch(rotationAxis) {
+      case "X":
+      default:
+        return [
+          new Matrix4().setPosition(new Vector3(0,(origin.y + 1),(origin.z))),
+          new Matrix4().setPosition(new Vector3(0,-(origin.y + 1),-(origin.z)))
+        ];
+      case "Y":
+        return [
+          new Matrix4().setPosition(new Vector3((origin.x + 1),0,(origin.z))),
+          new Matrix4().setPosition(new Vector3(-(origin.x + 1),0,-(origin.z)))
+        ];
+      case "Z":
+        return [
+          new Matrix4().setPosition(new Vector3((origin.x + 1),(origin.y + 1),0)),
+          new Matrix4().setPosition(new Vector3(-(origin.x + 1),-(origin.y + 1),0))
+        ];
+    }
   }
 
   function getIdsFromRotationAxis(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number) : array {
@@ -153,23 +186,6 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     }
   }
 
-
-  function random(elapsedTime: number) {
-    for(let id = 0; id < numberOfCubes; id++) {
-      const indexColor = Math.floor(Math.random() * 6);
-      let tempObject = new Object3D();
-      let matrix = new Matrix4();
-
-      meshRef.current.getMatrixAt(id, matrix);
-      matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
-      tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
-      //tempObject.rotateX(2.0 *  elapsedTime);
-      tempObject.updateMatrix();
-
-      meshRef.current.setMatrixAt(id, tempObject.matrix);
-    }
-  }
-
   useEffect(() => {
     if (meshRef == null) return;
     if (meshRef.current == null) return;
@@ -177,10 +193,10 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     elapsedTimeAdded.current = 0.0;
     animationFinish.current = false;
 
-    init();
-    if(rubickFaces.length > 0) {
+    initTest();
+    /*if(rubickFaces.length > 0) {
       rotateRubickCubes();
-    }
+    }*/
     //initTest();
 
 
@@ -202,6 +218,10 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
 
 
     //rotate(elapsedTime)
+    if(rubickFaces.length>0) {
+      //rotateRubickCubes(elapsedTime)
+      rotate('Z', 0, 0, elapsedTime)
+    }
 
     meshRef.current.instanceMatrix.needsUpdate = true;
 
