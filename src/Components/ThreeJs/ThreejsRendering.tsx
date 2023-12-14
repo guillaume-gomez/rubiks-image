@@ -1,6 +1,6 @@
 import { useRef , useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { CameraControls, Stage, Stats } from '@react-three/drei';
+import { CameraControls, Stats, GizmoHelper, GizmoViewport } from '@react-three/drei';
 import { RubickFace } from "../../types";
 import Toggle from "../Toggle";
 import CubesInstanceMesh from "./CubesInstanceMesh";
@@ -13,9 +13,6 @@ interface ThreejsRenderingProps {
   hasBorder: boolean;
   toggleFullScreen: (target: EventTarget) => void;
 }
-
-
-const spaceBetweenRubick = 0.1;
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, toggleFullScreen } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
@@ -67,6 +64,9 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
               <CubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
 
             </group>
+              <GizmoHelper alignment="bottom-right" margin={[50, 50]}>
+                <GizmoViewport labelColor="white" axisHeadScale={1} />
+              </GizmoHelper>
             <CameraControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault  maxDistance={250} ref={cameraControlRef} />
         </Canvas>
       </div>

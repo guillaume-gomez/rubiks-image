@@ -8,7 +8,6 @@ import { RubickFace } from "../../types";
 interface InstancedMeshProps {
   tileSize: number;
   rubickFaces: RubickFace[];
-  hasBorder?: boolean;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -40,7 +39,7 @@ const BORDER_SIZE = 0.1;
 const SIZE = 1 - BORDER_SIZE;
 const boxGeometry = new RoundedBoxGeometry(SIZE, SIZE, SIZE);
 
-function fromColorToRotation(color: string) : string {
+function fromColorToRotation(color: string) : [number, number, number] {
   switch(color) {
     case "#2C5DA6": return [0,-Math.PI/2, 0];
     case "#7CCF57": return [0, Math.PI/2, 0];
@@ -53,9 +52,7 @@ function fromColorToRotation(color: string) : string {
   }
 }
 
-const colors = ["#2C5DA6", "#7CCF57", "#BD2827", "#EC702D", "#EECF4E", "#FFFFFF"];
-
-function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
+function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>();
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -67,6 +64,10 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   const params= useRef<ParamsMove[]>([]);
 
   function finalResult() {
+    if(!meshRef || !meshRef.current) {
+      return;
+    }
+
     let id = 0;
     rubickFaces.forEach(rubickFace => {
       for(let z = 0; z < 3; z++) {
@@ -90,7 +91,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     rubickFaces.forEach(rubickFace => {
       for(let z = -1; z <= 1; z++)
       {
-        rubickFace.forEach( ({x, y, color}) => {
+        rubickFace.forEach( ({x, y}) => {
             //const indexColor = Math.floor(Math.random() * 6);
 
             tempObject.position.set((x/tileSize) + origin.current.x, (y/tileSize) + origin.current.y, z + origin.current.z);
@@ -117,8 +118,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
 
     let id = 0;
     for(let z = -1; z <= 1; z++) {
-      rubickFaces[0].forEach( ({x, y, color}) => {
-          const indexColor = Math.floor(Math.random() * 6);
+      rubickFaces[0].forEach( ({x, y}) => {
           tempObject.position.set((x/tileSize) + origin.current.x, (y/tileSize) + origin.current.y, z + origin.current.z);
           tempObject.updateMatrix();
           meshRef.current.setMatrixAt(id, tempObject.matrix);
@@ -142,11 +142,11 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     return { movesLength, currentMove: 0, moves };
   }
 
-  function rotateRubickCubes(elapsedTime) {
+  function rotateRubickCubes(elapsedTime: number) {
     rotation.current = Math.min(rotation.current + 0.1, 1);
     const iteration = (rotation.current - oldRotation.current) * Math.PI/2;
 
-    rubickFaces.forEach((rubickFace, index) => {
+    rubickFaces.forEach((_rubickFace, index) => {
       const { moves, currentMove, movesLength } = params.current[index];
       if(currentMove >= movesLength) {
         return;
@@ -253,16 +253,17 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   useEffect(() => {
     if (meshRef == null) return;
     if (meshRef.current == null) return;
-    init();
+    //init();
     //initTest();
+    finalResult();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
 
-  useFrame((state, elapsedTime) => {
-    if(rubickFaces.length>0) {
+  useFrame((_state, elapsedTime) => {
+    /*if(rubickFaces.length>0) {
       rotateRubickCubes(elapsedTime);
-    }
+    }*/
 
     meshRef.current.instanceMatrix.needsUpdate = true;
 

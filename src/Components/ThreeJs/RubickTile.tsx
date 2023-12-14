@@ -19,7 +19,7 @@ const SIZE = 1 - BORDER_SIZE;
 const boxGeometry = new BoxGeometry(SIZE, SIZE, SIZE);
 
 
-function fromColorToRotation(color: string) : string {
+function fromColorToRotation(color: string) : [number, number, number] {
   switch(color) {
     case "#2C5DA6": return [0,-Math.PI/2, 0];
     case "#7CCF57": return [0, Math.PI/2, 0];
