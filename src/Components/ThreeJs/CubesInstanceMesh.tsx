@@ -96,63 +96,80 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     if(rubickFaces.length <= 0) {
       return;
     }
+    pivots.current = [];
+    origin.current.set(5, -4, 3);
 
-    origin.current.set(0, 0, 0);
     let id = 0;
     for(let z = -1; z <= 1; z++) {
       rubickFaces[0].forEach( ({x, y, color}) => {
           const indexColor = Math.floor(Math.random() * 6);
           tempObject.position.set((x/tileSize) + origin.current.x, (y/tileSize) + origin.current.y, z + origin.current.z);
-          //tempObject.rotation.set(...fromColorToRotation(colors[indexColor]));
           tempObject.updateMatrix();
           meshRef.current.setMatrixAt(id, tempObject.matrix);
           id++;
       })
+      const { x, y } = rubickFaces[0][0]
+      pivots.current.push(new Vector3(x/tileSize, y/tileSize, z));
     }
   }
 
   function rotateRubickCubes(elapsedTime) {
+    const iteration = (springs.rotation.get() - oldRotation.current) * Math.PI/2;
+    // test
+    //rotate("Z", 0, 0, 1, elapsedTime);
+    //rotate("Z", 0, 1, 1, elapsedTime);
+    //rotate("Z", 0, 2, 1, elapsedTime);
+    // end test
     rubickFaces.forEach((rubickFace, index) => {
-      const face = index % 3;
-      rotate('X', index, 1, -1,elapsedTime)
+      rotate(springs.axis.get(), index, springs.face.get(), springs.direction.get(), iteration);
     })
-
-
+    oldRotation.current = springs.rotation.get();
   }
 
-  function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, direction: number, elapsedTime: number) {
+
+  function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, direction: number, iterationAngleInRadian: number) {
     const topLeftRubickCubeIndex = rubickCubeIndex * 3 * 9;
 
     const ids = getIdsFromRotationAxis(rotationAxis, topLeftRubickCubeIndex, face);
     const pivot = pivots.current[(rubickCubeIndex *3) + face];
+    console.log(pivot)
+/*
+    let tempObject3 = new Object3D();
+    let matrix3 = new Matrix4();
+
+      meshRef.current.getMatrixAt(2, matrix3);
+      matrix3.decompose(tempObject3.position, tempObject3.quaternion, tempObject3.scale);
+
+      console.log(matrix3.elements)*/
 
     ids.forEach(id => {
       let tempObject = new Object3D();
-      let matrix = new Matrix4();
+      const matrix = new Matrix4();
 
       meshRef.current.getMatrixAt(id, matrix);
       matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
 
-      const [translation, translationInverse] = getTranslationFromRotationAxis(rotationAxis, pivot, origin.current);
-      const rotate = new Matrix4().makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, direction * elapsedTime));
+      const [translation, translationInverse] = getTranslationFromRotationAxis(rotationAxis, face, pivot, origin.current);
+      const rotate = new Matrix4().makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, iterationAngleInRadian));
 
       tempObject.applyMatrix4(translation.multiply(rotate).multiply(translationInverse));
       meshRef.current.setMatrixAt(id, tempObject.matrix);
     });
   }
 
-  function getTranslationFromRotationAxis(rotationAxis: "X"|"Y"|"Z", pivot: Vector3, origin: Vector3) : [Matrix4, Matrix4] {
+  function getTranslationFromRotationAxis(rotationAxis: "X"|"Y"|"Z", face: number, pivot: Vector3, origin: Vector3) : [Matrix4, Matrix4] {
     switch(rotationAxis) {
       case "X":
       default:
+
         return [
-          new Matrix4().setPosition(new Vector3( 0 ,  (origin.y + 1) + pivot.y, origin.z + pivot.z)),
-          new Matrix4().setPosition(new Vector3( 0 , -(origin.y + 1) - pivot.y, -origin.z - pivot.z))
+          new Matrix4().setPosition(new Vector3( 0 ,  (origin.y + 1) + pivot.y, origin.z + pivot.z + (1-face))),
+          new Matrix4().setPosition(new Vector3( 0 , -(origin.y + 1) - pivot.y, -origin.z - pivot.z - (1-face)))
         ];
       case "Y":
         return [
-          new Matrix4().setPosition(new Vector3( (origin.x + 1) + pivot.x,  0,  origin.z + pivot.z)),
-          new Matrix4().setPosition(new Vector3(-(origin.x + 1) - pivot.x,  0, -origin.z - pivot.z))
+          new Matrix4().setPosition(new Vector3( (origin.x + 1) + pivot.x,  0,  origin.z + pivot.z + (1-face))),
+          new Matrix4().setPosition(new Vector3(-(origin.x + 1) - pivot.x,  0, -origin.z - pivot.z - (1- face)))
         ];
       case "Z":
         return [
@@ -195,27 +212,19 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     if (meshRef.current == null) return;
     init();
 
-    setTimeout(() => {
-       api.start({
-        to: {
-          x: 100,
-        },
-      })
-    }, 5000)
+    api.start()
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
 
   useFrame((state, elapsedTime) => {
     if(rubickFaces.length>0) {
-      rotateRubickCubes(elapsedTime)
+      rotateRubickCubes(elapsedTime);
     }
 
     meshRef.current.instanceMatrix.needsUpdate = true;
 
   });
-
-  console.log(springs.x.get())
 
   return (
     <instancedMesh ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
