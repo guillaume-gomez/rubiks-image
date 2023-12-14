@@ -1,6 +1,6 @@
 import { useRef , useEffect } from 'react';
 import { useFrame } from "@react-three/fiber";
-import { useSpring, useSpringRef, animated } from '@react-spring/web'
+import { sample } from "lodash";
 import { Object3D, Matrix4, Vector3, InstancedMesh, MeshStandardMaterial, Euler } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { RubickFace } from "../../types";
@@ -40,7 +40,6 @@ function fromColorToRotation(color: string) : string {
 
 const colors = ["#2C5DA6", "#7CCF57", "#BD2827", "#EC702D", "#EECF4E", "#FFFFFF"];
 
-
 function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>();
   const origin = useRef<Vector3>(new Vector3());
@@ -48,11 +47,9 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   const tempObject = new Object3D();
   const numberOfCubes =  rubickFaces.length * 9 * 3;
 
-  const api = useSpringRef()
-  const springs = useSpring({
-    ref: api,
-    from: { x: 0 },
-  })
+  const oldRotation = useRef<number>(0.0);
+  const rotation = useRef<number>(0.0);
+  const params= useRef({ direction: -1, axis: "X", face: 2});
 
   function finalResult() {
     let id = 0;
@@ -71,7 +68,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
 
   function init() {
     pivots.current = [];
-    origin.current.set(3, -4, -5);
+    origin.current.set(0, 0, 0);
 
     let id = 0;
     rubickFaces.forEach(rubickFace => {
@@ -91,6 +88,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
       }
     })
   }
+
 
   function initTest() {
     if(rubickFaces.length <= 0) {
@@ -114,46 +112,47 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   }
 
   function rotateRubickCubes(elapsedTime) {
-    const iteration = (springs.rotation.get() - oldRotation.current) * Math.PI/2;
+    rotation.current = Math.min(rotation.current + 0.1, 1);
+    const iteration = (rotation.current - oldRotation.current) * Math.PI/2;
+    //console.log(springs.rotation.get())
+    const { axis, face, direction } = params.current
+    rotate(axis, 0, face, direction, iteration);
+    oldRotation.current = rotation.current;
+
+    if(rotation.current + 0.1 >= 1.0) {
+      oldRotation.current = 0.0;
+      rotation.current = 0.0
+
+      const axis = sample(["X", "Y", "Z"]);
+      const face = sample([0,1,2]);
+      const direction = sample([-1,1]);
+      params.current = {axis, face, direction};
+    }
+
     // test
-    //rotate("Z", 0, 0, 1, elapsedTime);
+    //rotate("Y", 0, 0, 1, elapsedTime);
     //rotate("Z", 0, 1, 1, elapsedTime);
     //rotate("Z", 0, 2, 1, elapsedTime);
     // end test
+
+    /*const iteration = (springs.rotation.get() - oldRotation.current) * Math.PI/2;
     rubickFaces.forEach((rubickFace, index) => {
       rotate(springs.axis.get(), index, springs.face.get(), springs.direction.get(), iteration);
     })
-    oldRotation.current = springs.rotation.get();
+    oldRotation.current = springs.rotation.get();*/
   }
 
 
   function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, direction: number, iterationAngleInRadian: number) {
-    const topLeftRubickCubeIndex = rubickCubeIndex * 3 * 9;
-
-    const ids = getIdsFromRotationAxis(rotationAxis, topLeftRubickCubeIndex, face);
     const pivot = pivots.current[(rubickCubeIndex *3) + face];
-    console.log(pivot)
-/*
-    let tempObject3 = new Object3D();
-    let matrix3 = new Matrix4();
+    let cubes = findCubes(rotationAxis, rubickCubeIndex, face, pivot);
 
-      meshRef.current.getMatrixAt(2, matrix3);
-      matrix3.decompose(tempObject3.position, tempObject3.quaternion, tempObject3.scale);
-
-      console.log(matrix3.elements)*/
-
-    ids.forEach(id => {
-      let tempObject = new Object3D();
-      const matrix = new Matrix4();
-
-      meshRef.current.getMatrixAt(id, matrix);
-      matrix.decompose(tempObject.position, tempObject.quaternion, tempObject.scale);
-
+    cubes.forEach(({id, object}) => {
       const [translation, translationInverse] = getTranslationFromRotationAxis(rotationAxis, face, pivot, origin.current);
       const rotate = new Matrix4().makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, iterationAngleInRadian));
 
-      tempObject.applyMatrix4(translation.multiply(rotate).multiply(translationInverse));
-      meshRef.current.setMatrixAt(id, tempObject.matrix);
+      object.applyMatrix4(translation.multiply(rotate).multiply(translationInverse));
+      meshRef.current.setMatrixAt(id, object.matrix);
     });
   }
 
@@ -179,19 +178,29 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     }
   }
 
-  function getIdsFromRotationAxis(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number) : array {
-    let iterator = 0;
+  function findCubes(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, pivot: Vector3)  {
+    let foundCubes = [];
+    const beginRubickCube = rubickCubeIndex * 3 * 9;
+    for(let id = beginRubickCube; id < 27 + beginRubickCube; id++) {
+      const object = new Object3D();
+      const matrix = new Matrix4();
+
+      meshRef.current.getMatrixAt(id, matrix);
+      matrix.decompose(object.position, object.quaternion, object.scale);
+
+      if(isIntheFace(rotationAxis, face, pivot, object.position)) {
+        foundCubes.push({id, object});
+      }
+    }
+    return foundCubes;
+  }
+
+  function isIntheFace(rotationAxis: "X"|"Y"|"Z", face: number, pivot: Vector3, position: Vector3) : boolean {
     switch(rotationAxis) {
-      case "X":
-      default:
-        iterator = face * 1;
-        return [0, 3, 6, 9, 12, 15, 18, 21, 24].map(id => (id + iterator) + (rubickCubeIndex));
-      case "Y":
-       iterator = face * 3;
-        return [0, 1, 2, 9, 10, 11, 18,19, 20].map(id => (id + iterator) + (rubickCubeIndex));
-      case "Z":
-         iterator = face * 9;
-        return [0, 1, 2, 3, 4, 5, 6, 7, 8].map(id => (id + iterator)  + (rubickCubeIndex));
+      case "X": return (Math.round(position.x) - origin.current.x - pivot.x) === (face);
+      case "Y": return (Math.round(position.y) - origin.current.y - pivot.y) === (face);
+      case "Z": return (Math.round(position.z) - origin.current.z) === (face-1);
+      default: return false;
     }
   }
 
@@ -210,9 +219,8 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   useEffect(() => {
     if (meshRef == null) return;
     if (meshRef.current == null) return;
-    init();
-
-    api.start()
+    //init();
+    initTest();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
