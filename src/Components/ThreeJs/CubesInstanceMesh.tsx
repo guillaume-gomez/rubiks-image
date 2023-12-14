@@ -11,6 +11,21 @@ interface InstancedMeshProps {
   hasBorder?: boolean;
 }
 
+type axisType = "X"| "Y" | "Z";
+type faceType = 0 | 1 | 2;
+
+interface Move {
+  axis: axisType;
+  direction: number;
+  face: faceType;
+}
+
+interface ParamsMove {
+  moves: Move[];
+  movesLength: number;
+  currentMove: number;
+}
+
 const colorsMaterialsArray = [
   new MeshStandardMaterial({color: "#2C5DA6"}), // bleu -> right
   new MeshStandardMaterial({color: "#7CCF57"}), // green -> left
@@ -49,7 +64,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
 
   const oldRotation = useRef<number>(0.0);
   const rotation = useRef<number>(0.0);
-  const params= useRef({ direction: -1, axis: "X", face: 2});
+  const params= useRef<ParamsMove[]>([]);
 
   function finalResult() {
     let id = 0;
@@ -68,11 +83,13 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
 
   function init() {
     pivots.current = [];
+    params.current = [];
     origin.current.set(0, 0, 0);
 
     let id = 0;
     rubickFaces.forEach(rubickFace => {
-      for(let z = -1; z <= 1; z++) {
+      for(let z = -1; z <= 1; z++)
+      {
         rubickFace.forEach( ({x, y, color}) => {
             //const indexColor = Math.floor(Math.random() * 6);
 
@@ -86,6 +103,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
         const { x, y } = rubickFace[0]
         pivots.current.push(new Vector3(x/tileSize, y/tileSize, z));
       }
+      params.current.push(generateRandomMoves());
     })
   }
 
@@ -111,22 +129,38 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     }
   }
 
+  function generateRandomMoves(): ParamsMove {
+    let moves : Move[] = [];
+    const movesLength = Math.floor(Math.random() * 100);
+
+    for(let i=0; i < movesLength; i++) {
+      const axis : axisType = sample(["X", "Y", "Z"]);
+      const face : faceType = sample([0,1,2]);
+      const direction = sample([-1,1]);
+      moves.push({axis, face, direction});
+    }
+    return { movesLength, currentMove: 0, moves };
+  }
+
   function rotateRubickCubes(elapsedTime) {
     rotation.current = Math.min(rotation.current + 0.1, 1);
     const iteration = (rotation.current - oldRotation.current) * Math.PI/2;
-    //console.log(springs.rotation.get())
-    const { axis, face, direction } = params.current
-    rotate(axis, 0, face, direction, iteration);
+
+    rubickFaces.forEach((rubickFace, index) => {
+      const { moves, currentMove, movesLength } = params.current[index];
+      if(currentMove >= movesLength) {
+        return;
+      }
+      const { axis, face, direction} = moves[currentMove];
+      rotate(axis, index, face, direction, iteration);
+    })
     oldRotation.current = rotation.current;
 
     if(rotation.current + 0.1 >= 1.0) {
       oldRotation.current = 0.0;
-      rotation.current = 0.0
+      rotation.current = 0.0;
 
-      const axis = sample(["X", "Y", "Z"]);
-      const face = sample([0,1,2]);
-      const direction = sample([-1,1]);
-      params.current = {axis, face, direction};
+      params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
     }
 
     // test
@@ -143,7 +177,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   }
 
 
-  function rotate(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, direction: number, iterationAngleInRadian: number) {
+  function rotate(rotationAxis: axisType, rubickCubeIndex: number, face: faceType, direction: number, iterationAngleInRadian: number) {
     const pivot = pivots.current[(rubickCubeIndex *3) + face];
     let cubes = findCubes(rotationAxis, rubickCubeIndex, face, pivot);
 
@@ -156,7 +190,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     });
   }
 
-  function getTranslationFromRotationAxis(rotationAxis: "X"|"Y"|"Z", face: number, pivot: Vector3, origin: Vector3) : [Matrix4, Matrix4] {
+  function getTranslationFromRotationAxis(rotationAxis: axisType, face: faceType, pivot: Vector3, origin: Vector3) : [Matrix4, Matrix4] {
     switch(rotationAxis) {
       case "X":
       default:
@@ -178,7 +212,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     }
   }
 
-  function findCubes(rotationAxis: "X"|"Y"|"Z", rubickCubeIndex: number, face: number, pivot: Vector3)  {
+  function findCubes(rotationAxis: axisType, rubickCubeIndex: number, face: faceType, pivot: Vector3)  {
     let foundCubes = [];
     const beginRubickCube = rubickCubeIndex * 3 * 9;
     for(let id = beginRubickCube; id < 27 + beginRubickCube; id++) {
@@ -195,7 +229,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     return foundCubes;
   }
 
-  function isIntheFace(rotationAxis: "X"|"Y"|"Z", face: number, pivot: Vector3, position: Vector3) : boolean {
+  function isIntheFace(rotationAxis: axisType, face: faceType, pivot: Vector3, position: Vector3) : boolean {
     switch(rotationAxis) {
       case "X": return (Math.round(position.x) - origin.current.x - pivot.x) === (face);
       case "Y": return (Math.round(position.y) - origin.current.y - pivot.y) === (face);
@@ -204,7 +238,7 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
     }
   }
 
-  function getEulerFromRotationAxis(rotationAxis: "X"|"Y"|"Z", angleInRadian: number): Euler {
+  function getEulerFromRotationAxis(rotationAxis: axisType, angleInRadian: number): Euler {
     switch(rotationAxis) {
       case "X":
       default:
@@ -219,8 +253,8 @@ function Cubes({ tileSize, rubickFaces, hasBorder } : InstancedMeshProps) {
   useEffect(() => {
     if (meshRef == null) return;
     if (meshRef.current == null) return;
-    //init();
-    initTest();
+    init();
+    //initTest();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
