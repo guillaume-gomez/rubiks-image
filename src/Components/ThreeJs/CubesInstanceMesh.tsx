@@ -68,6 +68,10 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       return;
     }
 
+    pivots.current = [];
+    params.current = [];
+    origin.current.set(0, 0, 0);
+
     let id = 0;
     rubickFaces.forEach(rubickFace => {
       for(let z = 0; z < 3; z++) {
@@ -88,7 +92,7 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     origin.current.set(0, 0, 0);
 
     let id = 0;
-    rubickFaces.forEach(rubickFace => {
+    rubickFaces.forEach((rubickFace, index) => {
       for(let z = -1; z <= 1; z++)
       {
         rubickFace.forEach( ({x, y, color}) => {
@@ -104,12 +108,15 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
         const { x, y } = rubickFace[0]
         pivots.current.push(new Vector3(x/tileSize, y/tileSize, z));
       }
-      params.current.push(generateRandomMoves());
+      //make some moves to avoid the user to see the final result is in the first step
+      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(), 3);
+
+      params.current.push(randomMoves);
     })
   }
 
 
-  function initTest() {
+/*  function initTest() {
     const rubickFaceMock = [
       {"color":"#BD2827","x":0,"y":0},
       {"color":"#EC702D","x":32,"y":0},
@@ -140,10 +147,12 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     }
     params.current.push(generateRandomMoves());
   }
+}*/
 
   function generateRandomMoves(): ParamsMove {
     let moves : Move[] = [];
-    const movesLength = Math.floor(Math.random() * 25);
+    const minimumMoves = 10;
+    const movesLength = Math.floor(Math.random() * 25) + minimumMoves;
 
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);
@@ -158,6 +167,20 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     }
 
     return { movesLength: movesLength*2, currentMove: 0, moves };
+  }
+
+  function scrambleBeforeRunning(rubickCubeIndex: number, randomMoves: ParamsMove, numberOfMoves: number) : ParamsMove {
+    const { movesLength, moves } = randomMoves;
+
+    if(numberOfMoves > movesLength) {
+      return { movesLength, moves, currentMove: 0};
+    }
+
+    for(let i=0; i < numberOfMoves; i++) {
+      rotate(moves[i].axis, rubickCubeIndex, moves[i].face, moves[i].direction * Math.PI/2);
+    }
+
+    return { movesLength, moves, currentMove: numberOfMoves};
   }
 
   function rotateRubickCubes(elapsedTime: number) {
@@ -180,38 +203,19 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
 
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
     }
+    meshRef.current.instanceMatrix.needsUpdate = true;
 
     // test
     //rotate("Y", 10, 0, elapsedTime);
     //rotate("Z", 7, 2, elapsedTime);
     //rotate("X", 8, 0, elapsedTime);
     // end test
-
-     /*rotation.current = Math.min(rotation.current + 0.1, 1);
-     const iteration = (rotation.current - oldRotation.current) * Math.PI/2;
-
-    const { moves, currentMove, movesLength } = params.current[0];
-    if(currentMove >= movesLength) {
-      return;
-    }
-    const { axis, face, direction} = moves[currentMove];
-    rotate(axis, 0, face, direction* iteration);
-
-    oldRotation.current = rotation.current;
-
-    if(rotation.current + 0.1 >= 1.0) {
-      oldRotation.current = 0.0;
-      rotation.current = 0.0;
-
-      params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
-    }*/
   }
 
 
   function rotate(rotationAxis: axisType, rubickCubeIndex: number, face: faceType, iterationAngleInRadian: number) {
     const pivot = pivots.current[(rubickCubeIndex *3) + face];
     let cubes = findCubes(rotationAxis, rubickCubeIndex, face, pivot);
-    console.log(cubes)
 
     cubes.forEach(({id, object}) => {
       const [translation, translationInverse] = getTranslationFromRotationAxis(rotationAxis, face, pivot, origin.current);
@@ -262,7 +266,6 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   }
 
   function isIntheFace(rotationAxis: axisType, face: faceType, pivot: Vector3, position: Vector3) : boolean {
-    debugger
     switch(rotationAxis) {
       case "X": return (Math.round(position.x) - origin.current.x - pivot.x) === (face);
       case "Y": return (Math.round(-position.y) - origin.current.y - pivot.y) === (face);
@@ -293,13 +296,10 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
 
-  useFrame((_state, elapsedTime) => {
+  useFrame((state, elapsedTime) => {
     if(rubickFaces.length>0) {
       rotateRubickCubes(elapsedTime);
     }
-
-    meshRef.current.instanceMatrix.needsUpdate = true;
-
   });
 
   return (
