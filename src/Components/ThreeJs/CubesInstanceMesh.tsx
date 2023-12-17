@@ -57,18 +57,20 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>();
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
+  const oldRotation = useRef<number>(0.0);
+  const params= useRef<ParamsMove[]>([]);
   const tempObject = new Object3D();
   const numberOfCubes =  rubickFaces.length * 9 * 3;
 
   const api = useSpringRef()
-  const springs = useSpring({
+  useSpring({
     ref: api,
     from: { rotationStep: 0 },
     to  : { rotationStep: 1 },
     config: {
       duration: 200,
     },
-    delay: 5000,
+    delay: 500,
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
       oldRotation.current = 0.0;
@@ -82,9 +84,6 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     }
   })
 
-  const oldRotation = useRef<number>(0.0);
-  const rotation = useRef<number>(0.0);
-  const params= useRef<ParamsMove[]>([]);
 
   function finalResult() {
     if(!meshRef || !meshRef.current) {
@@ -303,6 +302,7 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     if (meshRef.current == null) return;
     if (rubickFaces.length <= 0) return;
     init();
+    oldRotation.current = 0.0;
     api.start();
     //finalResult();
 
