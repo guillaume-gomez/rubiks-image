@@ -1,6 +1,7 @@
 import { useRef , useEffect } from 'react';
 import { useFrame } from "@react-three/fiber";
 import { sample } from "lodash";
+import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, MeshStandardMaterial, Euler } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { RubickFace } from "../../types";
@@ -58,6 +59,28 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   const pivots = useRef<Vector3[]>([]);
   const tempObject = new Object3D();
   const numberOfCubes =  rubickFaces.length * 9 * 3;
+
+  const api = useSpringRef()
+  const springs = useSpring({
+    ref: api,
+    from: { rotationStep: 0 },
+    to  : { rotationStep: 1 },
+    config: {
+      duration: 200,
+    },
+    delay: 5000,
+    onRest: () => {
+      params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
+      oldRotation.current = 0.0;
+      api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
+    },
+    onChange: ({value: {rotationStep}}) => {
+      if(rubickFaces.length>0) {
+        rotateRubickCubes((rotationStep - oldRotation.current)*(Math.PI/2));
+      }
+      oldRotation.current = rotationStep
+    }
+  })
 
   const oldRotation = useRef<number>(0.0);
   const rotation = useRef<number>(0.0);
@@ -184,25 +207,14 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   }
 
   function rotateRubickCubes(elapsedTime: number) {
-    rotation.current = Math.min(rotation.current + 0.1, 1);
-    const iteration = (rotation.current - oldRotation.current) * Math.PI/2;
-
     rubickFaces.forEach((_rubickFace, index) => {
       const { moves, currentMove, movesLength } = params.current[index];
       if(currentMove >= movesLength) {
         return;
       }
       const { axis, face, direction} = moves[currentMove];
-      rotate(axis, index, face, direction * iteration);
+      rotate(axis, index, face, direction * elapsedTime);
     })
-    oldRotation.current = rotation.current;
-
-    if(rotation.current + 0.1 >= 1.0) {
-      oldRotation.current = 0.0;
-      rotation.current = 0.0;
-
-      params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
-    }
     meshRef.current.instanceMatrix.needsUpdate = true;
 
     // test
@@ -289,18 +301,13 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   useEffect(() => {
     if (meshRef == null) return;
     if (meshRef.current == null) return;
-    //initTest();
+    if (rubickFaces.length <= 0) return;
     init();
+    api.start();
     //finalResult();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
-
-  useFrame((state, elapsedTime) => {
-    if(rubickFaces.length>0) {
-      rotateRubickCubes(elapsedTime);
-    }
-  });
 
   return (
     <instancedMesh ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
