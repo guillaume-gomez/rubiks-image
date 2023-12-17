@@ -84,30 +84,6 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     }
   })
 
-
-  function finalResult() {
-    if(!meshRef || !meshRef.current) {
-      return;
-    }
-
-    pivots.current = [];
-    params.current = [];
-    origin.current.set(0, 0, 0);
-
-    let id = 0;
-    rubickFaces.forEach(rubickFace => {
-      for(let z = 0; z < 3; z++) {
-        rubickFace.forEach( ({x, y, color}) => {
-            tempObject.position.set((x/tileSize), -(y/tileSize), z);
-            tempObject.rotation.set(...fromColorToRotation(color));
-            tempObject.updateMatrix();
-            meshRef.current.setMatrixAt(id, tempObject.matrix);
-            id++;
-        })
-      }
-    })
-  }
-
   function init() {
     pivots.current = [];
     params.current = [];
@@ -118,12 +94,12 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       for(let z = -1; z <= 1; z++)
       {
         rubickFace.forEach( ({x, y, color}) => {
-            //const indexColor = Math.floor(Math.random() * 6);
+            const object = new Object3D();
 
-            tempObject.position.set((x/tileSize) + origin.current.x, -(y/tileSize) + origin.current.y, z + origin.current.z);
-            tempObject.rotation.set(...fromColorToRotation(color));
-            tempObject.updateMatrix();
-            meshRef.current.setMatrixAt(id, tempObject.matrix);
+            object.position.set((x/tileSize) + origin.current.x, -(y/tileSize) + origin.current.y, z + origin.current.z);
+            object.rotation.set(...fromColorToRotation(color));
+            object.updateMatrix();
+            meshRef.current.setMatrixAt(id, object.matrix);
             id++;
         })
 
@@ -136,40 +112,6 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       params.current.push(randomMoves);
     })
   }
-
-
-/*  function initTest() {
-    const rubickFaceMock = [
-      {"color":"#BD2827","x":0,"y":0},
-      {"color":"#EC702D","x":32,"y":0},
-      {"color":"#7CCF57","x":64,"y":0},
-      {"color":"#EECF4E","x":0,"y":32},
-      {"color":"#BD2827","x":32,"y":32},
-      {"color":"#7CCF57","x":64,"y":32},
-      {"color":"#EC702D","x":0,"y":64},
-      {"color":"#FFFFFF","x":32,"y":64},
-      {"color":"#FFFFFF","x":64,"y":64}
-    ];
-
-    pivots.current = [];
-    params.current = [];
-    origin.current.set(0, 0, 0);
-
-    let id = 0;
-    for(let z = -1; z <= 1; z++) {
-      rubickFaceMock.forEach( ({x, y, color}) => {
-          tempObject.position.set((x/tileSize) + origin.current.x, -(y/tileSize) + origin.current.y, z + origin.current.z);
-          tempObject.rotation.set(...fromColorToRotation(color));
-          tempObject.updateMatrix();
-          meshRef.current.setMatrixAt(id, tempObject.matrix);
-          id++;
-      })
-      const { x, y } = rubickFaceMock[0]
-      pivots.current.push(new Vector3(x/tileSize, y/tileSize, z));
-    }
-    params.current.push(generateRandomMoves());
-  }
-}*/
 
   function generateRandomMoves(): ParamsMove {
     let moves : Move[] = [];
