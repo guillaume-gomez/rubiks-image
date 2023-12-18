@@ -74,6 +74,9 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
       oldRotation.current = 0.0;
+      if(isAnimationFinish()) {
+        return;
+      }
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
     },
     onChange: ({value: {rotationStep}}) => {
@@ -237,6 +240,11 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       case "Z":
         return new Euler(0, 0, angleInRadian);
     }
+  }
+
+  function isAnimationFinish() :boolean {
+    const animationFinishedArray = params.current.filter((param) => param.currentMove >= param.movesLength);
+    return animationFinishedArray.length === params.current.length;
   }
 
   useEffect(() => {
