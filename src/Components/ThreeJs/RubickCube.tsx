@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { RubickFace } from "../../types";
 import RubickFaceThree from "./RubickFace";
 import { MeshStandardMaterial, BoxGeometry } from 'three';
@@ -18,33 +17,7 @@ const borderGeometry = new BoxGeometry(2.8, 2.8 , 2.8);
 
 const borderGeometryFace = new BoxGeometry(2.8,2.8,0.8);
 
-/*
-blue <-> green
-orange <-> red
-yellow <-> white
-*/
-function findOppositeTile(hexColor: string) : string {
-  switch(hexColor) {
-    case "#FFFFFF": return "#EECF4E";
-    case "#EECF4E": return "#FFFFFF";
-
-    case "#EC702D": return "#BD2827";
-    case "#BD2827": return "#EC702D";
-
-    case "#2C5DA6": return "#7CCF57";
-    case "#7CCF57": return "#2C5DA6";
-
-    default: return "#000000";
-  }
-}
-
-function computeOppositeFace(rubickFace: RubickFace) : RubickFace {
-  return rubickFace.map((rubickTile) => ({...rubickTile, color: findOppositeTile(rubickTile.color)}));
-}
-
 function RubickCube({ hideOtherFaces, rubickFace, position, hasBorder } : RubickCubesProps) {
-  const oppositeFace = useMemo(() => computeOppositeFace(rubickFace), [rubickFace]);
-
   if(hideOtherFaces) {
     return (
       <group

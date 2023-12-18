@@ -1,5 +1,4 @@
 import { useRef , useEffect } from 'react';
-import { useFrame } from "@react-three/fiber";
 import { sample } from "lodash";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, MeshStandardMaterial, Euler } from 'three';
@@ -54,12 +53,11 @@ function fromColorToRotation(color: string) : [number, number, number] {
 }
 
 function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
-  const meshRef = useRef<InstancedMesh>();
+  const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
   const oldRotation = useRef<number>(0.0);
   const params= useRef<ParamsMove[]>([]);
-  const tempObject = new Object3D();
   const numberOfCubes =  rubickFaces.length * 9 * 3;
 
   const api = useSpringRef()
@@ -102,7 +100,7 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
             object.position.set((x/tileSize) + origin.current.x, -(y/tileSize) + origin.current.y, z + origin.current.z);
             object.rotation.set(...fromColorToRotation(color));
             object.updateMatrix();
-            meshRef.current.setMatrixAt(id, object.matrix);
+            meshRef.current?.setMatrixAt(id, object.matrix);
             id++;
         })
 
@@ -159,7 +157,7 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       const { axis, face, direction} = moves[currentMove];
       rotate(axis, index, face, direction * elapsedTime);
     })
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    meshRef.current!.instanceMatrix.needsUpdate = true;
 
     // test
     //rotate("Y", 10, 0, elapsedTime);
@@ -178,7 +176,7 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       const rotate = new Matrix4().makeRotationFromEuler(getEulerFromRotationAxis(rotationAxis, iterationAngleInRadian));
 
       object.applyMatrix4(translation.multiply(rotate).multiply(translationInverse));
-      meshRef.current.setMatrixAt(id, object.matrix);
+      meshRef.current?.setMatrixAt(id, object.matrix);
     });
   }
 
@@ -211,7 +209,7 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       const object = new Object3D();
       const matrix = new Matrix4();
 
-      meshRef.current.getMatrixAt(id, matrix);
+      meshRef.current?.getMatrixAt(id, matrix);
       matrix.decompose(object.position, object.quaternion, object.scale);
 
       if(isIntheFace(rotationAxis, face, pivot, object.position)) {
