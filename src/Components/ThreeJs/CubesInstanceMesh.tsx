@@ -149,6 +149,10 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   }
 
   function rotateRubickCubes(elapsedTime: number) {
+    if(!meshRef.current) {
+      return;
+    }
+
     rubickFaces.forEach((_rubickFace, index) => {
       const { moves, currentMove, movesLength } = params.current[index];
       if(currentMove >= movesLength) {
@@ -156,8 +160,8 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
       }
       const { axis, face, direction} = moves[currentMove];
       rotate(axis, index, face, direction * elapsedTime);
-    })
-    meshRef.current!.instanceMatrix.needsUpdate = true;
+    });
+    meshRef.current.instanceMatrix.needsUpdate = true;
 
     // test
     //rotate("Y", 10, 0, elapsedTime);
@@ -250,9 +254,9 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
     if (meshRef.current == null) return;
     if (rubickFaces.length <= 0) return;
     init();
+
     oldRotation.current = 0.0;
     api.start();
-    //finalResult();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
