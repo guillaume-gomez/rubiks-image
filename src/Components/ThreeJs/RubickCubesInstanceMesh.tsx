@@ -1,11 +1,11 @@
 import { useRef , useEffect } from 'react';
 import { sample } from "lodash";
 import { useSpring, useSpringRef} from '@react-spring/web';
-import { Object3D, Matrix4, Vector3, InstancedMesh, MeshStandardMaterial, Euler } from 'three';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
+import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
 
-interface InstancedMeshProps {
+interface RubickCubesInstancedMeshProps {
   tileSize: number;
   rubickFaces: RubickFace[];
 }
@@ -25,34 +25,7 @@ interface ParamsMove {
   currentMove: number;
 }
 
-const colorsMaterialsArray = [
-  new MeshStandardMaterial({color: "#BD2827"}), // red -> right
-  new MeshStandardMaterial({color: "#EC702D"}), // orange -> left
-  new MeshStandardMaterial({color: "#EECF4E"}), // yellow -> top
-  new MeshStandardMaterial({color: "#FFFFFF"}), // white -> down
-  new MeshStandardMaterial({color: "#2C5DA6"}), // blue -> front
-  new MeshStandardMaterial({color: "#7CCF57"}), //green -> back
-]
-
-
-const BORDER_SIZE = 0.1;
-const SIZE = 1 - BORDER_SIZE;
-const boxGeometry = new RoundedBoxGeometry(SIZE, SIZE, SIZE);
-
-function fromColorToRotation(color: string) : [number, number, number] {
-  switch(color) {
-    case "#BD2827": return [0,-Math.PI/2, 0];
-    case "#EC702D": return [0, Math.PI/2, 0];
-    case "#EECF4E": return [Math.PI/2, 0, 0];
-    case "#FFFFFF": return [-Math.PI/2, 0, 0];
-    case "#2C5DA6":
-    default:
-     return [0,0, 0];
-    case "#7CCF57": return [0,Math.PI, 0];
-  }
-}
-
-function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
+function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -262,8 +235,8 @@ function Cubes({ tileSize, rubickFaces } : InstancedMeshProps) {
   }, [rubickFaces]);
 
   return (
-    <instancedMesh ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
+    <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
 }
 
-export default Cubes;
+export default RubickCubesInstancedMesh;
