@@ -169,25 +169,27 @@ function App() {
                   value={view3d}
                   toggle={() => setView3d(!view3d)}
                 />
-              { view3d ?
-                <ThreeJsRendering
-                  width={possibleWidth}
-                  height={possibleHeight}
-                  tileSize={tileSize}
-                  hasBorder={hasBorder}
-                  rubickFaces={rubickFaces}
-                  toggleFullScreen={() => {}}
-                />
-                :
-                <CanvasRendering
-                  width={possibleWidth}
-                  height={possibleHeight}
-                  tileSize={tileSize}
-                  hasBorder={hasBorder}
-                  rubickFaces={rubickFaces}
-                  toggleFullScreen={() => {}}
-                />
-              }
+              <div style={{ width: "100%", height: "65vh" }}>
+                { view3d ?
+                  <ThreeJsRendering
+                    width={possibleWidth}
+                    height={possibleHeight}
+                    tileSize={tileSize}
+                    hasBorder={hasBorder}
+                    rubickFaces={rubickFaces}
+                    toggleFullScreen={() => {}}
+                  />
+                  :
+                  <CanvasRendering
+                    width={possibleWidth}
+                    height={possibleHeight}
+                    tileSize={tileSize}
+                    hasBorder={hasBorder}
+                    rubickFaces={rubickFaces}
+                    toggleFullScreen={() => {}}
+                  />
+                }
+              </div>
             </Card>
           </div>
         </div>

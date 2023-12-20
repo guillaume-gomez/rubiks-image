@@ -89,15 +89,19 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   }
 
   return (
-    <div>
+    <>
       <Toggle
         label="Show real result"
         value={displayPreview}
         toggle={() => setDisplayPreview(!displayPreview)}
       />
       <span>The image could be wider than your screen. That is why we display the preview at first</span>
-      <canvas className={ displayPreview ? "w-full" : "hidden"} ref={canvasPreview} />
-      <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
+      <canvas
+        className={ displayPreview ? "w-full" : "hidden"}
+        ref={canvasPreview}
+        style={{ height: "90%"}}
+      />
+      <div className={`w-full relative overflow-x-scroll ${displayPreview ? "absolute hidden" : "absolute"}`} style={{ minHeight: "400px" }} >
         <canvas
           className={ displayPreview ? "absolute hidden" : "absolute"}
           ref={refCanvas}
@@ -107,7 +111,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
           onDoubleClick={(event) => toggleFullScreen(event.target)}
         />
       </div>
-    </div>
+    </>
   );
 });
 

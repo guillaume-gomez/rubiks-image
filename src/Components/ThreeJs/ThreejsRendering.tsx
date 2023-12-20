@@ -47,7 +47,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
   }
 
   return (
-    <div>
+    <>
       <Toggle
         label="Hide other faces (improve performances)"
         value={hideOtherFaces}
@@ -59,7 +59,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
           dpr={window.devicePixelRatio}
           //onDoubleClick={toggleFullscreen}
           ref={canvasRef}
-          style={{width: "75%", height: "90%"}}
+          style={{ width: "100%", height: "95%"}}
         >
           <color attach="background" args={['#0f1216']} />
           <Stats/>
@@ -101,7 +101,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, tog
             <CameraControls minPolarAngle={0} maxPolarAngle={Math.PI / 1.9} makeDefault  maxDistance={250} ref={cameraControlRef} />
         </Canvas>
       </div>
-    </div>
+    </>
   );
 }
 
