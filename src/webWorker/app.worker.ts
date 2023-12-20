@@ -39,9 +39,14 @@ export default () => {
     { name: "blue", color: {red: 44, green: 93, blue:166}, hexColor: "#2C5DA6" }
   ];
 
-  const minBy = (arr, key) => {
-    const min = Math.min(...arr.map(d => d[key]))
-    return arr.find(d => d[key] === min);
+  function minBy(array, key) {
+    const min = Math.min(...array.map(d => d[key]))
+    return array.find(d => d[key] === min);
+  }
+
+  function sample(array) {
+    const si = Math.floor(array.length * Math.random());
+    return arr.slice(si,si+1)[0];
   }
 
   function colorDistance(color1: Color, color2: Color) : number {
