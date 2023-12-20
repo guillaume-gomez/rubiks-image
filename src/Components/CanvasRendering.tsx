@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 're
 import { RubickFace } from "../types";
 import Toggle from "./Toggle";
 import { resizeImageCanvas } from "../tools";
+import ExportImageButton from "./ExportImageButton";
 
 
 interface CanvasRenderingProps {
@@ -25,16 +26,16 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   hasBorder,
   toggleFullScreen}, ref) => {
   const [displayPreview, setDisplayPreview] = useState<boolean>(true);
-  const refCanvas = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if(refCanvas.current
-        && refCanvas.current.width > 0
-        && refCanvas.current.height > 0
+    if(canvasRef.current
+        && canvasRef.current.width > 0
+        && canvasRef.current.height > 0
         && canvasPreview.current
       ) {
-      const context = refCanvas.current.getContext("2d");
+      const context = canvasRef.current.getContext("2d");
       if(!context) {
         return;
       }
@@ -44,14 +45,14 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
         renderBorder(context, width, height);
       }
       // generate preview
-      resizeImageCanvas(refCanvas.current, canvasPreview.current, refCanvas.current.width, refCanvas.current.height);
+      resizeImageCanvas(canvasRef.current, canvasPreview.current, canvasRef.current.width, canvasRef.current.height);
     }
-  }, [refCanvas, canvasPreview, rubickFaces]);
+  }, [canvasRef, canvasPreview, rubickFaces]);
 
   useImperativeHandle(ref, () => ({
     getImage() {
-      if(refCanvas.current) {
-        return refCanvas.current.toDataURL('image/png');
+      if(canvasRef.current) {
+        return canvasRef.current.toDataURL('image/png');
       }
       return null;
     }
@@ -89,7 +90,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       <Toggle
         label="Show real result"
         value={displayPreview}
@@ -100,12 +101,17 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
         <canvas
           className={ displayPreview ? "absolute hidden" : "absolute"}
-          ref={refCanvas}
+          ref={canvasRef}
           width={width}
           height={height}
           style={{background:"#797979", overflow: 'scroll'}}
           onDoubleClick={(event) => toggleFullScreen(event.target)}
         />
+      </div>
+      <div>
+        <ExportImageButton canvasRef={canvasRef} />
+        <p className="text-sm">Download image could take times if the image is large</p>
+        {/*<p className="text-sm italic">Chrome does not allow you to Download twice 😅</p>*/}
       </div>
     </div>
   );
