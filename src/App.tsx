@@ -13,6 +13,7 @@ import Error from "./Components/Error";
 import CanvasRendering from "./Components/CanvasRendering";
 import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
 
+import logo from '/logo.svg';
 import './App.css';
 
 
@@ -77,8 +78,20 @@ function App() {
 
     return (
       <div className="flex flex-row gap-3 w-full">
-          <span>Width : {width}</span>
-          <span>Height : {height}</span>
+        <div className="tooltip flex flex-row items-center gap-1" data-tip={`${width} pixels`}>
+          <span className="font-semibold">Width:</span>
+          <span className="italic">
+            {width/tileSize} cubes
+          </span>
+          <img src={logo} width='16px' alt="rubick's cubes"/>
+        </div>
+        <div className="tooltip flex flex-row items-center gap-1" data-tip={`${height} pixels`}>
+          <span className="font-semibold">Height:</span>
+          <span className="italic">
+            {height/tileSize} cubes
+          </span>
+          <img src={logo} width='16px' alt="rubick's cubes"/>
+        </div>
       </div>
     )
   }
