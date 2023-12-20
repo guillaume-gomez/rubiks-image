@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import useImageSizes from "./Hooks/useImageSizes";
 import useRubickImage from "./Hooks/useRubickImage";
@@ -10,12 +10,12 @@ import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
 import Error from "./Components/Error";
-import { resizeImageCanvas } from "./tools";
+import CanvasRendering from "./Components/CanvasRendering";
+import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
 
 
 import './App.css';
 
-type AlgorithmType = "optimized" | "biggestImage";
 
 const initialTileSize = 32;
 
@@ -25,9 +25,7 @@ function App() {
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
   const [loading, setLoading] = useState<boolean>(false);
-
-  const canvasFinal = useRef<HTMLCanvasElement>(null);
-  const canvasPreview = useRef<HTMLCanvasElement>(null);
+  const [view3d, setView3d] = useState<boolean>(false);
 
   const {
     computePossibleSize,
@@ -50,7 +48,7 @@ function App() {
     hasBorder,
     noise,
     tileSize,
-    users
+    rubickFaces
   } = useRubickImage({ initialTileSize });
 
   useEffect(() => {
@@ -72,23 +70,7 @@ function App() {
       return;
     }
     setLoading(true);
-
-    if(image && canvasFinal.current && canvasPreview.current) {
-      setTimeout(() => {
-        if(algorithmType === "optimized") {
-          optimizedGenerateImage(image, canvasFinal.current, possibleWidth, possibleHeight).then(
-            () => setLoading(false)
-          );
-        } else {
-          generateImage(image, canvasFinal.current).then(
-            () => setLoading(false)
-          );
-        }
-        // generate preview
-        resizeImageCanvas(canvasFinal.current, canvasPreview.current, canvasFinal.current.width, canvasFinal.current.height);
-
-      }, [500])
-    }
+    optimizedGenerateImage(image, possibleWidth, possibleHeight).then(() => setLoading(false));
   }
 
   function renderPreview() {
@@ -96,8 +78,8 @@ function App() {
       return <></>;
     }
 
-    const width = algorithmType === "optimized" ? possibleWidth : (image.width * tileSize);
-    const height = algorithmType === "optimized" ? possibleHeight : (image.width * tileSize);
+    const width =  possibleWidth;
+    const height = possibleHeight;
 
     return (
       <div className="flex flex-row gap-3 w-full">
@@ -121,22 +103,6 @@ function App() {
                 onChange={uploadImage}
                 value={image}
               />
-              <button
-                  onClick={generateImagesInImage}
-                  type="button"
-                  disabled={loading}
-                  className="btn btn-primary">
-                  {
-                    loading ?
-                      <span className="loading loading-spinner loading-lg"></span> :
-                      "Generate"
-                  }
-              </button>
-              <ul>
-              {
-                users.map(user => <li>{user.name}</li>)
-              }
-              </ul>
             </Card>
             <Card title="Image Settings">
               <div>
@@ -165,72 +131,74 @@ function App() {
               </div>
             </Card>
             <Card title="Image Size">
-              <select
-                value={algorithmType}
-                onChange={(event) => setAlgorithmType(event.target.value as AlgorithmType)}
-                className="select select-primary w-full max-w-xs">
-                  <option key="0" disabled >Select the algorithm</option>
-                  <option key="1" value="optimized">Optimised</option>
-                  <option key="2" value="biggestImage"> Biggest Image</option>
-              </select>
               <div>
-                {
-                  algorithmType === "optimized" ?
-                    (
-                      <div>
-                        <Toggle
-                          label="Allow resize (will impact the proportions)"
-                          value={allowResize}
-                          toggle={() => setAllowResize(!allowResize)}
-                        />
-                        <Toggle
-                          label="Best proportion"
-                          value={bestProportion}
-                          toggle={() => setBestProportion(!bestProportion)}
-                        />
-                        <div>
-                          <label>Ratio</label>
-                          <input
-                            disabled={bestProportion}
-                            type="range"
-                            min="1"
-                            max={20}
-                            value={ratio}
-                            onChange={(e) => setRatio(parseInt(e.target.value))}
-                            className={`range ${bestProportion ? "range-error" : "range-primary"}`}
-                            />
-                          <span>{ratio}</span>
-                        </div>
-                      </div>
-                    ) :
-                    <></>
-                }
+                <div>
+                  <Toggle
+                    label="Allow resize (will impact the proportions)"
+                    value={allowResize}
+                    toggle={() => setAllowResize(!allowResize)}
+                  />
+                  <Toggle
+                    label="Best proportion"
+                    value={bestProportion}
+                    toggle={() => setBestProportion(!bestProportion)}
+                  />
+                  <div>
+                    <label>Ratio</label>
+                    <input
+                      disabled={bestProportion}
+                      type="range"
+                      min="3"
+                      max={24}
+                      step={3}
+                      value={ratio}
+                      onChange={(e) => setRatio(parseInt(e.target.value))}
+                      className={`range ${bestProportion ? "range-error" : "range-primary"}`}
+                      />
+                    <span>{ratio}</span>
+                  </div>
+                </div>
                 {renderPreview()}
               </div>
             </Card>
             <button
-              className="btn btn-accent"
-              onClick={generateImagesInImage}
-            >
-              {
-                loading ?
-                  <span className="loading loading-spinner loading-lg"></span> :
-                  "Generate"
-              }
+                  onClick={generateImagesInImage}
+                  type="button"
+                  disabled={loading}
+                  className="btn btn-accent">
+                  {
+                    loading ?
+                      <span className="loading loading-spinner loading-lg"></span> :
+                      "Generate"
+                  }
             </button>
           </div>
           <div className="basis-3/4">
             <Card title="Result">
-                <Toggle
-                label="Show real result"
-                value={fullscreen}
-                toggle={() => setFullscreen(!fullscreen)}
-              />
-              <span>The image could be wider than your screen. That is why we display the preview at first</span>
-              <canvas className={ fullscreen ? "hidden" : "w-full"} ref={canvasPreview} />
-              <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
-                <canvas className={ fullscreen ? "absolute" : "absolute hidden"} ref={canvasFinal} style={{ overflow: 'scroll'}}/>
-              </div>
+             <Toggle
+                  label="3D views"
+                  value={view3d}
+                  toggle={() => setView3d(!view3d)}
+                />
+              { view3d ?
+                <ThreeJsRendering
+                  width={possibleWidth}
+                  height={possibleHeight}
+                  tileSize={tileSize}
+                  hasBorder={hasBorder}
+                  rubickFaces={rubickFaces}
+                  toggleFullScreen={() => {}}
+                />
+                :
+                <CanvasRendering
+                  width={possibleWidth}
+                  height={possibleHeight}
+                  tileSize={tileSize}
+                  hasBorder={hasBorder}
+                  rubickFaces={rubickFaces}
+                  toggleFullScreen={() => {}}
+                />
+              }
             </Card>
           </div>
         </div>

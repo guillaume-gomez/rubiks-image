@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { minBy, sample } from "lodash";
-import { getContext, colorDistance, resizeImageCanvas, fromColorArrayToStringCSS } from "../tools";
+import { getOffscreenContext, colorDistance, resizeImageCanvas } from "../tools";
+import { RubickFace } from "../types";
 
 
 import worker from '../webWorker/app.worker';
@@ -17,173 +18,73 @@ interface Color {
 export const tileSizeDefault = 32;
 type OptionType = "hasBorder" | "noise" | "tileSize";
 
-interface RubickFace {
+interface RubickTile {
   name: string;
   color: Color;
+  hexColor: string
 }
+
 
 interface RubickImageProps {
   initialTileSize?: number;
 }
 
-const rubickFaces : RubickFace[] = [
-  { name: "white", color: {red: 255, green: 255, blue:255} },
-  { name: "green", color: {red: 124, green: 178, blue:87} },
-  { name: "yellow", color: {red: 238, green: 207, blue:78} },
-  { name: "orange", color: {red: 236, green: 112, blue:45} },
-  { name: "red", color: {red: 189, green: 40, blue:39} },
-  { name: "blue", color: {red: 44, green: 93, blue:166} }
+const RubickTiles : RubickTile[] = [
+  { name: "white", color: {red: 255, green: 255, blue:255}, hexColor: "#FFFFFF" },
+  { name: "green", color: {red: 124, green: 178, blue:87}, hexColor: "#7CCF57" },
+  { name: "yellow", color: {red: 238, green: 207, blue:78}, hexColor: "#EECF4E" },
+  { name: "orange", color: {red: 236, green: 112, blue:45}, hexColor: "#EC702D" },
+  { name: "red", color: {red: 189, green: 40, blue:39}, hexColor: "#BD2827" },
+  { name: "blue", color: {red: 44, green: 93, blue:166}, hexColor: "#2C5DA6" }
 ];
 
 export default function useRubickImage({ initialTileSize = tileSizeDefault } : RubickImageProps) {
   const [hasBorder, setBorder] = useState<boolean>(false);
   const [noise, setNoise] = useState<number>(0);
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
-  const [users, setUsers] = useState([]);
+  const [rubickFaces, setRubickFaces] = useState<RubickFace[]>([]);
   const webWorker = new WebWorker(worker);
 
   useEffect(() => {
-      fetchUsers().then(users => {
-            setUsers(users);
-        });
         return () => {
             webWorker.terminate();
         }
     }, []
   );
 
+function createCanvasBuffer(image: HTMLImageElement) : OffscreenCanvas {
+    const canvasBuffer =  new OffscreenCanvas(image.width, image.height);
 
-  function createCanvasBuffer(image: HTMLImageElement) : HTMLCanvasElement {
-    const canvasBuffer = document.createElement("canvas");
-    canvasBuffer.width = image.width;
-    canvasBuffer.height = image.height;
-
-    const context = getContext(canvasBuffer);
+    const context = getOffscreenContext(canvasBuffer);
     context.drawImage(image, 0, 0, canvasBuffer.width, canvasBuffer.height);
     return canvasBuffer;
   }
 
-  function renderSquare(context : CanvasRenderingContext2D, color: string, x: number, y: number) {
-    context.fillStyle = color;
-
-    if(hasBorder) {
-      context.lineWidth = 2;
-    }
-
-    context.beginPath();
-    context.rect(x, y, tileSize, tileSize);
-    if(hasBorder) {
-      context.stroke();
-    }
-    context.fill();
-    context.closePath();
-  }
-
-  // promise resolve nothing
-  async function generateImage(
-    image: HTMLImageElement,
-    canvasTarget: HTMLCanvasElement
-  ) {
-    canvasTarget.width = image.width * tileSize;
-    canvasTarget.height = image.height * tileSize;
-
-    const canvasBuffer = createCanvasBuffer(image);
-    const contextBuffer = getContext(canvasBuffer);
-    const contextTarget = getContext(canvasTarget);
-
-     for(let y = 0; y < image.height; ++y) {
-        for(let x = 0; x < image.width; ++x) {
-          const color = fromColorToDominantRubikColorWithRandom(fromPixelToColor(contextBuffer, x,y));
-          renderSquare(contextTarget, color, x, y);
-        }
-      }
-  }
-
-  // promise resolve nothing
   async function optimizedGenerateImage(
     image: HTMLImageElement,
-    canvasTarget: HTMLCanvasElement,
     expectedWidth: number,
     expectedHeight: number
   ) {
+      return new Promise((resolve) => {
+        const canvasBuffer = createCanvasBuffer(image);
 
+        const contextBuffer = getOffscreenContext(canvasBuffer);
+        resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
 
-      canvasTarget.width = expectedWidth;
-      canvasTarget.height = expectedHeight;
+        webWorker.postMessage({
+          imageData: contextBuffer.getImageData(0,0, canvasBuffer.width, canvasBuffer.height),
+          width: expectedWidth,
+          height: expectedHeight,
+          tileSize,
+          noise
+        });
 
-      const canvasBuffer = createCanvasBuffer(image);
-      const contextBuffer = getContext(canvasBuffer);
-
-      //const contextTarget = getContext(canvasTarget);
-      resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
-
-      const offscreenCanvas = canvasTarget.transferControlToOffscreen();
-      webWorker.postMessage({
-        users,
-        type: "asc",
-        expectedWidth,
-        expectedHeight,
-        offscreenCanvas,
-        pixels: contextBuffer.getImageData(0,0, expectedWidth, expectedHeight)
-      }, [offscreenCanvas]);
-
-      /*for(let y = 0; y < canvasBuffer.height; y += tileSize) {
-        for(let x = 0; x < canvasBuffer.width; x += tileSize) {
-          const color = fromColorToDominantRubikColorWithRandom(interpolateArea(contextBuffer, tileSize, x,y));
-          renderSquare(contextTarget, color, x, y);
-        }
-      }*/
-
-      webWorker.addEventListener('message', (event) => {
-        const sortedList = event.data;
-        setUsers(sortedList);
-
-    });
-  }
-
-  function fromPixelToColor(context: CanvasRenderingContext2D, x: number, y: number) : Color {
-    const pixel = context.getImageData(x, y, 1, 1);
-    const { data } = pixel;
-    return { red: data[0], green: data[1], blue: data[2] };
-  }
-
-  function interpolateArea(context: CanvasRenderingContext2D, tileSize: number, x: number, y: number) : Color {
-    const pixels = context.getImageData(x,y, tileSize, tileSize);
-    const { data } = pixels;
-    const numberOfPixels = tileSize * tileSize;
-    let red = 0;
-    let green = 0;
-    let blue = 0;
-
-
-    for (let i = 0; i < data.length; i += 4) {
-      red += data[i];
-      green += data[i + 1];
-      blue += data[i + 2];
-    }
-
-    return { red: (red/numberOfPixels), green: (green/numberOfPixels), blue: (blue/numberOfPixels) };
-  }
-
-
-  function fromColorToDominantRubikColor(color: Color) : string {
-    const comparaisonValues = rubickFaces.map(rubickFace => ({ ...rubickFace, value: colorDistance(color, rubickFace.color)}) );
-    const foundPixel = minBy(comparaisonValues, 'value');
-    if(!foundPixel) {
-      throw `No sprite found for the pixel with the value ${color}`;
-    }
-
-    return fromColorArrayToStringCSS(foundPixel.color);
-  }
-
-  function fromColorToDominantRubikColorWithRandom(color: Color) : string {
-
-    if(Math.random() < (noise)/100) {
-      const pickedColor = sample(rubickFaces);
-      return fromColorToDominantRubikColor(pickedColor!.color);
-    }
-
-    return fromColorToDominantRubikColor(color);
+        webWorker.addEventListener('message', (event) => {
+            const newRubicksPixels = event.data;
+            setRubickFaces(newRubicksPixels);
+            resolve();
+        });
+      })
   }
 
   function setOption(optionName: OptionType, value: unknown) {
@@ -206,6 +107,5 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
     }
   }
 
-
-  return { generateImage, optimizedGenerateImage, setOption, hasBorder, noise, tileSize, users };
+  return { optimizedGenerateImage, setOption, hasBorder, noise, tileSize, rubickFaces };
 }

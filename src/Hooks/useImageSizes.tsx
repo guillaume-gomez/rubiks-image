@@ -6,7 +6,7 @@ interface useImageSizesProps {
   initialTileSize: number;
 }
 
-function useImageSizes({ initialTileSize = tileSizeDefault }: useImageSizesProps) {
+function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
   const [allowResize, setAllowResize] = useState<boolean>(false);
@@ -17,6 +17,10 @@ function useImageSizes({ initialTileSize = tileSizeDefault }: useImageSizesProps
   function setPossibleSize(width: number, height: number) {
     setWidth(width);
     setHeight(height);
+  }
+
+  function makeItDivibleByThreeAndTileSize(number: number) : number {
+    return Math.round(number/(3 * tileSize))*(3 * tileSize);
   }
 
   function optimizedScaleBasic(imageWidth: number, imageHeight: number, tileSize: number, bestProportion: boolean) : [number, number] {
@@ -40,10 +44,14 @@ function useImageSizes({ initialTileSize = tileSizeDefault }: useImageSizesProps
   }
 
   function optimizedScale(imageWidth: number, imageHeight: number, allowResize: boolean) : [number, number] {
+    const imageWidthDivisibleByThree = makeItDivibleByThreeAndTileSize(imageWidth);
+    const imageHeightDivisibleByThree = makeItDivibleByThreeAndTileSize(imageHeight);
+    console.log(imageWidth, "-> ", imageWidthDivisibleByThree);
+    console.log(imageHeight, "-> ", imageHeightDivisibleByThree);
     if(allowResize) {
-        return findBestCombinaisonTruncatedBy(imageWidth, imageHeight);
+        return findBestCombinaisonTruncatedBy(imageWidthDivisibleByThree, imageHeightDivisibleByThree);
     } else {
-      return optimizedScaleBasic(imageWidth, imageHeight, tileSize, bestProportion);
+      return optimizedScaleBasic(imageWidthDivisibleByThree, imageHeightDivisibleByThree, tileSize, bestProportion);
     }
   }
 
@@ -54,7 +62,7 @@ function useImageSizes({ initialTileSize = tileSizeDefault }: useImageSizesProps
 
   function findBestCombinaisonTruncatedBy(imageWidth: number, imageHeight: number) : [number, number] {
     let combinaisons = [];
-    for(let truncate = 2; truncate <= 12; truncate++) {
+    for(let truncate = 1; truncate <= 20; truncate++) {
       const truncatedWidth = imageWidth + (imageWidth % truncate);
       const truncatedHeight = imageHeight + (imageHeight % truncate);
       const combinaison = optimizedScaleBasic(truncatedWidth, truncatedHeight, tileSize, bestProportion);
