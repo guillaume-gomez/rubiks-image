@@ -54,8 +54,17 @@ function App() {
 
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
-    setError("");
     setPossibleSize(newImage.width, newImage.height);
+    if(newImage.width === 0) {
+      setError("Error! The image has 0 pixels as width");
+    } else if(newImage.height === 0) {
+      setError("Error! The image has 0 pixels as height");
+    } else if(newImage.width < tileSize || newImage.height < tileSize) {
+      setError("Error! The image has a dimension below the tileSize");
+    }
+    else {
+      setError("");
+    }
   }
 
   function generateImagesInImage() {
@@ -106,8 +115,12 @@ function App() {
                   min={16}
                   step={8}
                   onChange={(value) => {
-                    setOption("tileSize", value)
+                    setOption("tileSize", value);
                     setTileSize(value);
+
+                    if(value < (image?.width||0) && value < (image?.height||0)) {
+                      setError("");
+                    }
                   }}
                 />
                 <Range
