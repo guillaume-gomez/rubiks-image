@@ -40,7 +40,6 @@ function App() {
   const {
     optimizedGenerateImage,
     setOption,
-    hasBorder,
     noise,
     tileSize,
     rubickFaces
@@ -111,11 +110,6 @@ function App() {
                     setTileSize(value);
                   }}
                 />
-                <Toggle
-                  label="has border"
-                  value={hasBorder}
-                  toggle={() => setOption("hasBorder", !hasBorder)}
-                />
                 <Range
                   label="noise"
                   value={noise}
@@ -175,7 +169,6 @@ function App() {
                     width={possibleWidth}
                     height={possibleHeight}
                     tileSize={tileSize}
-                    hasBorder={hasBorder}
                     rubickFaces={rubickFaces}
                     toggleFullScreen={() => {}}
                   />
@@ -184,7 +177,6 @@ function App() {
                     width={possibleWidth}
                     height={possibleHeight}
                     tileSize={tileSize}
-                    hasBorder={hasBorder}
                     rubickFaces={rubickFaces}
                     toggleFullScreen={() => {}}
                   />

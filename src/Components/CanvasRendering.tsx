@@ -9,7 +9,6 @@ interface CanvasRenderingProps {
   height: number;
   tileSize: number;
   rubickFaces: RubickFace[];
-  hasBorder: boolean;
   toggleFullScreen: (target: EventTarget) => void;
 }
 
@@ -22,9 +21,9 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   height,
   tileSize,
   rubickFaces,
-  hasBorder,
   toggleFullScreen}, ref) => {
   const [displayPreview, setDisplayPreview] = useState<boolean>(true);
+  const [hasBorder, setHasBorder] = useState<boolean>(false);
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
 
@@ -46,7 +45,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       // generate preview
       resizeImageCanvas(refCanvas.current, canvasPreview.current, refCanvas.current.width, refCanvas.current.height);
     }
-  }, [refCanvas, canvasPreview, rubickFaces]);
+  }, [refCanvas, canvasPreview, rubickFaces, hasBorder]);
 
   useImperativeHandle(ref, () => ({
     getImage() {
@@ -90,6 +89,11 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
 
   return (
     <>
+      <Toggle
+        label="has border"
+        value={hasBorder}
+        toggle={() => setHasBorder(!hasBorder)}
+      />
       <Toggle
         label="Show real result"
         value={displayPreview}

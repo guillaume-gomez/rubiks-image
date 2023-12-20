@@ -11,11 +11,10 @@ interface ThreejsRenderingProps {
   height: number;
   tileSize: number;
   rubickFaces: RubickFace[];
-  hasBorder: boolean;
   toggleFullScreen: (target: EventTarget) => void;
 }
 
-function ThreejsRendering({ width, height, tileSize, rubickFaces, hasBorder, toggleFullScreen } : ThreejsRenderingProps) {
+function ThreejsRendering({ width, height, tileSize, rubickFaces, toggleFullScreen } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
