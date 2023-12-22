@@ -125,8 +125,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           <CameraControls
             minPolarAngle={0}
             maxPolarAngle={Math.PI / 1.9}
-            minAzimuthAngle={-1}
-            maxAzimuthAngle={1}
+            minAzimuthAngle={-0.55}
+            maxAzimuthAngle={0.55}
             makeDefault
             maxDistance={ratio*2.0}
             ref={cameraControlRef}
