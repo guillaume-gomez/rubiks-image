@@ -15,8 +15,6 @@ interface ThreejsRenderingProps {
   rubickFaces: RubickFace[];
 }
 
-const intensity= 0.5;
-
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
