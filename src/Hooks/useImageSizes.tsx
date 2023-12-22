@@ -9,7 +9,6 @@ interface useImageSizesProps {
 function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
-  const [allowResize, setAllowResize] = useState<boolean>(false);
   const [bestProportion, setBestProportion] = useState<boolean>(true);
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
   const [ratio, setRatio] = useState<number>(1);
@@ -43,20 +42,16 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     }
   }
 
-  function optimizedScale(imageWidth: number, imageHeight: number, allowResize: boolean) : [number, number] {
+  function optimizedScale(imageWidth: number, imageHeight: number) : [number, number] {
     const imageWidthDivisibleByThree = makeItDivibleByThreeAndTileSize(imageWidth);
     const imageHeightDivisibleByThree = makeItDivibleByThreeAndTileSize(imageHeight);
     console.log(imageWidth, "-> ", imageWidthDivisibleByThree);
     console.log(imageHeight, "-> ", imageHeightDivisibleByThree);
-    if(allowResize) {
-        return findBestCombinaisonTruncatedBy(imageWidthDivisibleByThree, imageHeightDivisibleByThree);
-    } else {
-      return optimizedScaleBasic(imageWidthDivisibleByThree, imageHeightDivisibleByThree, tileSize, bestProportion);
-    }
+    return optimizedScaleBasic(imageWidthDivisibleByThree, imageHeightDivisibleByThree, tileSize, bestProportion);
   }
 
   function computePossibleSize(imageWidth: number, imageHeight: number) {
-    const [possibleWidth, possibleHeight] = optimizedScale(imageWidth, imageHeight, allowResize);
+    const [possibleWidth, possibleHeight] = optimizedScale(imageWidth, imageHeight);
     setPossibleSize(possibleWidth, possibleHeight);
   }
 
@@ -80,8 +75,6 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     setPossibleSize,
     possibleWidth: width,
     possibleHeight: height,
-    allowResize,
-    setAllowResize,
     ratio,
     setRatio,
     bestProportion,

@@ -28,8 +28,6 @@ function App() {
     setPossibleSize,
     possibleWidth,
     possibleHeight,
-    allowResize,
-    setAllowResize,
     ratio,
     setRatio,
     bestProportion,
@@ -49,12 +47,16 @@ function App() {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
-  }, [image, allowResize, bestProportion, ratio, tileSize]);
+  }, [image, bestProportion, ratio, tileSize]);
 
 
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
+
     setPossibleSize(newImage.width, newImage.height);
+    setBestProportion(false);
+    setRatio(10);
+
     if(newImage.width === 0) {
       setError("Error! The image has 0 pixels as width");
     } else if(newImage.height === 0) {
@@ -135,21 +137,19 @@ function App() {
               <div>
                 <div>
                   <Toggle
-                    label="Allow resize (will impact the proportions)"
-                    value={allowResize}
-                    toggle={() => setAllowResize(!allowResize)}
-                  />
-                  <Toggle
                     label="Best proportion"
                     value={bestProportion}
-                    toggle={() => setBestProportion(!bestProportion)}
+                    toggle={() => {
+                      setBestProportion(!bestProportion);
+                      setRatio(1);
+                    }}
                   />
                   <div>
                     <label>Ratio</label>
                     <input
                       disabled={bestProportion}
                       type="range"
-                      min="3"
+                      min={3}
                       max={24}
                       step={3}
                       value={ratio}
@@ -183,7 +183,6 @@ function App() {
                     height={possibleHeight}
                     tileSize={tileSize}
                     rubickFaces={rubickFaces}
-                    toggleFullScreen={() => {}}
                   />
                   :
                   <CanvasRendering
@@ -191,7 +190,6 @@ function App() {
                     height={possibleHeight}
                     tileSize={tileSize}
                     rubickFaces={rubickFaces}
-                    toggleFullScreen={() => {}}
                   />
                 }
               </div>
