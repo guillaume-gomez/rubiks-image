@@ -21,14 +21,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const { toggleFullscreen } = useFullscreen({ target: canvasRef });
+  const ratio = Math.max(width, height)/tileSize
 
   useEffect(() => {
     recenterCamera();
-  }, [])
-
-  useEffect(() => {
-    recenterCamera();
-  }, [rubickFaces.length, cameraControlRef]);
+  }, [rubickFaces.length, cameraControlRef.current]);
 
 
   function recenterCamera() {
@@ -36,12 +33,14 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       // position
       // target
       cameraControlRef.current.setLookAt(
-            0, 0, height/tileSize * 2,
+            0, 0, ratio * 2,
             0,0, 0,
             true
           );
     }
   }
+
+  console.log("ratio: ", ratio * 2.5)
 
   return (
     <>
@@ -52,7 +51,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       />
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
-          camera={{ position: [0, 0.0, 1], fov: 35, far: 250 }}
+          camera={{ position: [0, 0.0, 1], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
           onDoubleClick={toggleFullscreen}
           ref={canvasRef}
@@ -61,15 +60,18 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           <color attach="background" args={['#c0d6e9']} />
           <Stats/>
           <ambientLight color={0x000000} intensity={0.2} />
-          <directionalLight color={0xffffff} position={[-5,1, 0]} intensity={0.5} />
-          <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={0.4} />
+          <directionalLight color={0xffffff} position={[-5,1, 0]} intensity={1.5} />
+          <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
           <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
           <Backdrop
             scale={[width,height/tileSize * 3, 50]}
             position={[0, -(height/2/tileSize) -5, -10]}
-            floor={3} // Stretches the floor segment, 0.25 by default
-            segments={20} // Mesh-resolution, 20 by default
+            floor={3}
+            segments={20}
           >
+
+
+
             <meshStandardMaterial color="#FFFFFF" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
           </Backdrop>
           <group
@@ -91,7 +93,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             minAzimuthAngle={-1}
             maxAzimuthAngle={1}
             makeDefault
-            maxDistance={(Math.max(width, height)/tileSize)*2.0}
+            maxDistance={ratio*2.0}
             ref={cameraControlRef}
           />
         </Canvas>
