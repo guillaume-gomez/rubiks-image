@@ -20,12 +20,25 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const cameraControlRef = useRef<CameraControls|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
+  const [invert, setInvert] = useState<boolean>(false);
   const { toggleFullscreen } = useFullscreen({ target: canvasRef });
-  const ratio = Math.max(width, height)/tileSize
+  const ratio = Math.max(width, height)/tileSize;
+  const [position, setPosition] = useState<[number, number, number]>([0,0,0]);
+  const [rotation, setRotation] = useState<[number, number, number]>([0,0,0]);
 
   useEffect(() => {
     recenterCamera();
   }, [rubickFaces.length, cameraControlRef.current]);
+
+  useEffect(() => {
+    if(invert) {
+      setPosition([(width/2/tileSize), (height/2/tileSize), 0]);
+      setRotation([0 , Math.PI, 0]);
+    } else {
+      setPosition([-(width/2/tileSize), (height/2/tileSize), 0]);
+      setRotation([0 , 0, 0]);
+    }
+  }, [invert, width, tileSize]);
 
 
   function recenterCamera() {
@@ -49,6 +62,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         value={hideOtherFaces}
         toggle={() => setHideOtherFaces(!hideOtherFaces)}
       />
+      <Toggle
+        label="Invert"
+        value={invert}
+        toggle={() => setInvert(!invert)}
+      />
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
           camera={{ position: [0, 0.0, 1], fov: 35, far: 1000 }}
@@ -69,14 +87,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             floor={3}
             segments={20}
           >
-
-
-
             <meshStandardMaterial color="#FFFFFF" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
           </Backdrop>
           <group
-            position={[
-            -(width/2/tileSize), (height/2/tileSize), 0]}
+            rotation={rotation}
+            position={position}
           >
             {
               hideOtherFaces ?
