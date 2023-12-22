@@ -58,14 +58,14 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           ref={canvasRef}
           style={{ width: "100%", height: "95%"}}
         >
-          <color attach="background" args={['#45A5FF']} />
+          <color attach="background" args={['#c0d6e9']} />
           <Stats/>
           <ambientLight color={0x000000} intensity={0.2} />
           <directionalLight color={0xffffff} position={[-5,1, 0]} intensity={0.5} />
           <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={0.4} />
           <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
           <Backdrop
-            scale={[width,height/tileSize * 3,25]}
+            scale={[width,height/tileSize * 3, 50]}
             position={[0, -(height/2/tileSize) -5, -10]}
             floor={3} // Stretches the floor segment, 0.25 by default
             segments={20} // Mesh-resolution, 20 by default
@@ -88,8 +88,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           <CameraControls
             minPolarAngle={0}
             maxPolarAngle={Math.PI / 1.9}
-            minAzimuthAngle={-Math.PI / 4}
-            maxAzimuthAngle={Math.PI / 4}
+            minAzimuthAngle={-1}
+            maxAzimuthAngle={1}
             makeDefault
             maxDistance={(Math.max(width, height)/tileSize)*2.0}
             ref={cameraControlRef}
