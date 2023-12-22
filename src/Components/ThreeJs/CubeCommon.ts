@@ -6,7 +6,7 @@ const SIZE = 1 - BORDER_SIZE;
 
 export const boxGeometry = new RoundedBoxGeometry(SIZE, SIZE, SIZE);
 
-const paramsMaterial = { roughness: 0.0, metalness: 0.2 }
+const paramsMaterial = { roughness: 0.0, metalness: 0.2, emissive: 0x000000, castShadow: true }
 
 export const colorsMaterialsArray = [
   new MeshStandardMaterial({color: "#BD2827", ...paramsMaterial}), // red -> right

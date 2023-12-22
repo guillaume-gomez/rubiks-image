@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useFullscreen } from "rooks";
 import { RubickFace } from "../types";
 import Toggle from "./Toggle";
 import { resizeImageCanvas } from "../tools";
@@ -9,7 +10,6 @@ interface CanvasRenderingProps {
   height: number;
   tileSize: number;
   rubickFaces: RubickFace[];
-  toggleFullScreen: (target: EventTarget) => void;
 }
 
 export interface ExternalActionInterface {
@@ -20,12 +20,12 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   width,
   height,
   tileSize,
-  rubickFaces,
-  toggleFullScreen}, ref) => {
+  rubickFaces}, ref) => {
   const [displayPreview, setDisplayPreview] = useState<boolean>(true);
   const [hasBorder, setHasBorder] = useState<boolean>(false);
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
+  const { toggleFullscreen } = useFullscreen({ target: refCanvas });
 
   useEffect(() => {
     if(refCanvas.current
@@ -103,7 +103,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       <canvas
         className={ displayPreview ? "w-full" : "hidden"}
         ref={canvasPreview}
-        style={{ height: "90%"}}
+        style={{ height: "85%"}}
       />
       <div className={`w-full relative overflow-x-scroll ${displayPreview ? "absolute hidden" : "absolute"}`} style={{ minHeight: "400px" }} >
         <canvas
@@ -112,7 +112,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
           width={width}
           height={height}
           style={{background:"#797979", overflow: 'scroll'}}
-          onDoubleClick={(event) => toggleFullScreen(event.target)}
+          onDoubleClick={toggleFullscreen}
         />
       </div>
     </>
