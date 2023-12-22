@@ -10,7 +10,7 @@ interface Color {
 }
 
 export const tileSizeDefault = 32;
-type OptionType = "hasBorder" | "noise" | "tileSize";
+type OptionType = "noise" | "tileSize";
 
 interface RubickTile {
   name: string;
@@ -33,7 +33,6 @@ const RubickTiles : RubickTile[] = [
 ];
 
 export default function useRubickImage({ initialTileSize = tileSizeDefault } : RubickImageProps) {
-  const [hasBorder, setBorder] = useState<boolean>(false);
   const [noise, setNoise] = useState<number>(0);
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
   const [rubickFaces, setRubickFaces] = useState<RubickFace[]>([]);
@@ -149,10 +148,6 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
 
   function setOption(optionName: OptionType, value: unknown) {
     switch(optionName) {
-      case "hasBorder": {
-        setBorder(value as boolean);
-        break;
-      }
       case "noise": {
         setNoise(value as number);
         break;
@@ -168,5 +163,5 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
   }
 
 
-  return { optimizedGenerateImage, setOption, hasBorder, noise, tileSize, rubickFaces };
+  return { optimizedGenerateImage, setOption, noise, tileSize, rubickFaces };
 }

@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useFullscreen } from "rooks";
 import { RubickFace } from "../types";
 import Toggle from "./Toggle";
 import { resizeImageCanvas } from "../tools";
@@ -9,8 +10,6 @@ interface CanvasRenderingProps {
   height: number;
   tileSize: number;
   rubickFaces: RubickFace[];
-  hasBorder: boolean;
-  toggleFullScreen: (target: EventTarget) => void;
 }
 
 export interface ExternalActionInterface {
@@ -21,12 +20,12 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   width,
   height,
   tileSize,
-  rubickFaces,
-  hasBorder,
-  toggleFullScreen}, ref) => {
+  rubickFaces}, ref) => {
   const [displayPreview, setDisplayPreview] = useState<boolean>(true);
+  const [hasBorder, setHasBorder] = useState<boolean>(false);
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
+  const { toggleFullscreen } = useFullscreen({ target: refCanvas });
 
   useEffect(() => {
     if(refCanvas.current
@@ -46,7 +45,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       // generate preview
       resizeImageCanvas(refCanvas.current, canvasPreview.current, refCanvas.current.width, refCanvas.current.height);
     }
-  }, [refCanvas, canvasPreview, rubickFaces]);
+  }, [refCanvas, canvasPreview, rubickFaces, hasBorder]);
 
   useImperativeHandle(ref, () => ({
     getImage() {
@@ -89,25 +88,34 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   }
 
   return (
-    <div>
+    <>
+      <Toggle
+        label="has border"
+        value={hasBorder}
+        toggle={() => setHasBorder(!hasBorder)}
+      />
       <Toggle
         label="Show real result"
         value={displayPreview}
         toggle={() => setDisplayPreview(!displayPreview)}
       />
       <span>The image could be wider than your screen. That is why we display the preview at first</span>
-      <canvas className={ displayPreview ? "w-full" : "hidden"} ref={canvasPreview} />
-      <div className="w-full relative overflow-x-scroll" style={{ minHeight: "400px" }} >
+      <canvas
+        className={ displayPreview ? "w-full" : "hidden"}
+        ref={canvasPreview}
+        style={{ height: "85%"}}
+      />
+      <div className={`w-full relative overflow-x-scroll ${displayPreview ? "absolute hidden" : "absolute"}`} style={{ minHeight: "400px" }} >
         <canvas
           className={ displayPreview ? "absolute hidden" : "absolute"}
           ref={refCanvas}
           width={width}
           height={height}
           style={{background:"#797979", overflow: 'scroll'}}
-          onDoubleClick={(event) => toggleFullScreen(event.target)}
+          onDoubleClick={toggleFullscreen}
         />
       </div>
-    </div>
+    </>
   );
 });
 

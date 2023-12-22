@@ -29,8 +29,6 @@ function App() {
     setPossibleSize,
     possibleWidth,
     possibleHeight,
-    allowResize,
-    setAllowResize,
     ratio,
     setRatio,
     bestProportion,
@@ -41,7 +39,6 @@ function App() {
   const {
     optimizedGenerateImage,
     setOption,
-    hasBorder,
     noise,
     tileSize,
     rubickFaces
@@ -51,13 +48,26 @@ function App() {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
-  }, [image, allowResize, bestProportion, ratio, tileSize]);
+  }, [image, bestProportion, ratio, tileSize]);
 
 
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
-    setError("");
+
     setPossibleSize(newImage.width, newImage.height);
+    setBestProportion(true);
+    setRatio(1);
+
+    if(newImage.width === 0) {
+      setError("Error! The image has 0 pixels as width");
+    } else if(newImage.height === 0) {
+      setError("Error! The image has 0 pixels as height");
+    } else if(newImage.width < tileSize || newImage.height < tileSize) {
+      setError("Error! The image has a dimension below the tileSize");
+    }
+    else {
+      setError("");
+    }
   }
 
   function generateImagesInImage() {
@@ -120,14 +130,13 @@ function App() {
                   min={16}
                   step={8}
                   onChange={(value) => {
-                    setOption("tileSize", value)
+                    setOption("tileSize", value);
                     setTileSize(value);
+
+                    if(value < (image?.width||0) && value < (image?.height||0)) {
+                      setError("");
+                    }
                   }}
-                />
-                <Toggle
-                  label="has border"
-                  value={hasBorder}
-                  toggle={() => setOption("hasBorder", !hasBorder)}
                 />
                 <Range
                   label="noise"
@@ -141,21 +150,19 @@ function App() {
               <div>
                 <div>
                   <Toggle
-                    label="Allow resize (will impact the proportions)"
-                    value={allowResize}
-                    toggle={() => setAllowResize(!allowResize)}
-                  />
-                  <Toggle
                     label="Best proportion"
                     value={bestProportion}
-                    toggle={() => setBestProportion(!bestProportion)}
+                    toggle={() => {
+                      setBestProportion(!bestProportion);
+                      setRatio(1);
+                    }}
                   />
                   <div>
                     <label>Ratio</label>
                     <input
                       disabled={bestProportion}
                       type="range"
-                      min="3"
+                      min={3}
                       max={24}
                       step={3}
                       value={ratio}
@@ -182,25 +189,23 @@ function App() {
                   value={view3d}
                   toggle={() => setView3d(!view3d)}
                 />
-              { view3d ?
-                <ThreeJsRendering
-                  width={possibleWidth}
-                  height={possibleHeight}
-                  tileSize={tileSize}
-                  hasBorder={hasBorder}
-                  rubickFaces={rubickFaces}
-                  toggleFullScreen={() => {}}
-                />
-                :
-                <CanvasRendering
-                  width={possibleWidth}
-                  height={possibleHeight}
-                  tileSize={tileSize}
-                  hasBorder={hasBorder}
-                  rubickFaces={rubickFaces}
-                  toggleFullScreen={() => {}}
-                />
-              }
+              <div style={{ width: "100%", height: "65vh" }}>
+                { view3d ?
+                  <ThreeJsRendering
+                    width={possibleWidth}
+                    height={possibleHeight}
+                    tileSize={tileSize}
+                    rubickFaces={rubickFaces}
+                  />
+                  :
+                  <CanvasRendering
+                    width={possibleWidth}
+                    height={possibleHeight}
+                    tileSize={tileSize}
+                    rubickFaces={rubickFaces}
+                  />
+                }
+              </div>
             </Card>
           </div>
         </div>
