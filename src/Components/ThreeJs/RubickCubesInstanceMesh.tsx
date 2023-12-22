@@ -46,6 +46,7 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstanc
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
       oldRotation.current = 0.0;
       if(isAnimationFinish()) {
+        api.stop();
         return;
       }
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
@@ -135,12 +136,6 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstanc
       rotate(axis, index, face, direction * elapsedTime);
     });
     meshRef.current.instanceMatrix.needsUpdate = true;
-
-    // test
-    //rotate("Y", 10, 0, elapsedTime);
-    //rotate("Z", 7, 2, elapsedTime);
-    //rotate("X", 8, 0, elapsedTime);
-    // end test
   }
 
 
@@ -232,7 +227,7 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstanc
     api.start();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [rubickFaces]);
+  }, [rubickFaces.length]);
 
   return (
     <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
