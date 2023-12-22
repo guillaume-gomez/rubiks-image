@@ -54,8 +54,8 @@ function App() {
     setImage(newImage);
 
     setPossibleSize(newImage.width, newImage.height);
-    setBestProportion(false);
-    setRatio(10);
+    setBestProportion(true);
+    setRatio(1);
 
     if(newImage.width === 0) {
       setError("Error! The image has 0 pixels as width");
