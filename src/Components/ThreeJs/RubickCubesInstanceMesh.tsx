@@ -42,6 +42,7 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstanc
       duration: 200,
     },
     delay: 500,
+    reset: true,
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
       oldRotation.current = 0.0;
