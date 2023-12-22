@@ -1,8 +1,9 @@
 import { useRef , useState, useEffect } from 'react';
 import { useFullscreen } from "rooks";
 import { Canvas } from '@react-three/fiber';
-import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop, Plane, SpotLight } from '@react-three/drei';
+import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@react-three/drei';
 import { RubickFace } from "../../types";
+import { useSpring, animated } from '@react-spring/three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
@@ -23,8 +24,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const [invert, setInvert] = useState<boolean>(false);
   const { toggleFullscreen } = useFullscreen({ target: canvasRef });
   const ratio = Math.max(width, height)/tileSize;
-  const [position, setPosition] = useState<[number, number, number]>([0,0,0]);
-  const [rotation, setRotation] = useState<[number, number, number]>([0,0,0]);
+  const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
+    position: [-(width/2/tileSize), (height/2/tileSize), 0],
+    rotation: [0, 0, 0],
+    config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
+  }));
 
   useEffect(() => {
     recenterCamera();
@@ -32,11 +36,27 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
 
   useEffect(() => {
     if(invert) {
-      setPosition([(width/2/tileSize), (height/2/tileSize), 0]);
-      setRotation([0 , Math.PI, 0]);
+      apiGroup.start({
+        from: {
+          position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          rotation: [0, 0, 0]
+        },
+        to: {
+          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          rotation: [0, Math.PI, 0]
+        }
+      });
     } else {
-      setPosition([-(width/2/tileSize), (height/2/tileSize), 0]);
-      setRotation([0 , 0, 0]);
+      apiGroup.start({
+        to: {
+          position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          rotation: [0, 0, 0]
+        },
+        from: {
+          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          rotation: [0, Math.PI, 0]
+        }
+      });
     }
   }, [invert, width, tileSize]);
 
@@ -83,13 +103,13 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
           <Backdrop
             scale={[width,height/tileSize * 3, 50]}
-            position={[0, -(height/2/tileSize) -5, -10]}
-            floor={3}
+            position={[0, -(height/2/tileSize) -5, -width/tileSize]}
+            floor={10}
             segments={20}
           >
-            <meshStandardMaterial color="#FFFFFF" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
+            <meshStandardMaterial color="#FF0000" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
           </Backdrop>
-          <group
+          <animated.group
             rotation={rotation}
             position={position}
           >
@@ -98,7 +118,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
               : <RubickCubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
             }
-          </group>
+          </animated.group>
           <GizmoHelper alignment="bottom-right" margin={[50, 50]}>
             <GizmoViewport labelColor="white" axisHeadScale={1} />
           </GizmoHelper>
