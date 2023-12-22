@@ -94,7 +94,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           style={{ width: "100%", height: "95%"}}
         >
           <color attach="background" args={['#c0d6e9']} />
-          <Stats/>
+          { import.meta.env.MODE === "development" ? <Stats/> : <></> }
           <ambientLight color={0x000000} intensity={0.2} />
           <directionalLight color={0xffffff} position={[-5,1, 0]} intensity={1.5} />
           <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
