@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { minBy } from "lodash";
 import { pgcd } from "../tools";
 
 interface useImageSizesProps {
@@ -53,21 +52,6 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
   function computePossibleSize(imageWidth: number, imageHeight: number) {
     const [possibleWidth, possibleHeight] = optimizedScale(imageWidth, imageHeight);
     setPossibleSize(possibleWidth, possibleHeight);
-  }
-
-  function findBestCombinaisonTruncatedBy(imageWidth: number, imageHeight: number) : [number, number] {
-    let combinaisons = [];
-    for(let truncate = 1; truncate <= 20; truncate++) {
-      const truncatedWidth = imageWidth + (imageWidth % truncate);
-      const truncatedHeight = imageHeight + (imageHeight % truncate);
-      const combinaison = optimizedScaleBasic(truncatedWidth, truncatedHeight, tileSize, bestProportion);
-      combinaisons.push(combinaison);
-    }
-    const bestCombinaison = minBy(combinaisons, (combinaison: [number, number]) => combinaison[0] * combinaison[1]);
-    if(!bestCombinaison) {
-      return [imageWidth, imageHeight];
-    }
-    return bestCombinaison;
   }
 
   return {
