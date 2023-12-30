@@ -104,6 +104,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             position={[0, -(height/2/tileSize) -5, -width/tileSize]}
             floor={10}
             segments={20}
+            receiveShadow={true}
           >
             <meshStandardMaterial color="#FF0000" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
           </Backdrop>
