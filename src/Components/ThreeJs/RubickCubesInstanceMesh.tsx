@@ -1,4 +1,4 @@
-import { useRef , useEffect } from 'react';
+import { useRef , useEffect, useMemo } from 'react';
 import { sample } from "lodash";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
@@ -23,15 +23,19 @@ interface ParamsMove {
   moves: Move[];
   movesLength: number;
   currentMove: number;
+  width: number;
+  height: number;
 }
 
-function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstancedMeshProps) {
+function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : RubickCubesInstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
   const oldRotation = useRef<number>(0.0);
   const params= useRef<ParamsMove[]>([]);
   const numberOfCubes =  rubickFaces.length * 9 * 3;
+  const centerPos = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
+
 
   const api = useSpringRef()
   useSpring({
@@ -82,17 +86,30 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces } : RubickCubesInstanc
         const { x, y } = rubickFace[0]
         pivots.current.push(new Vector3(x/tileSize, y/tileSize, z));
       }
+      const { x, y } = rubickFace[0];
       //make some moves to avoid the user to see the final result is in the first step
-      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(), 3);
+      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y), 3);
 
       params.current.push(randomMoves);
     })
   }
 
-  function generateRandomMoves(): ParamsMove {
+  function generateWaveRandomMoves(x: number, y: number) : number {
+    const radiusX = Math.abs(centerPos.x - x);
+    const radiusY = Math.abs(centerPos.y - y);
+
+    const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
+    // empirical value to reduce the number of moves
+    const factor = 40;
+
+    return distance / factor;
+  }
+
+  function generateRandomMoves(x: number, y: number): ParamsMove {
     let moves : Move[] = [];
     const minimumMoves = 10;
-    const movesLength = Math.floor(Math.random() * 25) + minimumMoves;
+    const movesLength = Math.ceil(generateWaveRandomMoves(x,y)) + minimumMoves;
+    console.log(movesLength);
 
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);

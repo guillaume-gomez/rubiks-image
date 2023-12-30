@@ -115,7 +115,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             {
               hideOtherFaces ?
               <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
-              : <RubickCubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
+              : <RubickCubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} width={width} height={height} />
             }
           </animated.group>
           <GizmoHelper alignment="bottom-right" margin={[50, 50]}>
