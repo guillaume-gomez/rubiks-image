@@ -8,6 +8,8 @@ import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCo
 interface RubickCubesInstancedMeshProps {
   tileSize: number;
   rubickFaces: RubickFace[];
+  width: number;
+  height: number;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -23,8 +25,6 @@ interface ParamsMove {
   moves: Move[];
   movesLength: number;
   currentMove: number;
-  width: number;
-  height: number;
 }
 
 function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : RubickCubesInstancedMeshProps) {
