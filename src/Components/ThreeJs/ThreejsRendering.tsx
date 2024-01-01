@@ -91,7 +91,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           dpr={window.devicePixelRatio}
           onDoubleClick={toggleFullscreen}
           ref={canvasRef}
-          style={{ width: "100%", height: "95%"}}
+          style={{ width: "100%", height: "90%"}}
         >
           <color attach="background" args={['#c0d6e9']} />
           { import.meta.env.MODE === "development" ? <Stats/> : <></> }
