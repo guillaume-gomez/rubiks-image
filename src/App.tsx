@@ -110,7 +110,7 @@ function App() {
     <div className="container mx-auto md:px-0 px-5">
       <div className="flex flex-col gap-4">
         <Header/>
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col xl:flex-row gap-6">
           <div className="flex flex-col gap-3">
             <Card title="Upload your image">
               {
@@ -190,7 +190,7 @@ function App() {
               Generate
             </button>
           </div>
-          <div className="basis-3/4">
+          <div className="md:basis-3/4">
             <Card title="Result">
              <Toggle
                   label="3D views"

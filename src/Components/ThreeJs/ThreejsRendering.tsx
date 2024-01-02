@@ -56,7 +56,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         }
       });
     }
-  }, [invert, width, tileSize]);
+  }, [invert, width, height, tileSize]);
 
 
   function recenterCamera() {
@@ -70,8 +70,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           );
     }
   }
-
-  console.log("ratio: ", ratio * 2.5)
 
   return (
     <>
