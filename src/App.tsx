@@ -120,6 +120,7 @@ function App() {
                 onChange={uploadImage}
                 value={image}
               />
+
             </Card>
             <Card title="Image Settings">
               <div>
