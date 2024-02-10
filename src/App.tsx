@@ -10,6 +10,7 @@ import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
 import Error from "./Components/Error";
+import ExportLink from "./Components/ExportLink";
 import CanvasRendering from "./Components/CanvasRendering";
 import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
 
@@ -77,6 +78,7 @@ function App() {
     }
     optimizedGenerateImage(image, possibleWidth, possibleHeight);
   }
+
 
   function renderPreview() {
     if(!image) {
@@ -184,6 +186,7 @@ function App() {
                 {renderPreview()}
               </div>
             </Card>
+            <ExportLink params={"toto=foobard"} label="Export link"/>
             <button
               className="btn btn-accent"
               onClick={generateImagesInImage}
