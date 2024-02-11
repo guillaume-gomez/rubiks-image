@@ -17,6 +17,11 @@ import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
 import logo from '/logo.svg';
 import './App.css';
 
+interface threeJsParams {
+  tileSize: number;
+  width: number;
+  height: number;
+}
 
 const initialTileSize = 32;
 
@@ -25,6 +30,8 @@ function App() {
   const [image, setImage] = useState<HTMLImageElement>();
   const [view3d, setView3d] = useState<boolean>(true);
   const [chooseContrastedImage, setChooseContrastedImage] = useState<boolean>(true);
+  // memoize for three js to avoid changes before generation
+  const [threeJsParams, setThreeJsParams] = useState<threeJsParams>({ tileSize: initialTileSize, width: 0, height: 0});
 
   const {
     computePossibleSize,
@@ -84,6 +91,8 @@ function App() {
   }
 
   function generateImagesInImage() {
+    // update the params
+    setThreeJsParams({tileSize, width: possibleWidth, height: possibleHeight});
     if(!image) {
       setError("Error! Please upload an image");
       return;
@@ -233,9 +242,9 @@ function App() {
               <div style={{ width: "100%", height: "65vh" }}>
                 { view3d ?
                   <ThreeJsRendering
-                    width={possibleWidth}
-                    height={possibleHeight}
-                    tileSize={tileSize}
+                    width={threeJsParams.width}
+                    height={threeJsParams.height}
+                    tileSize={threeJsParams.tileSize}
                     rubickFaces={rubickFaces}
                   />
                   :
