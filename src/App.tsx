@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 
 import useImageSizes from "./Hooks/useImageSizes";
 import useRubickImage from "./Hooks/useRubickImage";
+import useImageContrast from "./Hooks/useImageContrast";
 
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
@@ -12,7 +13,6 @@ import Range from "./Components/Range";
 import Error from "./Components/Error";
 import CanvasRendering from "./Components/CanvasRendering";
 import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
-import { histogramEqualization } from "./addContrast";
 
 import logo from '/logo.svg';
 import './App.css';
@@ -23,8 +23,8 @@ const initialTileSize = 32;
 function App() {
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
-  const [constrastedImage, setConstrastedImage] = useState<HTMLImageElement>();
   const [view3d, setView3d] = useState<boolean>(true);
+  const [chooseContrastedImage, setChooseContrastedImage] = useState<boolean>(true);
 
   const {
     computePossibleSize,
@@ -46,36 +46,22 @@ function App() {
     rubickFaces
   } = useRubickImage({ initialTileSize });
 
+  const { contrastedImage, computeImage } = useImageContrast();
+
   const refOutput = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    async function loadImageAsync(image: HTMLImageElement, refOutput : HTMLCanvasElement) {
-      const base64Image = histogramEqualization(image, refOutput);
-      const newConstrastedImage = await loadImage(base64Image);
-      setConstrastedImage(newConstrastedImage);
-    }
-    if(image && refOutput.current) {
+    if(image) {
       computePossibleSize(image.width, image.height);
-      loadImageAsync(image, refOutput.current);
     }
   }, [image, bestProportion, ratio, tileSize]);
 
-  function loadImage(base64Image: string): Promise<HTMLImageElement> {
-    console.log("fdjkfdj")
-    return new Promise((resolve, reject) => {
-      console.log("begin")
-      const img = new Image();
-      img.src = base64Image;
-      img.onload = () => {
-        console.log("loaded")
-        resolve(img)
-      }
-      img.onerror = e => {
-        console.log("fdjkfdkj")
-        reject(e)
-      }
-  });
-}
+
+  useEffect(() => {
+    if(image && refOutput.current) {
+      computeImage(image, refOutput.current);
+    }
+  }, [image])
 
 
   function uploadImage(newImage: HTMLImageElement) {
@@ -102,11 +88,19 @@ function App() {
       setError("Error! Please upload an image");
       return;
     }
-    if(!constrastedImage) {
+
+    if(!chooseContrastedImage) {
+      optimizedGenerateImage(image, possibleWidth, possibleHeight);
+      return
+    }
+
+    if(!contrastedImage) {
       setError("Contrasted image is not fully generated");
       return;
     }
-    optimizedGenerateImage(constrastedImage, possibleWidth, possibleHeight);
+
+    optimizedGenerateImage(contrastedImage, possibleWidth, possibleHeight);
+
   }
 
   function renderPreview() {
@@ -156,7 +150,7 @@ function App() {
             <Card title="Image Settings">
               <div>
                 <Range
-                  label="tileSize"
+                  label="TileSize"
                   value={tileSize}
                   max={128}
                   min={16}
@@ -171,11 +165,18 @@ function App() {
                   }}
                 />
                 <Range
-                  label="noise"
+                  label="Noise"
                   value={noise}
                   max={50}
                   onChange={(value) => setOption("noise", value)}
                 />
+                <Toggle
+                    label="Add constract"
+                    value={chooseContrastedImage}
+                    toggle={() => {
+                      setChooseContrastedImage(!chooseContrastedImage);
+                    }}
+                  />
               </div>
             </Card>
             <Card title="Image Size">
