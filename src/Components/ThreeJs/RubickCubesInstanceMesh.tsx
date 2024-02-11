@@ -109,7 +109,6 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
     let moves : Move[] = [];
     const minimumMoves = 10;
     const movesLength = Math.ceil(generateWaveRandomMoves(x,y)) + minimumMoves;
-    console.log(movesLength);
 
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);

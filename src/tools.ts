@@ -70,3 +70,5 @@ export function resizeImageCanvas(originCanvas: HTMLCanvasElement|OffscreenCanva
     expectedHeight
   );
 }
+
+

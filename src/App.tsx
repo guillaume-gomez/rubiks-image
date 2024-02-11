@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import useImageSizes from "./Hooks/useImageSizes";
 import useRubickImage from "./Hooks/useRubickImage";
+import useImageContrast from "./Hooks/useImageContrast";
 
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
@@ -23,6 +24,7 @@ function App() {
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
   const [view3d, setView3d] = useState<boolean>(true);
+  const [chooseContrastedImage, setChooseContrastedImage] = useState<boolean>(true);
 
   const {
     computePossibleSize,
@@ -44,11 +46,22 @@ function App() {
     rubickFaces
   } = useRubickImage({ initialTileSize });
 
+  const { contrastedImage, computeImage } = useImageContrast();
+
+  const refOutput = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
   }, [image, bestProportion, ratio, tileSize]);
+
+
+  useEffect(() => {
+    if(image && refOutput.current) {
+      computeImage(image, refOutput.current);
+    }
+  }, [image])
 
 
   function uploadImage(newImage: HTMLImageElement) {
@@ -75,7 +88,19 @@ function App() {
       setError("Error! Please upload an image");
       return;
     }
-    optimizedGenerateImage(image, possibleWidth, possibleHeight);
+
+    if(!chooseContrastedImage) {
+      optimizedGenerateImage(image, possibleWidth, possibleHeight);
+      return
+    }
+
+    if(!contrastedImage) {
+      setError("Contrasted image is not fully generated");
+      return;
+    }
+
+    optimizedGenerateImage(contrastedImage, possibleWidth, possibleHeight);
+
   }
 
   function renderPreview() {
@@ -120,12 +145,12 @@ function App() {
                 onChange={uploadImage}
                 value={image}
               />
-
+              <canvas ref={refOutput} style={{display: "none"}} />
             </Card>
             <Card title="Image Settings">
               <div>
                 <Range
-                  label="tileSize"
+                  label="TileSize"
                   value={tileSize}
                   max={128}
                   min={16}
@@ -140,11 +165,18 @@ function App() {
                   }}
                 />
                 <Range
-                  label="noise"
+                  label="Noise"
                   value={noise}
                   max={50}
                   onChange={(value) => setOption("noise", value)}
                 />
+                <Toggle
+                    label="Add constract"
+                    value={chooseContrastedImage}
+                    toggle={() => {
+                      setChooseContrastedImage(!chooseContrastedImage);
+                    }}
+                  />
               </div>
             </Card>
             <Card title="Image Size">
