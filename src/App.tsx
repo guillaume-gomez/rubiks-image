@@ -135,7 +135,7 @@ function App() {
     <div className="container mx-auto md:px-0 px-5">
       <div className="flex flex-col gap-4 h-screen">
         <Header/>
-        <div className="flex flex-col xl:flex-row gap-6 grow">
+        <div className="flex flex-col xl:flex-row gap-6">
           <div className="flex flex-col gap-3">
             <Card title="Upload your image">
               {
