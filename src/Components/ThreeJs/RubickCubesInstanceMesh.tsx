@@ -105,10 +105,21 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
     return distance / factor;
   }
 
+  function generateInvertWaveRandomMoves(x: number, y: number) : number {
+    const radiusX = Math.abs(centerPos.x - x);
+    const radiusY = Math.abs(centerPos.y - y);
+
+    const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
+    // empirical value to reduce the number of moves
+    const factor = 40;
+
+    return ((width/2) - distance) / factor;
+  }
+
   function generateRandomMoves(x: number, y: number): ParamsMove {
     let moves : Move[] = [];
     const minimumMoves = 10;
-    const movesLength = Math.ceil(generateWaveRandomMoves(x,y)) + minimumMoves;
+    const movesLength = Math.ceil(generateInvertWaveRandomMoves(x,y)) + minimumMoves;
 
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);
