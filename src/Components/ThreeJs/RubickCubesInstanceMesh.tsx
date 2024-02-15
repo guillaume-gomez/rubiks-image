@@ -10,10 +10,12 @@ interface RubickCubesInstancedMeshProps {
   rubickFaces: RubickFace[];
   width: number;
   height: number;
+  animationType: animationType;
 }
 
 type axisType = "X"| "Y" | "Z";
 type faceType = 0 | 1 | 2;
+type animationType = "wave" | "inverted-wave" | "one-by-one";
 
 interface Move {
   axis: axisType;
@@ -27,7 +29,7 @@ interface ParamsMove {
   currentMove: number;
 }
 
-function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : RubickCubesInstancedMeshProps) {
+function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animationType } : RubickCubesInstancedMeshProps) {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -94,18 +96,19 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
     })
   }
 
-  function generateWaveRandomMoves(x: number, y: number) : number {
-    const radiusX = Math.abs(centerPos.x - x);
-    const radiusY = Math.abs(centerPos.y - y);
 
-    const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
-    // empirical value to reduce the number of moves
-    const factor = 40;
+  function computeMovesForAnimation(animationType: animationType, x: number, y: number) : number {
+    switch(animationType) {
+      case "wave":
+      default:
+        return generateWaveRandomMoves(x, y, false);
+      case "inverted-wave":
+        return generateWaveRandomMoves(x, y, true);
 
-    return distance / factor;
+    }
   }
 
-  function generateInvertWaveRandomMoves(x: number, y: number) : number {
+  function generateWaveRandomMoves(x: number, y: number, invert: boolean) : number {
     const radiusX = Math.abs(centerPos.x - x);
     const radiusY = Math.abs(centerPos.y - y);
 
@@ -113,13 +116,17 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
     // empirical value to reduce the number of moves
     const factor = 40;
 
-    return ((width/2) - distance) / factor;
+    if(invert) {
+      return ((width/2) - distance) / factor;
+    }
+
+    return distance / factor;
   }
 
   function generateRandomMoves(x: number, y: number): ParamsMove {
     let moves : Move[] = [];
     const minimumMoves = 10;
-    const movesLength = Math.ceil(generateInvertWaveRandomMoves(x,y)) + minimumMoves;
+    const movesLength = Math.ceil(computeMovesForAnimation(animationType, x,y)) + minimumMoves;
 
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);
