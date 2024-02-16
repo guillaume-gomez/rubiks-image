@@ -90,21 +90,22 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animat
       }
       const { x, y } = rubickFace[0];
       //make some moves to avoid the user to see the final result is in the first step
-      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y), 3);
+      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y, index), 3);
 
       params.current.push(randomMoves);
     })
   }
 
 
-  function computeMovesForAnimation(animationType: animationType, x: number, y: number) : number {
+  function computeMovesForAnimation(animationType: animationType, x: number, y: number, position: number) : number {
     switch(animationType) {
       case "wave":
       default:
         return generateWaveRandomMoves(x, y, false);
       case "inverted-wave":
         return generateWaveRandomMoves(x, y, true);
-
+      case "one-by-one":
+        return position * 0.5 ;
     }
   }
 
@@ -123,10 +124,10 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animat
     return distance / factor;
   }
 
-  function generateRandomMoves(x: number, y: number): ParamsMove {
+  function generateRandomMoves(x: number, y: number, position: number): ParamsMove {
     let moves : Move[] = [];
     const minimumMoves = 10;
-    const movesLength = Math.ceil(computeMovesForAnimation(animationType, x,y)) + minimumMoves;
+    const movesLength = Math.ceil(computeMovesForAnimation(animationType, x,y, position)) + minimumMoves;
 
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);
