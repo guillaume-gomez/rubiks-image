@@ -33,10 +33,21 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   }, [rubickFaces.length, cameraControlRef.current]);
 
   useEffect(() => {
+    apiGroup.start({
+      from: {
+        position: [-(width/2/tileSize), (height/2/tileSize), 0],
+      },
+      to: {
+        position: [(width/2/tileSize), (height/2/tileSize), 0],
+      }
+    });
+  }, [width, height, tileSize]);
+
+  useEffect(() => {
     if(invert) {
       apiGroup.start({
         from: {
-          position: [-(width/2/tileSize), (height/2/tileSize), 0],
+         position: [-(width/2/tileSize), (height/2/tileSize), 0],
           rotation: [0, 0, 0]
         },
         to: {
@@ -56,7 +67,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         }
       });
     }
-  }, [invert, width, height, tileSize]);
+  }, [invert])
 
 
   function recenterCamera() {
