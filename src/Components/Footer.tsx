@@ -3,6 +3,7 @@ function Footer() {
     <footer className="footer items-center p-4 bg-neutral text-neutral-content">
       <aside className="items-center grid-flow-col">
        <p>Made by Guillaume Gomez - 2023</p>
+       <p>Do you want to support ? Give a start to this project</p>
       </aside>
       <nav className="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
       </nav>
