@@ -1,4 +1,4 @@
-import { useRef , useState, useEffect } from 'react';
+import { useRef , useState, useEffect, Suspense } from 'react';
 import { useFullscreen } from "rooks";
 import { Canvas } from '@react-three/fiber';
 import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@react-three/drei';
@@ -96,49 +96,51 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       />
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
-          camera={{ position: [0, 0.0, 1], fov: 35, far: 1000 }}
+          camera={{ position: [0, 0.0, ratio*2], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
           onDoubleClick={toggleFullscreen}
           ref={canvasRef}
           style={{ width: "100%", height: "90%"}}
         >
-          <color attach="background" args={['#c0d6e9']} />
-          { import.meta.env.MODE === "development" ? <Stats/> : <></> }
-          <ambientLight color={0x000000} intensity={0.2} />
-          <directionalLight color={0xffffff} position={[-5,1, 0]} intensity={1.5} />
-          <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
-          <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
-          <Backdrop
-            scale={[width,height/tileSize * 3, 50]}
-            position={[0, -(height/2/tileSize) -5, -width/tileSize]}
-            floor={10}
-            segments={20}
-            receiveShadow={true}
-          >
-            <meshStandardMaterial color="#FF0000" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
-          </Backdrop>
-          <animated.group
-            rotation={rotation}
-            position={position}
-          >
-            {
-              hideOtherFaces ?
-              <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
-              : <RubickCubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} width={width} height={height} />
-            }
-          </animated.group>
-          <GizmoHelper alignment="bottom-right" margin={[50, 50]}>
-            <GizmoViewport labelColor="white" axisHeadScale={1} />
-          </GizmoHelper>
-          <CameraControls
-            minPolarAngle={0}
-            maxPolarAngle={Math.PI / 1.9}
-            minAzimuthAngle={-0.55}
-            maxAzimuthAngle={0.55}
-            makeDefault
-            maxDistance={ratio*2.0}
-            ref={cameraControlRef}
-          />
+          <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
+            <color attach="background" args={['#c0d6e9']} />
+            { import.meta.env.MODE === "development" ? <Stats/> : <></> }
+            <ambientLight color={0x000000} intensity={0.2} />
+            <directionalLight color={0xffffff} position={[-5,1, 0]} intensity={1.5} />
+            <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
+            <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
+            <Backdrop
+              scale={[width,height/tileSize * 3, 50]}
+              position={[0, -(height/2/tileSize) -5, -width/tileSize]}
+              floor={10}
+              segments={20}
+              receiveShadow={true}
+            >
+              <meshStandardMaterial color="#FF0000" metalness={1.0} emissive={"#45A5FF"} flatShading={true} />
+            </Backdrop>
+            <animated.group
+              rotation={rotation}
+              position={position}
+            >
+              {
+                hideOtherFaces ?
+                <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
+                : <RubickCubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} width={width} height={height} />
+              }
+            </animated.group>
+            <GizmoHelper alignment="bottom-right" margin={[50, 50]}>
+              <GizmoViewport labelColor="white" axisHeadScale={1} />
+            </GizmoHelper>
+            <CameraControls
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI / 1.9}
+              minAzimuthAngle={-0.55}
+              maxAzimuthAngle={0.55}
+              makeDefault
+              maxDistance={ratio*2.5}
+              ref={cameraControlRef}
+            />
+          </Suspense>
         </Canvas>
       </div>
     </>
