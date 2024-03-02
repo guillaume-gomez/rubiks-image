@@ -38,7 +38,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         position: [-(width/2/tileSize), (height/2/tileSize), 0],
       },
       to: {
-        position: [(width/2/tileSize), (height/2/tileSize), 0],
+        position: [-(width/2/tileSize), (height/2/tileSize), 0],
       }
     });
   }, [width, height, tileSize]);
