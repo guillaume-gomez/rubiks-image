@@ -109,7 +109,14 @@ function App() {
     }
 
     optimizedGenerateImage(contrastedImage, possibleWidth, possibleHeight);
+  }
 
+  function isImageFullyUploaded() : boolean {
+    if(chooseContrastedImage) {
+      return !!contrastedImage;
+    }
+
+    return !!image;
   }
 
   function renderPreview() {
@@ -156,81 +163,83 @@ function App() {
               />
               <canvas ref={refOutput} style={{display: "none"}} />
             </Card>
-            <Card title="Image Settings">
-              <div>
-                <Range
-                  label="TileSize"
-                  value={tileSize}
-                  max={128}
-                  min={16}
-                  step={8}
-                  onChange={(value) => {
-                    setOption("tileSize", value);
-                    setTileSize(value);
-
-                    if(value < (image?.width||0) && value < (image?.height||0)) {
-                      setError("");
-                    }
-                  }}
-                />
-                <Range
-                  label="Noise"
-                  value={noise}
-                  max={50}
-                  onChange={(value) => setOption("noise", value)}
-                />
-                <Toggle
-                    label="Add constract"
-                    value={chooseContrastedImage}
-                    toggle={() => {
-                      setChooseContrastedImage(!chooseContrastedImage);
-                    }}
-                  />
-              </div>
-            </Card>
-            <Card title="Image Size">
-              <div>
+            { isImageFullyUploaded() && <div>
+              <Card title="Image Settings">
                 <div>
-                  <Toggle
-                    label="Best proportion"
-                    value={bestProportion}
-                    toggle={() => {
-                      setBestProportion(!bestProportion);
-                      setRatio(1);
+                  <Range
+                    label="TileSize"
+                    value={tileSize}
+                    max={128}
+                    min={16}
+                    step={8}
+                    onChange={(value) => {
+                      setOption("tileSize", value);
+                      setTileSize(value);
+
+                      if(value < (image?.width||0) && value < (image?.height||0)) {
+                        setError("");
+                      }
                     }}
                   />
-                  <div>
-                    <label>Ratio</label>
-                    <input
-                      disabled={bestProportion}
-                      type="range"
-                      min={3}
-                      max={9}
-                      step={3}
-                      value={ratio}
-                      onChange={(e) => setRatio(parseInt(e.target.value))}
-                      className={`range ${bestProportion ? "range-error" : "range-primary"}`}
-                      />
-                    <span>{ratio}</span>
-                  </div>
+                  <Range
+                    label="Noise"
+                    value={noise}
+                    max={50}
+                    onChange={(value) => setOption("noise", value)}
+                  />
+                  <Toggle
+                      label="Add constract"
+                      value={chooseContrastedImage}
+                      toggle={() => {
+                        setChooseContrastedImage(!chooseContrastedImage);
+                      }}
+                    />
                 </div>
-                {
-                  ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > 5000 ?
-                    <div role="alert" className="alert alert-warning">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                      <span>Warning: The number of cubes can be too much in 3D</span>
+              </Card>
+              <Card title="Image Size">
+                <div>
+                  <div>
+                    <Toggle
+                      label="Best proportion"
+                      value={bestProportion}
+                      toggle={() => {
+                        setBestProportion(!bestProportion);
+                        setRatio(1);
+                      }}
+                    />
+                    <div>
+                      <label>Ratio</label>
+                      <input
+                        disabled={bestProportion}
+                        type="range"
+                        min={3}
+                        max={9}
+                        step={3}
+                        value={ratio}
+                        onChange={(e) => setRatio(parseInt(e.target.value))}
+                        className={`range ${bestProportion ? "range-error" : "range-primary"}`}
+                        />
+                      <span>{ratio}</span>
                     </div>
-                   : <></>
-                }
-                {renderPreview()}
-              </div>
-            </Card>
-            <button
-              className="btn btn-accent"
-              onClick={generateImagesInImage}
-            >
-              Generate
-            </button>
+                  </div>
+                  {
+                    ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > 5000 ?
+                      <div role="alert" className="alert alert-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span>Warning: The number of cubes can be too much in 3D</span>
+                      </div>
+                     : <></>
+                  }
+                  {renderPreview()}
+                </div>
+              </Card>
+              <button
+                className="btn btn-accent"
+                onClick={generateImagesInImage}
+              >
+                Generate
+              </button>
+            </div>}
           </div>
           <div className="md:basis-3/4">
             <Card title="Result">
