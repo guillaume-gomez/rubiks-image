@@ -3,6 +3,7 @@ import { useFullscreen } from "rooks";
 import { RubickFace } from "../types";
 import Toggle from "./Toggle";
 import { resizeImageCanvas } from "../tools";
+import useRatioImage from "../Hooks/useRatioImage";
 
 
 interface CanvasRenderingProps {
@@ -26,6 +27,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   const refCanvas = useRef<HTMLCanvasElement>(null);
   const canvasPreview = useRef<HTMLCanvasElement>(null);
   const { toggleFullscreen } = useFullscreen({ target: refCanvas });
+  const { resize } = useRatioImage({initialMaxWidth: 400, initialMaxHeight: 300});
 
   useEffect(() => {
     if(refCanvas.current
@@ -43,7 +45,8 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
         renderBorder(context, width, height);
       }
       // generate preview
-      resizeImageCanvas(refCanvas.current, canvasPreview.current, refCanvas.current.width, refCanvas.current.height);
+      const [widthPreview, heightPreview] = resize(width, height);
+      resizeImageCanvas(refCanvas.current, canvasPreview.current, widthPreview, heightPreview);
     }
   }, [refCanvas, canvasPreview, rubickFaces, hasBorder]);
 
@@ -87,6 +90,8 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
     context.fillRect(x,y, tileSize, tileSize);
   }
 
+
+
   return (
     <>
       <Toggle
@@ -101,9 +106,8 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       />
       <span>The image could be wider than your screen. That is why we display the preview at first</span>
       <canvas
-        className={ displayPreview ? "w-full" : "hidden"}
+        className={ displayPreview ? "" : "hidden"}
         ref={canvasPreview}
-        style={{ height: "85%"}}
       />
       <div className={`w-full relative overflow-x-scroll ${displayPreview ? "absolute hidden" : "absolute"}`} style={{ minHeight: "400px" }} >
         <canvas
