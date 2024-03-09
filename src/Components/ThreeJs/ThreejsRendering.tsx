@@ -5,7 +5,7 @@ import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@re
 import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
 import Toggle from "../Toggle";
-import RubickCubesInstanceMesh from "./RubickCubesInstanceMesh";
+import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 
 interface ThreejsRenderingProps {
@@ -27,6 +27,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
     rotation: [0, 0, 0],
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
+  const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
+
 
   useEffect(() => {
     recenterCamera();
@@ -82,6 +84,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
     }
   }
 
+  function resetAnimation() {
+    if(rubickCubeInstanceMeshActionsRef && rubickCubeInstanceMeshActionsRef.current) {
+      rubickCubeInstanceMeshActionsRef.current.reset();
+    }
+  }
+
   return (
     <>
       <Toggle
@@ -94,6 +102,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         value={invert}
         toggle={() => setInvert(!invert)}
       />
+      <button className="btn btn-secondary btn-xs" onClick={resetAnimation}>Reset Animation</button>
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
           camera={{ position: [0, 0.0, ratio*2], fov: 35, far: 1000 }}
@@ -125,7 +134,13 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               {
                 hideOtherFaces ?
                 <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
-                : <RubickCubesInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} width={width} height={height} />
+                : <RubickCubesInstanceMesh
+                  tileSize={tileSize}
+                  rubickFaces={rubickFaces}
+                  width={width}
+                  height={height}
+                  ref={rubickCubeInstanceMeshActionsRef}
+                />
               }
             </animated.group>
             <GizmoHelper alignment="bottom-right" margin={[50, 50]}>

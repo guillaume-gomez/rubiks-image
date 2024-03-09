@@ -1,9 +1,14 @@
-import { useRef , useEffect, useMemo } from 'react';
+import { useRef , useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { sample } from "lodash";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
 import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+
+
+export interface ExternalActionInterface {
+  reset: () => void;
+}
 
 interface RubickCubesInstancedMeshProps {
   tileSize: number;
@@ -27,7 +32,8 @@ interface ParamsMove {
   currentMove: number;
 }
 
-function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : RubickCubesInstancedMeshProps) {
+const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
+  (({ tileSize, rubickFaces, width, height }, ref) => {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -36,8 +42,7 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
   const numberOfCubes =  rubickFaces.length * 9 * 3;
   const centerPos = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
 
-
-  const api = useSpringRef()
+  const api = useSpringRef();
   useSpring({
     ref: api,
     from: { rotationStep: 0 },
@@ -62,7 +67,24 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
       }
       oldRotation.current = rotationStep
     }
-  })
+  });
+
+  useImperativeHandle(ref, () => ({
+      reset() {
+        if (meshRef == null) return;
+        if (meshRef.current == null) return;
+        if (rubickFaces.length <= 0) return;
+        if(!isAnimationFinish()) {
+          return;
+        }
+        init();
+
+        oldRotation.current = 0.0;
+        api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
+
+        meshRef.current.instanceMatrix.needsUpdate = true;
+      }
+  }));
 
   function init() {
     pivots.current = [];
@@ -249,6 +271,6 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height } : Rub
   return (
     <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
-}
+});
 
 export default RubickCubesInstancedMesh;
