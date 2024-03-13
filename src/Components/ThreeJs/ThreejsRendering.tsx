@@ -102,7 +102,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         value={invert}
         toggle={() => setInvert(!invert)}
       />
-      <button className="btn btn-secondary btn-xs" onClick={resetAnimation}>Reset Animation</button>
+      <button
+        className="btn btn-secondary btn-xs"
+        onClick={resetAnimation}
+      >
+          Reset Animation
+      </button>
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
           camera={{ position: [0, 0.0, ratio*2], fov: 35, far: 1000 }}
