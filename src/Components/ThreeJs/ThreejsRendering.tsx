@@ -102,12 +102,15 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         value={invert}
         toggle={() => setInvert(!invert)}
       />
-      { !hideOtherFaces && <div><button
-          className="btn btn-secondary btn-xs"
-          onClick={resetAnimation}
-        >
-            Reset Animation
-        </button></div>
+      { !hideOtherFaces &&
+        <div>
+          <button
+            className="btn btn-secondary btn-xs"
+            onClick={resetAnimation}
+          >
+              Reset Animation
+          </button>
+        </div>
       }
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
