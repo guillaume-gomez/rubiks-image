@@ -1,5 +1,5 @@
 import { useRef , useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
-import { sample } from "lodash";
+import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";

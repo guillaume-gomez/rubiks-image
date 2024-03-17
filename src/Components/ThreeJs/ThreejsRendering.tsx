@@ -102,12 +102,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         value={invert}
         toggle={() => setInvert(!invert)}
       />
-      { !hideOtherFaces && <button
+      { !hideOtherFaces && <div><button
           className="btn btn-secondary btn-xs"
           onClick={resetAnimation}
         >
             Reset Animation
-        </button>
+        </button></div>
       }
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
@@ -115,7 +115,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           dpr={window.devicePixelRatio}
           onDoubleClick={toggleFullscreen}
           ref={canvasRef}
-          style={{ width: "100%", height: "90%"}}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
             <color attach="background" args={['#c0d6e9']} />

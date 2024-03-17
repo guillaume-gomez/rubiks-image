@@ -1,19 +1,16 @@
 import { ReactNode } from "react";
+import CardBase from "./CardBase";
 
 interface CardProps {
   title: string | ReactNode;
   children: ReactNode;
-  bgColor?: string
 }
 
-function Card({ title, children, bgColor = "bg-base-200" } : CardProps) {
+function Card({ title, children} : CardProps) {
   return (
-    <div className={`card ${bgColor} shadow-xl`}>
-      <div className="card-body p-4">
-        <h2 className="card-title">{title}</h2>
-        {children}
-      </div>
-    </div>
+    <CardBase title={title} bgColor={"bg-base-300"} titleClass={"card-title"}>
+      {children}
+    </CardBase>
   );
 }
 
