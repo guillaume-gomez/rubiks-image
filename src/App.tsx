@@ -169,7 +169,7 @@ function App() {
     <div className="container mx-auto md:px-0 px-5">
       <div className="flex flex-col gap-4 h-screen">
         <Header/>
-        <div className="flex flex-col xl:flex-row gap-6 h-full">
+        <div className="flex flex-col xl:flex-row gap-6 basis-full">
           <div>
             <Card title="Settings">
                 <div className="flex flex-col gap-3">
@@ -282,6 +282,7 @@ function App() {
                   />
                 }
               </SubCard>
+              <p className="text-xs italic">Double click on the canvas to go full screen</p>
             </Card>
           </div>
         </div>
