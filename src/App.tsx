@@ -186,21 +186,6 @@ function App() {
                   <SubCard title="Image Settings">
                     <div>
                       <Range
-                        label="TileSize"
-                        value={tileSize}
-                        max={128}
-                        min={16}
-                        step={8}
-                        onChange={(value) => {
-                          setOption("tileSize", value);
-                          setTileSize(value);
-
-                          if(value < (image?.width||0) && value < (image?.height||0)) {
-                            setError("");
-                          }
-                        }}
-                      />
-                      <Range
                         label="Noise"
                         value={noise}
                         max={50}
@@ -217,6 +202,21 @@ function App() {
                   </SubCard>
                   <SubCard title="Image Size">
                     <div>
+                      <Range
+                        label="TileSize"
+                        value={tileSize}
+                        max={128}
+                        min={16}
+                        step={8}
+                        onChange={(value) => {
+                          setOption("tileSize", value);
+                          setTileSize(value);
+
+                          if(value < (image?.width||0) && value < (image?.height||0)) {
+                            setError("");
+                          }
+                        }}
+                      />
                       <div>
                         <Toggle
                           label="Best proportion"
