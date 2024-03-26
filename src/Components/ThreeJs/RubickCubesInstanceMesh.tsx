@@ -1,5 +1,6 @@
 import { useRef , useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
 import sample from "lodash/sample";
+import maxBy from "lodash/maxBy";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
@@ -32,6 +33,8 @@ interface ParamsMove {
   currentMove: number;
 }
 
+export const TRANSITION_DURATION = 200; //ms
+
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
   (({ tileSize, rubickFaces, width, height }, ref) => {
   const meshRef = useRef<InstancedMesh>(null);
@@ -48,7 +51,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     from: { rotationStep: 0 },
     to  : { rotationStep: 1 },
     config: {
-      duration: 200,
+      duration: TRANSITION_DURATION,
     },
     delay: 500,
     reset: true,
@@ -83,6 +86,11 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
         api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
 
         meshRef.current.instanceMatrix.needsUpdate = true;
+      },
+
+      getDuration() {
+        const maxMoveRubickCube = maxBy(params.current, 'movesLength');
+        return maxMoveRubickCube.movesLength * TRANSITION_DURATION;
       }
   }));
 
