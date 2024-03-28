@@ -9,6 +9,7 @@ import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCo
 
 export interface ExternalActionInterface {
   reset: () => void;
+  getDuration: () => number;
 }
 
 interface RubickCubesInstancedMeshProps {
@@ -90,6 +91,9 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
 
       getDuration() {
         const maxMoveRubickCube = maxBy(params.current, 'movesLength');
+        if(!maxMoveRubickCube) {
+          return 0;
+        }
         return maxMoveRubickCube.movesLength * TRANSITION_DURATION;
       }
   }));

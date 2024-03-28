@@ -7,6 +7,8 @@ import { useSpring, animated } from '@react-spring/three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
+import ProgressButton from "../ProgressButton";
+
 
 interface ThreejsRenderingProps {
   width: number;
@@ -20,6 +22,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
+  const [animationDuration, setAnimationDuration] = useState<number>(0);
   const { toggleFullscreen } = useFullscreen({ target: canvasRef });
   const ratio = Math.max(width, height)/tileSize;
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
@@ -32,6 +35,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
 
   useEffect(() => {
     recenterCamera();
+    computeAnimationDuration();
   }, [rubickFaces.length, cameraControlRef.current]);
 
   useEffect(() => {
@@ -87,8 +91,19 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   function resetAnimation() {
     if(rubickCubeInstanceMeshActionsRef && rubickCubeInstanceMeshActionsRef.current) {
       rubickCubeInstanceMeshActionsRef.current.reset();
+      computeAnimationDuration();
     }
   }
+
+  function computeAnimationDuration() {
+    console.log(rubickCubeInstanceMeshActionsRef.current)
+    if(rubickCubeInstanceMeshActionsRef.current) {
+      const durationInMs = rubickCubeInstanceMeshActionsRef.current.getDuration();
+      console.log(durationInMs)
+      setAnimationDuration(durationInMs);
+    }
+  }
+
 
   return (
     <>
@@ -103,14 +118,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-        <div>
-          <button
-            className="btn btn-secondary btn-xs"
-            onClick={resetAnimation}
-          >
-              Reset Animation
-          </button>
-        </div>
+          <ProgressButton label="Reset Animation" durationInMs={animationDuration} onClick={resetAnimation}/>
       }
       <div className="flex flex-col gap-5 w-full h-full">
         <Canvas
