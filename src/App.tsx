@@ -170,7 +170,7 @@ function App() {
       <div className="flex flex-col gap-4 h-screen">
         <Header/>
         <div className="flex flex-col xl:flex-row gap-6 basis-full">
-          <div className="md:basis-1/4">
+          <div>
             <Card title="Settings">
                 <div className="flex flex-col gap-3">
                   <SubCard title="Upload your image">
@@ -217,7 +217,7 @@ function App() {
                           }
                         }}
                       />
-                      <div>
+                      <div className="flex flex-row gap-2 items-center">
                         <Toggle
                           label="Best proportion"
                           value={bestProportion}
@@ -226,9 +226,10 @@ function App() {
                             setRatio(1);
                           }}
                         />
-                        <div>
-                          <label>Ratio</label>
-                          <input
+                        <div className="form-control w-full">
+                          <label className="label cursor-pointer flex flex-row gap-1">
+                            <span className="label-text">Ratio</span>
+                            <input
                             disabled={bestProportion}
                             type="range"
                             min={3}
@@ -238,7 +239,8 @@ function App() {
                             onChange={(e) => setRatio(parseInt(e.target.value))}
                             className={`range ${bestProportion ? "range-error" : "range-primary"}`}
                             />
-                          <span>{ratio}</span>
+                            <span>{ratio}</span>
+                          </label>
                         </div>
                       </div>
                       {
