@@ -170,7 +170,7 @@ function App() {
       <div className="flex flex-col gap-4 h-screen">
         <Header/>
         <div className="flex flex-col xl:flex-row gap-6 basis-full">
-          <div>
+          <div className="md:basis-1/4">
             <Card title="Settings">
                 <div className="flex flex-col gap-3">
                   <SubCard title="Upload your image">
