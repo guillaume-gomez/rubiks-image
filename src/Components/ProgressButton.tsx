@@ -26,12 +26,18 @@ function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) 
     if(!interval.current) {
         return;
     }
-    return () => clearInterval(interval.current);
+    return () => {
+      if(interval.current){
+        clearInterval(interval.current);
+      }
+    }
   }, []);
 
   useEffect(() => {
     if(milliseconds >= durationInMs) {
-        clearInterval(interval.current);
+        if(interval.current) {
+          clearInterval(interval.current);
+        }
         setPlay(false);
         setMilliseconds(0);
     }
