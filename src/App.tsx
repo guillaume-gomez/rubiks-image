@@ -226,21 +226,16 @@ function App() {
                             setRatio(1);
                           }}
                         />
-                        <div className="form-control w-full">
-                          <label className="label cursor-pointer flex flex-row gap-1">
-                            <span className="label-text">Ratio</span>
-                            <input
-                            disabled={bestProportion}
-                            type="range"
-                            min={3}
-                            max={9}
-                            step={3}
-                            value={ratio}
-                            onChange={(e) => setRatio(parseInt(e.target.value))}
-                            className={`range ${bestProportion ? "range-error" : "range-primary"}`}
-                            />
-                            <span>{ratio}</span>
-                          </label>
+                        <div className="w-full">
+                        <Range
+                          label="Ratio"
+                          value={ratio}
+                          max={9}
+                          min={3}
+                          step={3}
+                          className={bestProportion ? "range-error" : "range-primary"}
+                          onChange={(value) => setRatio(value)}
+                        />
                         </div>
                       </div>
                       {
