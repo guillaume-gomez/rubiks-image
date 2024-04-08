@@ -120,6 +120,15 @@ function App() {
     return !!image;
   }
 
+  function findBestTileSize(width: number, height: number, isMobile: boolean) {
+    const threshold = 2500;
+    const absoluteX = Math.sqrt((width*height)/threshold);
+    const naturalX = Math.floor(absoluteX);
+    const x = naturalX - (naturalX % 8);
+    setTileSize(x);
+    setOption("tileSize", x);
+  }
+
   function renderPreview() {
     if(!image) {
       return <></>;
@@ -230,7 +239,7 @@ function App() {
                         <Range
                           label="Ratio"
                           value={ratio}
-                          max={9}
+                          max={33}
                           min={3}
                           step={3}
                           className={bestProportion ? "range-error" : "range-primary"}
