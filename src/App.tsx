@@ -270,12 +270,15 @@ function App() {
                   />
                 }>
                 { view3d ?
+                  <>
                   <ThreeJsRendering
                     width={threeJsParams.width}
                     height={threeJsParams.height}
                     tileSize={threeJsParams.tileSize}
                     rubickFaces={rubickFaces}
                   />
+                  <p className="text-xs italic">Double click on the canvas to go full screen</p>
+                  </>
                   :
                   <CanvasRendering
                     width={possibleWidth}
@@ -285,7 +288,6 @@ function App() {
                   />
                 }
               </SubCard>
-              <p className="text-xs italic">Double click on the canvas to go full screen</p>
             </Card>
           </div>
         </div>
