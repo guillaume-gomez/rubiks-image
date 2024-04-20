@@ -5,12 +5,15 @@ interface useImageSizesProps {
   initialTileSize: number;
 }
 
+const MAX_CUBES = 5000;
+
 function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
   const [bestProportion, setBestProportion] = useState<boolean>(true);
   const [tileSize, setTileSize] = useState<number>(initialTileSize);
   const [ratio, setRatio] = useState<number>(1);
+  const [maxRatio, setMaxRatio] = useState<number>(3);
 
   function setPossibleSize(width: number, height: number) {
     setWidth(width);
@@ -44,14 +47,36 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
   function optimizedScale(imageWidth: number, imageHeight: number) : [number, number] {
     const imageWidthDivisibleByThree = makeItDivibleByThreeAndTileSize(imageWidth);
     const imageHeightDivisibleByThree = makeItDivibleByThreeAndTileSize(imageHeight);
-    console.log(imageWidth, "-> ", imageWidthDivisibleByThree);
-    console.log(imageHeight, "-> ", imageHeightDivisibleByThree);
     return optimizedScaleBasic(imageWidthDivisibleByThree, imageHeightDivisibleByThree, tileSize, bestProportion);
   }
 
   function computePossibleSize(imageWidth: number, imageHeight: number) {
     const [possibleWidth, possibleHeight] = optimizedScale(imageWidth, imageHeight);
     setPossibleSize(possibleWidth, possibleHeight);
+
+    if(!bestProportion) {
+    // divide by ratio to isolate the maxRatio (this computation only works without bestProportion)
+      const maxRatio = computeMaxRatio(possibleWidth/ ratio, possibleHeight/ratio);
+      setMaxRatio(maxRatio);
+      if(maxRatio === 3) {
+        setRatio(3);
+      }
+    } else {
+      setRatio(1);
+    }
+  }
+
+  function computeMaxRatio(minWidthPixelSize: number, minHeightPixelSize: number) {
+    const maxRatio = Math.ceil(
+      Math.sqrt( (MAX_CUBES * tileSize * tileSize) / (minWidthPixelSize * minHeightPixelSize) )
+    );
+
+    if(maxRatio <= 3) {
+      return 3;
+    }
+
+    const maxRatioDividedByThree = maxRatio - maxRatio % 3;
+    return maxRatioDividedByThree;
   }
 
   return {
@@ -61,6 +86,7 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     possibleHeight: height,
     ratio,
     setRatio,
+    maxRatio,
     bestProportion,
     setBestProportion,
     tileSize,

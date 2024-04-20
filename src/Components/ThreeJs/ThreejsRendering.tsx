@@ -7,8 +7,12 @@ import { useSpring, animated } from '@react-spring/three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
+<<<<<<< HEAD
 import ProgressButton from "../ProgressButton";
 
+=======
+import { useDoubleTap } from 'use-double-tap';
+>>>>>>> main
 
 interface ThreejsRenderingProps {
   width: number;
@@ -19,11 +23,19 @@ interface ThreejsRenderingProps {
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
+<<<<<<< HEAD
   const [animationDuration, setAnimationDuration] = useState<number>(0);
   const { toggleFullscreen } = useFullscreen({ target: canvasRef });
+=======
+
+  const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
+  const doubleTapEvent = useDoubleTap(() => {
+      toggleFullscreen();
+  });
+>>>>>>> main
   const ratio = Math.max(width, height)/tileSize;
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
     position: [-(width/2/tileSize), (height/2/tileSize), 0],
@@ -120,12 +132,14 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       { !hideOtherFaces &&
           <ProgressButton label="Reset Animation" durationInMs={animationDuration} onClick={resetAnimation}/>
       }
-      <div className="flex flex-col gap-5 w-full h-full">
+      <div
+        className="flex flex-col gap-5 w-full h-screen"
+        ref={containerCanvasRef}
+        {...doubleTapEvent}
+      >
         <Canvas
           camera={{ position: [0, 0.0, ratio*2], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
-          onDoubleClick={toggleFullscreen}
-          ref={canvasRef}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
             <color attach="background" args={['#c0d6e9']} />

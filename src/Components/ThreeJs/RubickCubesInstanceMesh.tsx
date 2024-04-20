@@ -92,7 +92,11 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       getDuration() {
         const maxMoveRubickCube = maxBy(params.current, 'movesLength');
         if(!maxMoveRubickCube) {
+<<<<<<< HEAD
           return 0;
+=======
+          return TRANSITION_DURATION;
+>>>>>>> main
         }
         return maxMoveRubickCube.movesLength * TRANSITION_DURATION;
       }

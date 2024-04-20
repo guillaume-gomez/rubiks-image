@@ -26,6 +26,8 @@ interface threeJsParams {
 
 const initialTileSize = 32;
 
+const MAX_CUBES = 5000;
+
 function App() {
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
@@ -41,6 +43,7 @@ function App() {
     possibleHeight,
     ratio,
     setRatio,
+    maxRatio,
     bestProportion,
     setBestProportion,
     setTileSize
@@ -112,6 +115,8 @@ function App() {
     optimizedGenerateImage(contrastedImage, possibleWidth, possibleHeight);
   }
 
+
+
   function isImageFullyUploaded() : boolean {
     if(chooseContrastedImage) {
       return !!contrastedImage;
@@ -165,6 +170,8 @@ function App() {
     return button;
   }
 
+  console.log("maxRatio: ", maxRatio)
+
   return (
     <div className="container mx-auto md:px-0 px-5">
       <div className="flex flex-col gap-4 h-screen">
@@ -217,32 +224,28 @@ function App() {
                           }
                         }}
                       />
-                      <div>
+                      <div className="flex flex-row gap-2 items-center">
                         <Toggle
                           label="Best proportion"
                           value={bestProportion}
                           toggle={() => {
                             setBestProportion(!bestProportion);
-                            setRatio(1);
                           }}
                         />
-                        <div>
-                          <label>Ratio</label>
-                          <input
-                            disabled={bestProportion}
-                            type="range"
-                            min={3}
-                            max={9}
-                            step={3}
-                            value={ratio}
-                            onChange={(e) => setRatio(parseInt(e.target.value))}
-                            className={`range ${bestProportion ? "range-error" : "range-primary"}`}
-                            />
-                          <span>{ratio}</span>
+                        <div className="w-full">
+                        <Range
+                          label="Ratio"
+                          value={ratio}
+                          max={maxRatio}
+                          min={3}
+                          step={3}
+                          className={bestProportion ? "range-error" : "range-primary"}
+                          onChange={(value) => setRatio(value)}
+                        />
                         </div>
                       </div>
                       {
-                        ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > 5000 ?
+                        ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > MAX_CUBES ?
                           <div role="alert" className="alert alert-warning">
                             <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             <span>Warning: The number of cubes can be too much in 3D</span>
@@ -257,7 +260,7 @@ function App() {
               </Card>
           </div>
 
-          <div className="md:basis-3/4 h-full">
+          <div className="xl:w-9/12 w-full h-full">
             <Card title="Result">
               <SubCard title={
                 <Toggle
@@ -267,12 +270,15 @@ function App() {
                   />
                 }>
                 { view3d ?
+                  <>
                   <ThreeJsRendering
                     width={threeJsParams.width}
                     height={threeJsParams.height}
                     tileSize={threeJsParams.tileSize}
                     rubickFaces={rubickFaces}
                   />
+                  <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
+                  </>
                   :
                   <CanvasRendering
                     width={possibleWidth}
@@ -282,7 +288,6 @@ function App() {
                   />
                 }
               </SubCard>
-              <p className="text-xs italic">Double click on the canvas to go full screen</p>
             </Card>
           </div>
         </div>
