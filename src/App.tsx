@@ -260,7 +260,7 @@ function App() {
               </Card>
           </div>
 
-          <div className="md:basis-3/4 h-full">
+          <div className="xl:w-9/12 w-full h-full">
             <Card title="Result">
               <SubCard title={
                 <Toggle
@@ -277,7 +277,7 @@ function App() {
                     tileSize={threeJsParams.tileSize}
                     rubickFaces={rubickFaces}
                   />
-                  <p className="text-xs italic">Double click on the canvas to go full screen</p>
+                  <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
                   </>
                   :
                   <CanvasRendering
