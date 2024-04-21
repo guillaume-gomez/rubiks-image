@@ -10,36 +10,45 @@ interface ProgressButtonProps {
 function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) {
   const [milliseconds, setMilliseconds] = useState<number>(0);
   const [play, setPlay] = useState<boolean>(false);
-  const interval: MutableRefObject<number | null> = useRef<number|null>(null);
+  const animationRef = useRef();
+  const previousTimeRef = useRef();
+
+  function animate(time: number) {
+    if (previousTimeRef.current != undefined) {
+      const deltaTime = time - previousTimeRef.current;
+
+      // Pass on a function to the setter of the state
+      // to make sure we always have the latest state
+      setMilliseconds(prevCount => (prevCount + deltaTime));
+    }
+    previousTimeRef.current = time;
+    animationRef.current = requestAnimationFrame(animate);
+  }
+
+   useEffect(() => {
+    return () => {
+      return () => cancelAnimationFrame(animationRef.current);
+    }
+  }, []);
 
   function handleClick() {
     if(play === false) {
         setPlay(true);
         onClick();
-        interval.current = setInterval(() => {
-          setMilliseconds(milliseconds => milliseconds + 50);
-        }, 50);
+        requestAnimationFrame(animate);
     }
   }
 
-  useEffect(() => {
-    if(!interval.current) {
-        return;
-    }
-    return () => {
-      if(interval.current){
-        clearInterval(interval.current);
-      }
-    }
-  }, []);
+
 
   useEffect(() => {
     if(milliseconds >= durationInMs) {
-        if(interval.current) {
-          clearInterval(interval.current);
+        if(animationRef.current) {
+           cancelAnimationFrame(animationRef.current)
         }
         setPlay(false);
         setMilliseconds(0);
+        previousTimeRef.current = undefined;
     }
   }, [milliseconds]);
 
