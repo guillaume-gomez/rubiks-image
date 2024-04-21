@@ -10,8 +10,8 @@ interface ProgressButtonProps {
 function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) {
   const [milliseconds, setMilliseconds] = useState<number>(0);
   const [play, setPlay] = useState<boolean>(false);
-  const animationRef = useRef();
-  const previousTimeRef = useRef();
+  const animationRef : MutableRefObject<number | undefined> = useRef<number | undefined>(undefined);
+  const previousTimeRef = useRef<number|undefined>(undefined);
 
   function animate(time: number) {
     if (previousTimeRef.current != undefined) {
@@ -25,10 +25,12 @@ function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) 
     animationRef.current = requestAnimationFrame(animate);
   }
 
-   useEffect(() => {
+  useEffect(() => {
     return () => {
-      return () => cancelAnimationFrame(animationRef.current);
-    }
+      if(animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    };
   }, []);
 
   function handleClick() {

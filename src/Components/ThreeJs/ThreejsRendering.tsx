@@ -7,12 +7,8 @@ import { useSpring, animated } from '@react-spring/three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
-<<<<<<< HEAD
 import ProgressButton from "../ProgressButton";
-
-=======
 import { useDoubleTap } from 'use-double-tap';
->>>>>>> main
 
 interface ThreejsRenderingProps {
   width: number;
@@ -26,16 +22,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
-<<<<<<< HEAD
   const [animationDuration, setAnimationDuration] = useState<number>(0);
-  const { toggleFullscreen } = useFullscreen({ target: canvasRef });
-=======
-
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
   });
->>>>>>> main
   const ratio = Math.max(width, height)/tileSize;
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
     position: [-(width/2/tileSize), (height/2/tileSize), 0],
@@ -130,7 +121,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-          <ProgressButton label="Reset Animation" durationInMs={animationDuration} onClick={resetAnimation}/>
+          <ProgressButton
+            label="Reset Animation"
+            durationInMs={animationDuration}
+            onClick={resetAnimation}
+          />
       }
       <div
         className="flex flex-col gap-5 w-full h-screen"
