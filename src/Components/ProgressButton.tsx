@@ -28,7 +28,7 @@ function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) 
   useEffect(() => {
     return () => {
       if(animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
+        cancelAnimationFrame(animationRef.current);
       }
     };
   }, []);
