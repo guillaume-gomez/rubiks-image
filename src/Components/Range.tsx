@@ -7,9 +7,10 @@ interface RangeProps {
   min?: number;
   max?: number;
   step?: number
+  className?: string
 }
 
-function Range({ label, value, onChange, min = 0, max = 100, step = 1 } : RangeProps) {
+function Range({ label, value, onChange, min = 0, max = 100, step = 1, className = "" } : RangeProps) {
   return (
     <div className="form-control">
       <label className="label cursor-pointer flex flex-row gap-1">
@@ -20,7 +21,7 @@ function Range({ label, value, onChange, min = 0, max = 100, step = 1 } : RangeP
           max={max}
           step={step}
           value={value}
-          className="range"
+          className={`range ${className}`}
           onChange={(event) => onChange(parseInt(event.target.value, 10))}
         />
         <span>{value}</span>

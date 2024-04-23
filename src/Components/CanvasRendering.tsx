@@ -28,6 +28,16 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   const { toggleFullscreen } = useFullscreen({ target: refCanvas });
 
   useEffect(() => {
+    if(canvasPreview.current) {
+      canvasPreview.current.style.width ='100%';
+      canvasPreview.current.style.height='100%';
+      // ...then set the internal size to match
+      canvasPreview.current.width  = canvasPreview.current.offsetWidth;
+      canvasPreview.current.height = canvasPreview.current.offsetHeight;
+    }
+  }, [canvasPreview])
+
+  useEffect(() => {
     if(refCanvas.current
         && refCanvas.current.width > 0
         && refCanvas.current.height > 0
@@ -103,7 +113,6 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
       <canvas
         className={ displayPreview ? "w-full" : "hidden"}
         ref={canvasPreview}
-        style={{ height: "85%"}}
       />
       <div className={`w-full relative overflow-x-scroll ${displayPreview ? "absolute hidden" : "absolute"}`} style={{ minHeight: "400px" }} >
         <canvas
