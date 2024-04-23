@@ -131,7 +131,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       case "inverted-wave":
         return generateWaveRandomMoves(x, y, true);
       case "one-by-one":
-        return position * 0.5 ;
+        return (position / rubickFaces.length ) * fromDurationToNumberOfMoves();
     }
   }
 
