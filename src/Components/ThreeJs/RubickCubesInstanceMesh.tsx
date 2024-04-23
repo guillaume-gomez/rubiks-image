@@ -144,9 +144,13 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
 
     const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
     const maxDistance = Math.sqrt(middleDistances.x * middleDistances.x + middleDistances.y * middleDistances.y);
-    const percentageDistance =  1 - ((maxDistance - distance)/maxDistance);
+    const distanceRatio = ((maxDistance - distance)/maxDistance);
 
-    return fromDurationToNumberOfMoves() * percentageDistance;
+    if(invert) {
+      return fromDurationToNumberOfMoves() * distanceRatio;
+    }
+
+    return fromDurationToNumberOfMoves() * (1 - distanceRatio);
   }
 
   function generateRandomMoves(x: number, y: number): ParamsMove {
