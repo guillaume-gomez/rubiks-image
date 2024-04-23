@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { minBy, sample } from "lodash";
+import minBy from "lodash/minBy";
+import sample from "lodash/sample";
 import { getOffscreenContext, colorDistance, resizeImageCanvas } from "../tools";
 import { RubickFace } from "../types";
 

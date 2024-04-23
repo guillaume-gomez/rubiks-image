@@ -1,9 +1,14 @@
-import { useRef , useEffect, useMemo } from 'react';
-import { sample } from "lodash";
+import { useRef , useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
+import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
 import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+
+
+export interface ExternalActionInterface {
+  reset: () => void;
+}
 
 interface RubickCubesInstancedMeshProps {
   tileSize: number;
@@ -11,6 +16,7 @@ interface RubickCubesInstancedMeshProps {
   width: number;
   height: number;
   animationType: animationType;
+  animationDuration: number;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -29,25 +35,28 @@ interface ParamsMove {
   currentMove: number;
 }
 
-function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animationType } : RubickCubesInstancedMeshProps) {
+const TRANSITION_DURATION = 200; //ms
+const DELAY_DURATION = 500; //ms
+
+const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
+  (({ tileSize, rubickFaces, width, height, animationDuration, animationType }, ref) => {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
   const oldRotation = useRef<number>(0.0);
   const params= useRef<ParamsMove[]>([]);
   const numberOfCubes =  rubickFaces.length * 9 * 3;
-  const centerPos = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
+  const middleDistances = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
 
-
-  const api = useSpringRef()
+  const api = useSpringRef();
   useSpring({
     ref: api,
     from: { rotationStep: 0 },
     to  : { rotationStep: 1 },
     config: {
-      duration: 200,
+      duration: TRANSITION_DURATION,
     },
-    delay: 500,
+    delay: DELAY_DURATION,
     reset: true,
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
@@ -59,12 +68,29 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animat
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
     },
     onChange: ({value: {rotationStep}}) => {
-      if(rubickFaces.length>0) {
+      if(rubickFaces.length > 0) {
         rotateRubickCubes((rotationStep - oldRotation.current)*(Math.PI/2));
       }
       oldRotation.current = rotationStep
     }
-  })
+  });
+
+  useImperativeHandle(ref, () => ({
+      reset() {
+        if (meshRef == null) return;
+        if (meshRef.current == null) return;
+        if (rubickFaces.length <= 0) return;
+        if(!isAnimationFinish()) {
+          return;
+        }
+        init();
+
+        oldRotation.current = 0.0;
+        api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
+
+        meshRef.current.instanceMatrix.needsUpdate = true;
+      },
+  }));
 
   function init() {
     pivots.current = [];
@@ -98,37 +124,42 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animat
 
 
   function computeMovesForAnimation(animationType: animationType, x: number, y: number, position: number) : number {
-    const minimumMoves = 10;
     switch(animationType) {
       case "wave":
       default:
-        return generateWaveRandomMoves(x, y, false) + minimumMoves;
+        return generateWaveRandomMoves(x, y, false);
       case "inverted-wave":
-        return generateWaveRandomMoves(x, y, true) + minimumMoves ;
+        return generateWaveRandomMoves(x, y, true);
       case "one-by-one":
         return position * 0.5 ;
     }
   }
 
+  function fromDurationToNumberOfMoves() {
+    return Math.ceil((animationDuration) / TRANSITION_DURATION);
+  }
+
   function generateWaveRandomMoves(x: number, y: number, invert: boolean) : number {
-    const radiusX = Math.abs(centerPos.x - x);
-    const radiusY = Math.abs(centerPos.y - y);
+    const radiusX = Math.abs(middleDistances.x - x);
+    const radiusY = Math.abs(middleDistances.y - y);
 
     const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
-    // empirical value to reduce the number of moves
-    const factor = 40;
+    const maxDistance = Math.sqrt(middleDistances.x * middleDistances.x + middleDistances.y * middleDistances.y);
+    const distanceRatio = ((maxDistance - distance)/maxDistance);
 
     if(invert) {
-      return ((width/2) - distance) / factor;
+      return fromDurationToNumberOfMoves() * distanceRatio;
     }
 
-    return distance / factor;
+    return fromDurationToNumberOfMoves() * (1 - distanceRatio);
   }
 
   function generateRandomMoves(x: number, y: number, position: number): ParamsMove {
     let moves : Move[] = [];
-    const movesLength = Math.ceil(computeMovesForAnimation(animationType, x,y, position));
+    //divide by 2 the result because the number of moves is multiplied
+    const movesLength = Math.ceil( computeMovesForAnimation(animationType, x,y, position) / 2);
 
+    //add the number of moves  once forward
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);
       const face : faceType = sample([0,1,2]);
@@ -136,6 +167,7 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animat
       moves.push({axis, face, direction});
     }
 
+    // add the number of moves twice in backyard
     for(let i=movesLength-1; i >= 0; i--) {
       const { axis, face, direction } = moves[i];
       moves.push({axis, face, direction: -direction});
@@ -268,6 +300,6 @@ function RubickCubesInstancedMesh({ tileSize, rubickFaces, width, height, animat
   return (
     <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
-}
+});
 
 export default RubickCubesInstancedMesh;
