@@ -154,6 +154,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   rubickFaces={rubickFaces}
                   width={width}
                   height={height}
+                  animationType="wave"
                   animationDuration={animationDuration}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />

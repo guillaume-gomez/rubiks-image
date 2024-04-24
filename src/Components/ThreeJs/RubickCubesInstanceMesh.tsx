@@ -15,11 +15,13 @@ interface RubickCubesInstancedMeshProps {
   rubickFaces: RubickFace[];
   width: number;
   height: number;
+  animationType: animationType;
   animationDuration: number;
 }
 
 type axisType = "X"| "Y" | "Z";
 type faceType = 0 | 1 | 2;
+type animationType = "wave" | "inverted-wave" | "one-by-one";
 
 interface Move {
   axis: axisType;
@@ -37,7 +39,7 @@ const TRANSITION_DURATION = 200; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationDuration }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationDuration, animationType }, ref) => {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -120,26 +122,41 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     })
   }
 
+
+  function computeMovesForAnimation(animationType: animationType, x: number, y: number) : number {
+    switch(animationType) {
+      case "wave":
+      default:
+        return generateWaveRandomMoves(x, y, false);
+      case "inverted-wave":
+        return generateWaveRandomMoves(x, y, true);
+
+    }
+  }
+
   function fromDurationToNumberOfMoves() {
     return Math.ceil((animationDuration) / TRANSITION_DURATION);
   }
 
-  function generateWaveRandomMoves(x: number, y: number) : number {
+  function generateWaveRandomMoves(x: number, y: number, invert: boolean) : number {
     const radiusX = Math.abs(middleDistances.x - x);
     const radiusY = Math.abs(middleDistances.y - y);
 
-
     const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
     const maxDistance = Math.sqrt(middleDistances.x * middleDistances.x + middleDistances.y * middleDistances.y);
-    const percentageDistance =  1 - ((maxDistance - distance)/maxDistance);
-    return fromDurationToNumberOfMoves() * percentageDistance;
+    const distanceRatio = ((maxDistance - distance)/maxDistance);
+
+    if(invert) {
+      return fromDurationToNumberOfMoves() * distanceRatio;
+    }
+
+    return fromDurationToNumberOfMoves() * (1 - distanceRatio);
   }
 
   function generateRandomMoves(x: number, y: number): ParamsMove {
     let moves : Move[] = [];
     //divide by 2 the result because the number of moves is multiplied
-    const movesLength = Math.ceil(generateWaveRandomMoves(x,y)/2);
-    console.log("moves, ", movesLength);
+    const movesLength = Math.ceil(computeMovesForAnimation(animationType, x,y)/2);
 
     //add the number of moves  once forward
     for(let i=0; i < movesLength; i++) {
@@ -278,8 +295,6 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces.length]);
-
-  console.log("nb_moves", Math.ceil(animationDuration / TRANSITION_DURATION))
 
   return (
     <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
