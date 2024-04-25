@@ -125,6 +125,15 @@ function App() {
     return !!image;
   }
 
+  function findBestTileSize(width: number, height: number, isMobile: boolean) {
+    const threshold = 2500;
+    const absoluteX = Math.sqrt((width*height)/threshold);
+    const naturalX = Math.floor(absoluteX);
+    const x = naturalX - (naturalX % 8);
+    setTileSize(x);
+    setOption("tileSize", x);
+  }
+
   function renderPreview() {
     if(!image) {
       return <></>;
