@@ -116,21 +116,22 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       }
       const { x, y } = rubickFace[0];
       //make some moves to avoid the user to see the final result is in the first step
-      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y), 3);
+      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y, index), 3);
 
       params.current.push(randomMoves);
     })
   }
 
 
-  function computeMovesForAnimation(animationType: animationType, x: number, y: number) : number {
+  function computeMovesForAnimation(animationType: animationType, x: number, y: number, position: number) : number {
     switch(animationType) {
       case "wave":
       default:
         return generateWaveRandomMoves(x, y, false);
       case "inverted-wave":
         return generateWaveRandomMoves(x, y, true);
-
+      case "one-by-one":
+        return (position / rubickFaces.length ) * fromDurationToNumberOfMoves();
     }
   }
 
@@ -153,10 +154,10 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     return fromDurationToNumberOfMoves() * (1 - distanceRatio);
   }
 
-  function generateRandomMoves(x: number, y: number): ParamsMove {
+  function generateRandomMoves(x: number, y: number, position: number): ParamsMove {
     let moves : Move[] = [];
     //divide by 2 the result because the number of moves is multiplied
-    const movesLength = Math.ceil(computeMovesForAnimation(animationType, x,y)/2);
+    const movesLength = Math.ceil( computeMovesForAnimation(animationType, x,y, position) / 2);
 
     //add the number of moves  once forward
     for(let i=0; i < movesLength; i++) {
