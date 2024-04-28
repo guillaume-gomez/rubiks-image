@@ -1,4 +1,57 @@
 # Rubicks image
 
-https://github.com/guillaume-gomez/rubiks-image/assets/5362875/b4fa046c-bdea-46c8-9718-33191cd25a53
+turning images into 3d rubiks cube mosaic
 
+![video](./examples/preview.mp4)
+
+
+## Examples
+
+<table>
+    <tr>
+        <th>Original Image</th>
+        <th>3D Output</th
+    </tr>
+    <tr>
+        <td>
+            <img src="/examples/rubiks-cube.jpg" width="50%"/>
+        </td>
+        <td>
+            <img src="/examples/rubick-cube-3d.png"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="/examples/mahomes.jpg" width="50%"/>
+        </td>
+        <td>
+            <img src="/examples/mahomes-3d.png"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="/examples/paul-Mescal.webp" width="50%"/>
+        </td>
+        <td>
+            <img src="/examples/paul-mescal-3d.png"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="/examples/raphael-quenard.jpeg" width="50%"/>
+        </td>
+        <td>
+            <img src="/examples/raphael-quenard-3d.png"/>
+        </td>
+    </tr>
+        <tr>
+        <td>
+            <img src="/examples/shining.webp" width="50%"/>
+        </td>
+        <td>
+            <img src="/examples/shining-3d.png"/>
+        </td>
+    </tr>
+
+    
+</table>
