@@ -1,5 +1,7 @@
 # Rubicks image
 
+turning images into 3d rubiks cube mosaic
+
 ![video](./examples/preview.mp4)
 
 

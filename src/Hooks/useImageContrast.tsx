@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { fill } from "lodash";
+import fill from "lodash/fill";
 import convert from "color-convert";
 import { getOffscreenContext } from "../tools";
 
