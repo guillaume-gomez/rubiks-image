@@ -8,7 +8,8 @@ https://github.com/guillaume-gomez/rubiks-image/assets/5362875/02735bf6-f129-499
 
 
 
-https://github.com/guillaume-gomez/rubiks-image/assets/5362875/86cd961e-aec8-4273-bbb3-5e19ea57c960
+https://github.com/guillaume-gomez/rubiks-image/assets/5362875/073e9475-841a-44dc-8e81-0e5c2890c0d9
+
 
 
 
