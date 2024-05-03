@@ -17,7 +17,7 @@ interface ThreejsRenderingProps {
   rubickFaces: RubickFace[];
 }
 
-type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one';
+type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one'|'random';
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
@@ -127,6 +127,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               { value: "wave", label: "Wave"},
               { value: "inverted-wave", label: "Inverted Wave"},
               { value: "one-by-one", label: "One by one"},
+              { value: "random", label: "Random"},
             ]}
           />
         </div>
