@@ -5,6 +5,7 @@ import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@re
 import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
 import Toggle from "../Toggle";
+import Select from "../Select";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import { useDoubleTap } from 'use-double-tap';
@@ -16,11 +17,14 @@ interface ThreejsRenderingProps {
   rubickFaces: RubickFace[];
 }
 
+type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one';
+
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
+  const [animationType, setAnimationType] = useState<AnimationType>("wave");
   const [animationDuration] = useState<number>(10000);
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
@@ -115,6 +119,16 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           >
               Reset Animation
           </button>
+          <Select
+            label={"Animation type"}
+            value={animationType}
+            onChange={(newAnimationType) => setAnimationType(newAnimationType as AnimationType)}
+            options={[
+              { value: "wave", label: "Wave"},
+              { value: "inverted-wave", label: "Inverted Wave"},
+              { value: "one-by-one", label: "One by one"},
+            ]}
+          />
         </div>
       }
       <div
@@ -154,7 +168,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   rubickFaces={rubickFaces}
                   width={width}
                   height={height}
-                  animationType="one-by-one"
+                  animationType={animationType}
                   animationDuration={animationDuration}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
