@@ -2,7 +2,14 @@
 
 turning images into 3d rubiks cube mosaic
 
-![video](./examples/preview.mp4)
+
+
+https://github.com/guillaume-gomez/rubiks-image/assets/5362875/02735bf6-f129-4991-bade-06047891f414
+
+
+
+https://github.com/guillaume-gomez/rubiks-image/assets/5362875/86cd961e-aec8-4273-bbb3-5e19ea57c960
+
 
 
 ## Examples
