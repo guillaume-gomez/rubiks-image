@@ -22,7 +22,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
-  const [animationDuration, setAnimationDuration] = useState<number>(0);
+  const [animationDuration] = useState<number>(10000);
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
@@ -164,6 +164,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   rubickFaces={rubickFaces}
                   width={width}
                   height={height}
+                  animationType="one-by-one"
+                  animationDuration={animationDuration}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }

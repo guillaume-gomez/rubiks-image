@@ -1,6 +1,5 @@
 import { useRef , useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
 import sample from "lodash/sample";
-import maxBy from "lodash/maxBy";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
@@ -9,7 +8,6 @@ import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCo
 
 export interface ExternalActionInterface {
   reset: () => void;
-  getDuration: () => number;
 }
 
 interface RubickCubesInstancedMeshProps {
@@ -17,10 +15,13 @@ interface RubickCubesInstancedMeshProps {
   rubickFaces: RubickFace[];
   width: number;
   height: number;
+  animationType: animationType;
+  animationDuration: number;
 }
 
 type axisType = "X"| "Y" | "Z";
 type faceType = 0 | 1 | 2;
+type animationType = "wave" | "inverted-wave" | "one-by-one";
 
 interface Move {
   axis: axisType;
@@ -34,17 +35,18 @@ interface ParamsMove {
   currentMove: number;
 }
 
-export const TRANSITION_DURATION = 200; //ms
+const TRANSITION_DURATION = 200; //ms
+const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationDuration, animationType }, ref) => {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
   const oldRotation = useRef<number>(0.0);
   const params= useRef<ParamsMove[]>([]);
   const numberOfCubes =  rubickFaces.length * 9 * 3;
-  const centerPos = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
+  const middleDistances = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
 
   const api = useSpringRef();
   useSpring({
@@ -54,7 +56,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     config: {
       duration: TRANSITION_DURATION,
     },
-    delay: 500,
+    delay: DELAY_DURATION,
     reset: true,
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
@@ -66,7 +68,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
     },
     onChange: ({value: {rotationStep}}) => {
-      if(rubickFaces.length>0) {
+      if(rubickFaces.length > 0) {
         rotateRubickCubes((rotationStep - oldRotation.current)*(Math.PI/2));
       }
       oldRotation.current = rotationStep
@@ -88,14 +90,6 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
 
         meshRef.current.instanceMatrix.needsUpdate = true;
       },
-
-      getDuration() {
-        const maxMoveRubickCube = maxBy(params.current, 'movesLength');
-        if(!maxMoveRubickCube) {
-          return 0;
-        }
-        return maxMoveRubickCube.movesLength * TRANSITION_DURATION;
-      }
   }));
 
   function init() {
@@ -122,28 +116,50 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       }
       const { x, y } = rubickFace[0];
       //make some moves to avoid the user to see the final result is in the first step
-      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y), 3);
+      const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y, index), 3);
 
       params.current.push(randomMoves);
     })
   }
 
-  function generateWaveRandomMoves(x: number, y: number) : number {
-    const radiusX = Math.abs(centerPos.x - x);
-    const radiusY = Math.abs(centerPos.y - y);
 
-    const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
-    // empirical value to reduce the number of moves
-    const factor = 40;
-
-    return distance / factor;
+  function computeMovesForAnimation(animationType: animationType, x: number, y: number, position: number) : number {
+    switch(animationType) {
+      case "wave":
+      default:
+        return generateWaveRandomMoves(x, y, false);
+      case "inverted-wave":
+        return generateWaveRandomMoves(x, y, true);
+      case "one-by-one":
+        return (position / rubickFaces.length ) * fromDurationToNumberOfMoves();
+    }
   }
 
-  function generateRandomMoves(x: number, y: number): ParamsMove {
-    let moves : Move[] = [];
-    const minimumMoves = 10;
-    const movesLength = Math.ceil(generateWaveRandomMoves(x,y)) + minimumMoves;
+  function fromDurationToNumberOfMoves() {
+    return Math.ceil((animationDuration) / TRANSITION_DURATION);
+  }
 
+  function generateWaveRandomMoves(x: number, y: number, invert: boolean) : number {
+    const radiusX = Math.abs(middleDistances.x - x);
+    const radiusY = Math.abs(middleDistances.y - y);
+
+    const distance = Math.sqrt(radiusX * radiusX + radiusY * radiusY);
+    const maxDistance = Math.sqrt(middleDistances.x * middleDistances.x + middleDistances.y * middleDistances.y);
+    const distanceRatio = ((maxDistance - distance)/maxDistance);
+
+    if(invert) {
+      return fromDurationToNumberOfMoves() * distanceRatio;
+    }
+
+    return fromDurationToNumberOfMoves() * (1 - distanceRatio);
+  }
+
+  function generateRandomMoves(x: number, y: number, position: number): ParamsMove {
+    let moves : Move[] = [];
+    //divide by 2 the result because the number of moves is multiplied
+    const movesLength = Math.ceil( computeMovesForAnimation(animationType, x,y, position) / 2);
+
+    //add the number of moves  once forward
     for(let i=0; i < movesLength; i++) {
       const axis : axisType = sample(["X", "Y", "Z"]);
       const face : faceType = sample([0,1,2]);
@@ -151,6 +167,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       moves.push({axis, face, direction});
     }
 
+    // add the number of moves twice in backyard
     for(let i=movesLength-1; i >= 0; i--) {
       const { axis, face, direction } = moves[i];
       moves.push({axis, face, direction: -direction});
