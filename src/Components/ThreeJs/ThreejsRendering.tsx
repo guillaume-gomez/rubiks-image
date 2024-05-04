@@ -38,7 +38,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
 
   useEffect(() => {
     recenterCamera();
-    computeAnimationDuration();
   }, [rubickFaces.length, cameraControlRef.current]);
 
   useEffect(() => {
@@ -94,19 +93,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   function resetAnimation() {
     if(rubickCubeInstanceMeshActionsRef && rubickCubeInstanceMeshActionsRef.current) {
       rubickCubeInstanceMeshActionsRef.current.reset();
-      computeAnimationDuration();
     }
   }
-
-  function computeAnimationDuration() {
-    console.log(rubickCubeInstanceMeshActionsRef.current)
-    if(rubickCubeInstanceMeshActionsRef.current) {
-      const durationInMs = rubickCubeInstanceMeshActionsRef.current.getDuration();
-      console.log(durationInMs)
-      setAnimationDuration(durationInMs);
-    }
-  }
-
 
   return (
     <>
