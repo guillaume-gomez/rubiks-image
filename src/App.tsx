@@ -72,6 +72,7 @@ function App() {
   useEffect(() => {
     if(image && refOutput.current) {
       computeImage(image, refOutput.current);
+      findBestTileSize(image.width, image.height, false);
     }
   }, [image])
 
@@ -124,6 +125,15 @@ function App() {
     }
 
     return !!image;
+  }
+
+  function findBestTileSize(width: number, height: number, isMobile: boolean) {
+    const threshold = isMobile ? MAX_CUBES/2 : MAX_CUBES;
+    const absoluteX = Math.sqrt((width*height)/threshold);
+    const naturalX = Math.floor(absoluteX);
+    const x = naturalX - (naturalX % 8);
+    setTileSize(x);
+    setOption("tileSize", x);
   }
 
   function renderPreview() {
