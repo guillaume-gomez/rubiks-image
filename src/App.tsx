@@ -38,7 +38,6 @@ function App() {
 
   const {
     computePossibleSize,
-    setPossibleSize,
     possibleWidth,
     possibleHeight,
     ratio,
@@ -61,17 +60,18 @@ function App() {
 
   const refOutput = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if(image) {
       computePossibleSize(image.width, image.height);
     }
-  }, [image, bestProportion, ratio, tileSize]);
+  }, [bestProportion, ratio, tileSize]);
+*/
+
 
 
   useEffect(() => {
     if(image && refOutput.current) {
       computeImage(image, refOutput.current);
-      findBestTileSize(image.width, image.height, false);
     }
   }, [image])
 
@@ -79,7 +79,11 @@ function App() {
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
 
-    setPossibleSize(newImage.width, newImage.height);
+    console.log("newImage ", newImage.width, ": ", newImage.height)
+
+    const [width, height] = computePossibleSize(newImage.width, newImage.height);
+    findBestTileSize(width, height, false);
+
     setBestProportion(true);
     setRatio(1);
 
@@ -130,7 +134,10 @@ function App() {
     const threshold = isMobile ? MAX_CUBES/2 : MAX_CUBES;
     const absoluteX = Math.sqrt((width*height)/threshold);
     const naturalX = Math.floor(absoluteX);
-    const x = naturalX - (naturalX % 8);
+    const x = naturalX + (naturalX % 8);
+    console.log(width);
+    console.log(height);
+    console.log(x);
     setTileSize(x);
     setOption("tileSize", x);
   }
@@ -139,6 +146,8 @@ function App() {
     if(!image) {
       return <></>;
     }
+
+    console.log(possibleWidth, ", ", possibleHeight)
 
     const width =  possibleWidth;
     const height = possibleHeight;

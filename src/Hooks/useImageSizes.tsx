@@ -50,7 +50,7 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     return optimizedScaleBasic(imageWidthDivisibleByThree, imageHeightDivisibleByThree, tileSize, bestProportion);
   }
 
-  function computePossibleSize(imageWidth: number, imageHeight: number) {
+  function computePossibleSize(imageWidth: number, imageHeight: number) : [number, number] {
     const [possibleWidth, possibleHeight] = optimizedScale(imageWidth, imageHeight);
     setPossibleSize(possibleWidth, possibleHeight);
 
@@ -64,6 +64,7 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     } else {
       setRatio(1);
     }
+    return [possibleWidth, possibleHeight];
   }
 
   function computeMaxRatio(minWidthPixelSize: number, minHeightPixelSize: number) {
