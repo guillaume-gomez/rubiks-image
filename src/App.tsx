@@ -60,15 +60,6 @@ function App() {
 
   const refOutput = useRef<HTMLCanvasElement>(null);
 
-  /*useEffect(() => {
-    if(image) {
-      computePossibleSize(image.width, image.height);
-    }
-  }, [bestProportion, ratio, tileSize]);
-*/
-
-
-
   useEffect(() => {
     if(image && refOutput.current) {
       computeImage(image, refOutput.current);
@@ -83,6 +74,7 @@ function App() {
 
     const [width, height] = computePossibleSize(newImage.width, newImage.height);
     findBestTileSize(width, height, false);
+    console.log(width, " ", height);
 
     setBestProportion(true);
     setRatio(1);
@@ -133,13 +125,11 @@ function App() {
   function findBestTileSize(width: number, height: number, isMobile: boolean) {
     const threshold = isMobile ? MAX_CUBES/2 : MAX_CUBES;
     const absoluteX = Math.sqrt((width*height)/threshold);
-    const naturalX = Math.floor(absoluteX);
-    const x = naturalX + (naturalX % 8);
-    console.log(width);
-    console.log(height);
-    console.log(x);
-    setTileSize(x);
-    setOption("tileSize", x);
+    const naturalX = Math.ceil(absoluteX);
+
+    const bestTileSize = (naturalX <= 8) ? 8 : (naturalX + 8) - (naturalX % 8);
+    setTileSize(bestTileSize);
+    setOption("tileSize", bestTileSize);
   }
 
   function renderPreview() {
