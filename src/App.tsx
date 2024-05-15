@@ -8,6 +8,7 @@ import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import Card from "./Components/Card";
 import SubCard from "./Components/SubCard";
+import CustomSettingsCard from "./Components/CustomSettingsCard";
 import InputFileWithPreview from "./Components/InputFileWithPreview";
 import Toggle from "./Components/Toggle";
 import Range from "./Components/Range";
@@ -179,14 +180,12 @@ function App() {
     return button;
   }
 
-  console.log("maxRatio: ", maxRatio)
-
   return (
     <div className="container mx-auto md:px-0 px-5">
       <div className="flex flex-col gap-4 h-screen">
         <Header/>
         <div className="flex flex-col xl:flex-row gap-6 basis-full">
-          <div>
+          <div className="xl:w-3/12">
             <Card title="Settings">
                 <div className="flex flex-col gap-3">
                   <SubCard title="Upload your image">
@@ -199,71 +198,79 @@ function App() {
                     />
                     <canvas ref={refOutput} style={{display: "none"}} />
                   </SubCard>
-                  <SubCard title="Image Settings">
-                    <div>
-                      <Range
-                        label="Noise"
-                        value={noise}
-                        max={50}
-                        onChange={(value) => setOption("noise", value)}
-                      />
-                      <Toggle
-                          label="Add constract"
-                          value={chooseContrastedImage}
-                          toggle={() => {
-                            setChooseContrastedImage(!chooseContrastedImage);
-                          }}
-                        />
-                    </div>
-                  </SubCard>
-                  <SubCard title="Image Size">
-                    <div>
-                      <Range
-                        label="TileSize"
-                        value={tileSize}
-                        max={128}
-                        min={16}
-                        step={8}
-                        onChange={(value) => {
-                          setOption("tileSize", value);
-                          setTileSize(value);
+                  
 
-                          if(value < (image?.width||0) && value < (image?.height||0)) {
-                            setError("");
-                          }
-                        }}
-                      />
-                      <div className="flex flex-row gap-2 items-center">
+                  <CustomSettingsCard>
+                    <div className="bg-base-100 p-2">
+                      <h3 className="italic">Rendering</h3>
+                      <div>
+                        <Range
+                          label="Noise"
+                          value={noise}
+                          max={50}
+                          onChange={(value) => setOption("noise", value)}
+                        />
                         <Toggle
-                          label="Best proportion"
-                          value={bestProportion}
-                          toggle={() => {
-                            setBestProportion(!bestProportion);
+                            label="Add constract"
+                            value={chooseContrastedImage}
+                            toggle={() => {
+                              setChooseContrastedImage(!chooseContrastedImage);
+                            }}
+                          />
+                      </div>
+                    </div>
+
+                    <div className="bg-base-100 p-2">
+                      <h3 className="italic">Size</h3>
+                      <div>
+                        <Range
+                          label="TileSize"
+                          value={tileSize}
+                          max={128}
+                          min={16}
+                          step={8}
+                          onChange={(value) => {
+                            setOption("tileSize", value);
+                            setTileSize(value);
+
+                            if(value < (image?.width||0) && value < (image?.height||0)) {
+                              setError("");
+                            }
                           }}
                         />
-                        <div className="w-full">
-                        <Range
-                          label="Ratio"
-                          value={ratio}
-                          max={maxRatio}
-                          min={3}
-                          step={3}
-                          className={bestProportion ? "range-error" : "range-primary"}
-                          onChange={(value) => setRatio(value)}
-                        />
-                        </div>
-                      </div>
-                      {
-                        ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > MAX_CUBES ?
-                          <div role="alert" className="alert alert-warning">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                            <span>Warning: The number of cubes can be too much in 3D</span>
+                        <div className="flex flex-row gap-2 items-center">
+                          <Toggle
+                            label="Best proportion"
+                            value={bestProportion}
+                            toggle={() => {
+                              setBestProportion(!bestProportion);
+                            }}
+                          />
+                          <div className="w-full">
+                          <Range
+                            label="Ratio"
+                            value={ratio}
+                            max={maxRatio}
+                            min={3}
+                            step={3}
+                            className={bestProportion ? "range-error" : "range-primary"}
+                            onChange={(value) => setRatio(value)}
+                          />
                           </div>
-                         : <></>
-                      }
-                      {renderPreview()}
+                        </div>
+                        {
+                          ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > MAX_CUBES ?
+                            <div role="alert" className="alert alert-warning">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                              <span>Warning: The number of cubes can be too much in 3D</span>
+                            </div>
+                           : <></>
+                        }
+                        {renderPreview()}
+                      </div>
                     </div>
-                  </SubCard>
+                  </CustomSettingsCard>
+
                   {renderGenerateButton()}
                 </div>
               </Card>
