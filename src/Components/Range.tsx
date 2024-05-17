@@ -32,7 +32,7 @@ function Range({ label, value, onChange, min = 0, max = 100, step = 1, disabled 
             max={max}
             step={step}
             value={value}
-            className={`range range-sm`}
+            className={`range range-primary range-sm`}
             onChange={(event) => onChange(parseInt(event.target.value, 10))}
           />
 
