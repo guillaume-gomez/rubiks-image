@@ -65,7 +65,14 @@ function App() {
     if(image && refOutput.current) {
       computeImage(image, refOutput.current);
     }
-  }, [image])
+  }, [image]);
+
+  // if tilesize change, need to recompute the best sizes
+  useEffect(() => {
+    if(image && refOutput.current) {
+      computePossibleSize(image.width, image.height)
+    }
+  }, [tileSize, bestProportion, ratio])
 
 
   function uploadImage(newImage: HTMLImageElement) {
@@ -138,8 +145,6 @@ function App() {
       return <></>;
     }
 
-    console.log(possibleWidth, ", ", possibleHeight)
-
     const width =  possibleWidth;
     const height = possibleHeight;
 
@@ -164,14 +169,15 @@ function App() {
   }
 
   function renderGenerateButton() {
-    const button =
-              <button
-                className="btn btn-accent w-full"
-                disabled={!isImageFullyUploaded()}
-                onClick={generateImagesInImage}
-              >
-                Generate
-              </button>
+    const button = (
+      <button
+        className="btn btn-accent w-full"
+        disabled={!isImageFullyUploaded()}
+        onClick={generateImagesInImage}
+      >
+        Generate
+      </button>
+    );
 
     if(!isImageFullyUploaded()) {
       return (<div className="tooltip tooltip-error" data-tip="Upload an image first !">{button}</div>)
@@ -202,7 +208,7 @@ function App() {
 
                   <CustomSettingsCard>
                     <div className="bg-base-100 p-2">
-                      <h3 className="italic">Rendering</h3>
+                      <h3 className="italic text-lg">Rendering</h3>
                       <div>
                         <Range
                           label="Noise"
@@ -221,7 +227,7 @@ function App() {
                     </div>
 
                     <div className="bg-base-100 p-2">
-                      <h3 className="italic">Size</h3>
+                      <h3 className="italic text-lg">Size</h3>
                       <div>
                         <Range
                           label="TileSize"
@@ -253,7 +259,7 @@ function App() {
                             max={maxRatio}
                             min={3}
                             step={3}
-                            className={bestProportion ? "range-error" : "range-primary"}
+                            disabled={bestProportion}
                             onChange={(value) => setRatio(value)}
                           />
                           </div>
