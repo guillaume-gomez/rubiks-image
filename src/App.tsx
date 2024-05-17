@@ -70,7 +70,7 @@ function App() {
   // if tilesize change, need to recompute the best sizes
   useEffect(() => {
     if(image && refOutput.current) {
-      computePossibleSize(image.width, image.height)
+      computePossibleSize(image.width, image.height, false)
     }
   }, [tileSize, bestProportion, ratio])
 
@@ -80,9 +80,9 @@ function App() {
 
     console.log("newImage ", newImage.width, ": ", newImage.height)
 
-    const [width, height] = computePossibleSize(newImage.width, newImage.height);
+    const [width, height] = computePossibleSize(newImage.width, newImage.height, false);
     findBestTileSize(width, height, false);
-    console.log(width, " ", height);
+    //console.log(width, " ", height);
 
     setBestProportion(true);
     setRatio(1);
