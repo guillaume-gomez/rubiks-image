@@ -164,6 +164,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               <GizmoViewport labelColor="white" axisHeadScale={1} />
             </GizmoHelper>
             <CameraControls
+              enablePan={false}
               minPolarAngle={0}
               maxPolarAngle={Math.PI / 1.9}
               minAzimuthAngle={-0.55}
