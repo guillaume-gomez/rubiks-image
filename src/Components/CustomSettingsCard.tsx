@@ -56,7 +56,7 @@ function CustomSettingsCard({ children } : CustomSettingsCardProps) {
     <div className="overflow-y-hidden transition-all duration-300"
       style={{ height: !collapsed ? ref.current?.offsetHeight || 0 : 0 }}
     >
-      <div ref={ref}>
+      <div ref={ref} className="flex flex-col gap-2">
       {children}
       </div>
     </div>

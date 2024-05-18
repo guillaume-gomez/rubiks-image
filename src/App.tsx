@@ -39,7 +39,6 @@ function App() {
 
   const {
     computePossibleSize,
-    setPossibleSize,
     possibleWidth,
     possibleHeight,
     ratio,
@@ -63,24 +62,28 @@ function App() {
   const refOutput = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if(image) {
-      computePossibleSize(image.width, image.height);
-    }
-  }, [image, bestProportion, ratio, tileSize]);
-
-
-  useEffect(() => {
     if(image && refOutput.current) {
       computeImage(image, refOutput.current);
-      findBestTileSize(image.width, image.height, false);
     }
-  }, [image])
+  }, [image]);
+
+  // if tilesize change, need to recompute the best sizes
+  useEffect(() => {
+    if(image && refOutput.current) {
+      computePossibleSize(image.width, image.height, false)
+    }
+  }, [tileSize, bestProportion, ratio])
 
 
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
 
-    setPossibleSize(newImage.width, newImage.height);
+    console.log("newImage ", newImage.width, ": ", newImage.height)
+
+    const [width, height] = computePossibleSize(newImage.width, newImage.height, false);
+    findBestTileSize(width, height, false);
+    //console.log(width, " ", height);
+
     setBestProportion(true);
     setRatio(1);
 
@@ -130,10 +133,11 @@ function App() {
   function findBestTileSize(width: number, height: number, isMobile: boolean) {
     const threshold = isMobile ? MAX_CUBES/2 : MAX_CUBES;
     const absoluteX = Math.sqrt((width*height)/threshold);
-    const naturalX = Math.floor(absoluteX);
-    const x = naturalX - (naturalX % 8);
-    setTileSize(x);
-    setOption("tileSize", x);
+    const naturalX = Math.ceil(absoluteX);
+
+    const bestTileSize = (naturalX <= 8) ? 8 : (naturalX + 8) - (naturalX % 8);
+    setTileSize(bestTileSize);
+    setOption("tileSize", bestTileSize);
   }
 
   function renderPreview() {
@@ -165,14 +169,15 @@ function App() {
   }
 
   function renderGenerateButton() {
-    const button =
-              <button
-                className="btn btn-accent w-full"
-                disabled={!isImageFullyUploaded()}
-                onClick={generateImagesInImage}
-              >
-                Generate
-              </button>
+    const button = (
+      <button
+        className="btn btn-accent w-full"
+        disabled={!isImageFullyUploaded()}
+        onClick={generateImagesInImage}
+      >
+        Generate
+      </button>
+    );
 
     if(!isImageFullyUploaded()) {
       return (<div className="tooltip tooltip-error" data-tip="Upload an image first !">{button}</div>)
@@ -202,8 +207,8 @@ function App() {
                   
 
                   <CustomSettingsCard>
-                    <div className="bg-base-100 p-2">
-                      <h3 className="italic">Rendering</h3>
+                    <div className="bg-base-100 p-2 border border-white">
+                      <h3 className="italic text-lg">Rendering</h3>
                       <div>
                         <Range
                           label="Noise"
@@ -221,14 +226,14 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="bg-base-100 p-2">
-                      <h3 className="italic">Size</h3>
+                    <div className="bg-base-100 p-2 border border-white">
+                      <h3 className="italic text-lg">Size</h3>
                       <div>
                         <Range
                           label="TileSize"
                           value={tileSize}
                           max={128}
-                          min={16}
+                          min={8}
                           step={8}
                           onChange={(value) => {
                             setOption("tileSize", value);
@@ -254,12 +259,14 @@ function App() {
                             max={maxRatio}
                             min={3}
                             step={3}
-                            className={bestProportion ? "range-error" : "range-primary"}
+                            disabled={bestProportion}
                             onChange={(value) => setRatio(value)}
                           />
                           </div>
                         </div>
-                        {
+                      </div>
+                    </div>
+                    {
                           ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > MAX_CUBES ?
                             <div role="alert" className="alert alert-warning">
                               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -268,8 +275,6 @@ function App() {
                            : <></>
                         }
                         {renderPreview()}
-                      </div>
-                    </div>
                   </CustomSettingsCard>
 
                   {renderGenerateButton()}
