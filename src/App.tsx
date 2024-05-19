@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
+import { isMobile } from 'react-device-detect';
+
 import useImageSizes from "./Hooks/useImageSizes";
 import useRubickImage from "./Hooks/useRubickImage";
 import useImageContrast from "./Hooks/useImageContrast";
@@ -27,7 +29,7 @@ interface threeJsParams {
 
 const initialTileSize = 32;
 
-const MAX_CUBES = 5000;
+const MAX_CUBES = 5000
 
 function App() {
   const [error, setError] = useState<string>("");
@@ -36,6 +38,7 @@ function App() {
   const [chooseContrastedImage, setChooseContrastedImage] = useState<boolean>(true);
   // memoize for three js to avoid changes before generation
   const [threeJsParams, setThreeJsParams] = useState<threeJsParams>({ tileSize: initialTileSize, width: 0, height: 0});
+  const maxCubes = isMobile ? MAX_CUBES/2 : MAX_CUBES;
 
   const {
     computePossibleSize,
@@ -70,7 +73,7 @@ function App() {
   // if tilesize change, need to recompute the best sizes
   useEffect(() => {
     if(image && refOutput.current) {
-      computePossibleSize(image.width, image.height, false)
+      computePossibleSize(image.width, image.height, isMobile)
     }
   }, [tileSize, bestProportion, ratio])
 
@@ -80,8 +83,8 @@ function App() {
 
     console.log("newImage ", newImage.width, ": ", newImage.height)
 
-    const [width, height] = computePossibleSize(newImage.width, newImage.height, false);
-    findBestTileSize(width, height, false);
+    const [width, height] = computePossibleSize(newImage.width, newImage.height, isMobile);
+    findBestTileSize(width, height, isMobile);
     //console.log(width, " ", height);
 
     setBestProportion(true);
@@ -267,7 +270,7 @@ function App() {
                       </div>
                     </div>
                     {
-                          ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > MAX_CUBES ?
+                          ((possibleWidth/tileSize) * (possibleHeight/tileSize)) > maxCubes ?
                             <div role="alert" className="alert alert-warning">
                               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                               <span>Warning: The number of cubes can be too much in 3D</span>
