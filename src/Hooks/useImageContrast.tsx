@@ -1,11 +1,11 @@
 import { useState } from "react";
 import fill from "lodash/fill";
 import convert from "color-convert";
-import { getOffscreenContext } from "../tools";
+import { getOffscreenContext, resizeImageCanvas } from "../tools";
 
 
 function useImageContrast() {
-  const [contrastedImage, setcontrastedImage] = useState<HTMLImageElement>();
+  const [contrastedImage, setContrastedImage] = useState<HTMLImageElement>();
 
   function positionToDataIndex(x: number, y: number, width: number) : number {
     // data is arranged as [R, G, B, A, R, G, B, A, ...]
@@ -74,15 +74,34 @@ function useImageContrast() {
     return canvasBuffer;
   }
 
+  function resizeCanvas(canvasBuffer: OffscreenCanvas) : OffscreenCanvas {
+    const maxDimension = 1000;
+    const {width, height} =  canvasBuffer;
+    if(width <= maxDimension && height <= maxDimension) {
+      console.log("je passe pas ici magueule")
+      return canvasBuffer;
+    }
+
+    let expectedWidth = width;
+    let expectedHeight = height;
+    if(width > height) {
+      expectedWidth = maxDimension;
+      expectedHeight = maxDimension * (height/width);
+    } else {
+      expectedWidth = maxDimension * (width/height);
+      expectedHeight = maxDimension;
+    }
+    resizeImageCanvas(canvasBuffer, canvasBuffer, expectedWidth, expectedHeight);
+    return canvasBuffer;
+  }
+
   function histogramEqualization(
-      image: HTMLImageElement,
+      canvasBuffer: OffscreenCanvas,
       canvasOutput: HTMLCanvasElement
   ) : string {
 
-      const { width, height } = image;
-      const canvasBuffer = createCanvasBuffer(image);
+      const { width, height } = canvasBuffer;
       const contextBuffer = getOffscreenContext(canvasBuffer);
-
       const [normalizedCDF, dataHSV] = cumulativeDistributionFunction(contextBuffer, width, height);
 
       const imageData = contextBuffer.getImageData(0, 0, width, height);
@@ -122,10 +141,18 @@ function useImageContrast() {
     });
   }
 
-  async function computeImage(image: HTMLImageElement, refOutput : HTMLCanvasElement) {
-    const base64Image = histogramEqualization(image, refOutput);
+  async function computeImage(image: HTMLImageElement, refOutput : HTMLCanvasElement, resize: boolean) {
+    let canvasBuffer = createCanvasBuffer(image);
+
+    if(resize) {
+      canvasBuffer = resizeCanvas(canvasBuffer);
+    }
+    console.log("originalWidth ", image.width, "originalHeight ", image.height);
+    console.log("width ", canvasBuffer.width, " height ", canvasBuffer.height);
+
+    const base64Image = histogramEqualization(canvasBuffer, refOutput);
     const newcontrastedImage = await loadImage(base64Image);
-    setcontrastedImage(newcontrastedImage);
+    setContrastedImage(newcontrastedImage);
   }
 
 
