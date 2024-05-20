@@ -50,13 +50,13 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     return optimizedScaleBasic(imageWidthDivisibleByThree, imageHeightDivisibleByThree, tileSize, bestProportion);
   }
 
-  function computePossibleSize(imageWidth: number, imageHeight: number) {
+  function computePossibleSize(imageWidth: number, imageHeight: number, isMobile: boolean) : [number, number] {
     const [possibleWidth, possibleHeight] = optimizedScale(imageWidth, imageHeight);
     setPossibleSize(possibleWidth, possibleHeight);
 
     if(!bestProportion) {
     // divide by ratio to isolate the maxRatio (this computation only works without bestProportion)
-      const maxRatio = computeMaxRatio(possibleWidth/ ratio, possibleHeight/ratio);
+      const maxRatio = computeMaxRatio(possibleWidth/ ratio, possibleHeight/ratio, isMobile);
       setMaxRatio(maxRatio);
       if(maxRatio === 3) {
         setRatio(3);
@@ -64,11 +64,13 @@ function useImageSizes({ initialTileSize = 32 }: useImageSizesProps) {
     } else {
       setRatio(1);
     }
+    return [possibleWidth, possibleHeight];
   }
 
-  function computeMaxRatio(minWidthPixelSize: number, minHeightPixelSize: number) {
+  function computeMaxRatio(minWidthPixelSize: number, minHeightPixelSize: number, isMobile: boolean) {
+    const maxCubes = isMobile ? MAX_CUBES/2 : MAX_CUBES
     const maxRatio = Math.ceil(
-      Math.sqrt( (MAX_CUBES * tileSize * tileSize) / (minWidthPixelSize * minHeightPixelSize) )
+      Math.sqrt( (maxCubes * tileSize * tileSize) / (minWidthPixelSize * minHeightPixelSize) )
     );
 
     if(maxRatio <= 3) {

@@ -9,6 +9,8 @@ import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesI
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
+import { isMobile } from 'react-device-detect';
+
 
 interface ThreejsRenderingProps {
   width: number;
@@ -16,6 +18,7 @@ interface ThreejsRenderingProps {
   tileSize: number;
   rubickFaces: RubickFace[];
 }
+
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
@@ -28,6 +31,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       toggleFullscreen();
   });
   const ratio = Math.max(width, height)/tileSize;
+  const cameraZ = isMobile ? 3 : 2.5;
+  console.log(window.screen)
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
     position: [-(width/2/tileSize), (height/2/tileSize), 0],
     rotation: [0, 0, 0],
@@ -83,7 +88,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       // position
       // target
       cameraControlRef.current.setLookAt(
-            0, 0, ratio * 2,
+            0, 0, ratio * cameraZ,
             0,0, 0,
             true
           );
@@ -167,7 +172,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               minAzimuthAngle={-0.55}
               maxAzimuthAngle={0.55}
               makeDefault
-              maxDistance={ratio*2.5}
+              maxDistance={ratio*cameraZ}
               ref={cameraControlRef}
             />
           </Suspense>
