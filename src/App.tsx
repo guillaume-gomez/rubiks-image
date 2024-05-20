@@ -66,7 +66,7 @@ function App() {
 
   useEffect(() => {
     if(image && refOutput.current) {
-      computeImage(image, refOutput.current);
+      computeImage(image, refOutput.current, true);
     }
   }, [image]);
 
@@ -81,12 +81,8 @@ function App() {
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
 
-    console.log("newImage ", newImage.width, ": ", newImage.height)
-
     const [width, height] = computePossibleSize(newImage.width, newImage.height, isMobile);
     findBestTileSize(width, height, isMobile);
-    //console.log(width, " ", height);
-
     setBestProportion(true);
     setRatio(1);
 
