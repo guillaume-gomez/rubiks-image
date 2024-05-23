@@ -17,6 +17,7 @@ interface RubickCubesInstancedMeshProps {
   height: number;
   animationType: animationType;
   animationDuration: number;
+  onStart: (mesh: InstancedMesh) => void;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -39,7 +40,7 @@ const TRANSITION_DURATION = 200; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationDuration, animationType }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationDuration, animationType, onStart }, ref) => {
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -89,8 +90,20 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
         api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
 
         meshRef.current.instanceMatrix.needsUpdate = true;
-      },
+      }
   }));
+
+  useEffect(() => {
+    if (meshRef == null) return;
+    if (meshRef.current == null) return;
+    if (rubickFaces.length <= 0) return;
+    init();
+
+    oldRotation.current = 0.0;
+    api.start();
+
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [rubickFaces.length]);
 
   function init() {
     pivots.current = [];
@@ -119,7 +132,9 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y, index), 3);
 
       params.current.push(randomMoves);
-    })
+    });
+
+    onStart(meshRef.current!);
   }
 
 
@@ -284,18 +299,6 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     const animationFinishedArray = params.current.filter((param) => param.currentMove >= param.movesLength);
     return animationFinishedArray.length === params.current.length;
   }
-
-  useEffect(() => {
-    if (meshRef == null) return;
-    if (meshRef.current == null) return;
-    if (rubickFaces.length <= 0) return;
-    init();
-
-    oldRotation.current = 0.0;
-    api.start();
-
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [rubickFaces.length]);
 
   return (
     <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
