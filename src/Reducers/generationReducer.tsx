@@ -5,48 +5,47 @@ type Action =
   { type: 'finish' }
 ;
 
-interface GenerationData {
+interface animationData {
     duration: number;
     started: boolean;
 
 }
 
-function generationReducer(generationData: GenerationData, action: Action) : GenerationData {
+function animationReducer(animationData: animationData, action: Action) : animationData {
     switch(action.type) {
         case "start": {
-            console.log("start frefo");
-            return {...generationData, started: true };
+            return {...animationData, started: true };
         }
         case "finish": {
-            return {...generationData, started: false };
+            return {...animationData, started: false };
         }
     }
-    return generationData;
+    return animationData;
 }
 
-const GenerationReducerContext = createContext<GenerationData>({duration: 10000, started: false});
+const AnimationReducerContext = createContext<animationData>({duration: 10000, started: false});
 const GenerationDispatchContext = createContext<Dispatch<Action>>(()=> null);
 
-export function useGeneration() {
-  return useContext(GenerationReducerContext);
+export function useAnimation() {
+  return useContext(AnimationReducerContext);
 }
 
-export function useGenerationDispatch() {
+export function useAnimationDispatch() {
   return useContext(GenerationDispatchContext);
 }
 
-interface GenerationProviderProps {
+interface AnimationProviderProps {
     children: ReactElement;
 }
 
-export function GenerationProvider({ children } : GenerationProviderProps ) {
-    const [generation, dispatch] = useReducer(generationReducer,{duration: 10000, started: false});
+export function AnimationProvider({ children } : AnimationProviderProps ) {
+    const [generation, dispatch] = useReducer(animationReducer,{duration: 10000, started: false});
 
     return (
-        <GenerationReducerContext.Provider value={generation}>
+        <AnimationReducerContext.Provider value={generation}>
           <GenerationDispatchContext.Provider value={dispatch}>
             {children}
           </GenerationDispatchContext.Provider>
-        </GenerationReducerContext.Provider>
+        </AnimationReducerContext.Provider>
    );
 }

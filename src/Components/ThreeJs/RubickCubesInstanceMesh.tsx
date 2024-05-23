@@ -4,6 +4,7 @@ import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
 import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import {  useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
 
 
 export interface ExternalActionInterface {
@@ -16,7 +17,6 @@ interface RubickCubesInstancedMeshProps {
   width: number;
   height: number;
   animationType: animationType;
-  animationDuration: number;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -39,7 +39,9 @@ const TRANSITION_DURATION = 200; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationDuration, animationType }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationType }, ref) => {
+  const dispatchGeneration = useAnimationDispatch();
+  const {duration } = useAnimation();
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -58,11 +60,15 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     },
     delay: DELAY_DURATION,
     reset: true,
+    onStart:() => {
+      dispatchGeneration({type: "start"});
+    },
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
       oldRotation.current = 0.0;
       if(isAnimationFinish()) {
         api.stop();
+        dispatchGeneration({type: "finish"})
         return;
       }
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
@@ -136,7 +142,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
   }
 
   function fromDurationToNumberOfMoves() {
-    return Math.ceil((animationDuration) / TRANSITION_DURATION);
+    return Math.ceil((duration) / TRANSITION_DURATION);
   }
 
   function generateWaveRandomMoves(x: number, y: number, invert: boolean) : number {

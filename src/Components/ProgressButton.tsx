@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef, MutableRefObject } from 'react';
+import { useAnimation } from "../Reducers/generationReducer";
 
 interface ProgressButtonProps {
   label: string;
-  durationInMs: number;
   onClick: () => void;
-
 }
 
-function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) {
+function ProgressButton({ label, onClick } : ProgressButtonProps) {
   const [milliseconds, setMilliseconds] = useState<number>(0);
   const [play, setPlay] = useState<boolean>(false);
   const animationRef : MutableRefObject<number | undefined> = useRef<number | undefined>(undefined);
   const previousTimeRef = useRef<number|undefined>(undefined);
+  const { started, duration: durationInMs } = useAnimation();
 
   function animate(time: number) {
     if (previousTimeRef.current != undefined) {
@@ -24,6 +24,19 @@ function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) 
     previousTimeRef.current = time;
     animationRef.current = requestAnimationFrame(animate);
   }
+
+  useEffect(() => {
+    if(started) {
+      handleClick();
+    } else {
+        if(animationRef.current) {
+           cancelAnimationFrame(animationRef.current)
+        }
+        setPlay(false);
+        setMilliseconds(0);
+        previousTimeRef.current = undefined;
+    }
+  }, [started])
 
   useEffect(() => {
     return () => {
@@ -41,21 +54,8 @@ function ProgressButton({ label, durationInMs, onClick } : ProgressButtonProps) 
     }
   }
 
-
-
-  useEffect(() => {
-    if(milliseconds >= durationInMs) {
-        if(animationRef.current) {
-           cancelAnimationFrame(animationRef.current)
-        }
-        setPlay(false);
-        setMilliseconds(0);
-        previousTimeRef.current = undefined;
-    }
-  }, [milliseconds]);
-
   return (
-    <button className="btn btn-secondary flex flex-row justify-start px-0" onClick={handleClick}>
+    <button className="btn btn-secondary btn-xs flex flex-row justify-start px-0" onClick={handleClick}>
         <div className="bg-primary w-full h-full flex items-center justify-center" style={{width: `${(milliseconds/durationInMs)*100}%`}}>
         </div>
         <div className="absolute object-center" style={{left: "50%"}}>{label}</div>

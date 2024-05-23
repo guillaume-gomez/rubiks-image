@@ -10,7 +10,7 @@ import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
 import { isMobile } from 'react-device-detect';
-
+import { AnimationProvider } from "../../Reducers/generationReducer";
 
 interface ThreejsRenderingProps {
   width: number;
@@ -25,7 +25,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
-  const [animationDuration] = useState<number>(10000);
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
@@ -102,7 +101,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   }
 
   return (
-    <>
+    <AnimationProvider>
       <Toggle
         label="Hide other faces (improve performances)"
         value={hideOtherFaces}
@@ -116,7 +115,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       { !hideOtherFaces &&
           <ProgressButton
             label="Reset Animation"
-            durationInMs={animationDuration}
             onClick={resetAnimation}
           />
       }
@@ -158,7 +156,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   width={width}
                   height={height}
                   animationType="one-by-one"
-                  animationDuration={animationDuration}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }
@@ -178,7 +175,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           </Suspense>
         </Canvas>
       </div>
-    </>
+    </AnimationProvider>
   );
 }
 
