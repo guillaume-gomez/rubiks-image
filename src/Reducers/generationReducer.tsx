@@ -1,32 +1,30 @@
 import { createContext, useContext, useReducer, ReactElement, Dispatch } from 'react';
 
 type Action =
-  { type: 'update' } |
   { type: 'start' } |
   { type: 'finish' }
 ;
 
 interface GenerationData {
     duration: number;
+    started: boolean;
 
 }
 
 function generationReducer(generationData: GenerationData, action: Action) : GenerationData {
     switch(action.type) {
-        case "update": {
-            return generationData;
-        }
         case "start": {
-            return generationData;
+            console.log("start frefo");
+            return {...generationData, started: true };
         }
         case "finish": {
-            return generationData;
+            return {...generationData, started: false };
         }
     }
     return generationData;
 }
 
-const GenerationReducerContext = createContext<GenerationData>({duration: 10000});
+const GenerationReducerContext = createContext<GenerationData>({duration: 10000, started: false});
 const GenerationDispatchContext = createContext<Dispatch<Action>>(()=> null);
 
 export function useGeneration() {
@@ -42,7 +40,7 @@ interface GenerationProviderProps {
 }
 
 export function GenerationProvider({ children } : GenerationProviderProps ) {
-    const [generation, dispatch] = useReducer(generationReducer,{duration: 10000});
+    const [generation, dispatch] = useReducer(generationReducer,{duration: 10000, started: false});
 
     return (
         <GenerationReducerContext.Provider value={generation}>
