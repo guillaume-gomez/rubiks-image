@@ -102,6 +102,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
 
   return (
     <AnimationProvider>
+      <>
       <Toggle
         label="Hide other faces (improve performances)"
         value={hideOtherFaces}
@@ -175,6 +176,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           </Suspense>
         </Canvas>
       </div>
+      </>
     </AnimationProvider>
   );
 }
