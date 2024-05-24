@@ -8,7 +8,10 @@ import { InstancedMesh } from 'three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
+import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
+import { isMobile } from 'react-device-detect';
+import { AnimationProvider } from "../../Reducers/generationReducer";
 
 
 interface ThreejsRenderingProps {
@@ -24,12 +27,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
-  const [animationDuration] = useState<number>(10000);
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
   });
   const ratio = Math.max(width, height)/tileSize;
+  const cameraZ = isMobile ? 3 : 2.5;
   //console.log(window.screen)
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
     position: [-(width/2/tileSize), (height/2/tileSize), 0],
@@ -95,7 +98,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   }
 
   return (
-    <>
+    <AnimationProvider>
+      <>
       <Toggle
         label="Hide other faces (improve performances)"
         value={hideOtherFaces}
@@ -107,14 +111,10 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-        <div>
-          <button
-            className="btn btn-secondary btn-xs"
+          <ProgressButton
+            label="Reset Animation"
             onClick={resetAnimation}
-          >
-              Reset Animation
-          </button>
-        </div>
+          />
       }
       <div
         className="flex flex-col gap-5 w-full h-screen"
@@ -154,7 +154,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   width={width}
                   height={height}
                   animationType="one-by-one"
-                  animationDuration={animationDuration}
                   onStart={onStart}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
@@ -175,7 +174,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           </Suspense>
         </Canvas>
       </div>
-    </>
+      </>
+    </AnimationProvider>
   );
 }
 

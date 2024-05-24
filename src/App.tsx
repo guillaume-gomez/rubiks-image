@@ -18,6 +18,7 @@ import Error from "./Components/Error";
 import CanvasRendering from "./Components/CanvasRendering";
 import ThreeJsRendering from "./Components/ThreeJs/ThreejsRendering";
 
+
 import logo from '/logo.svg';
 import './App.css';
 
@@ -39,6 +40,7 @@ function App() {
   // memoize for three js to avoid changes before generation
   const [threeJsParams, setThreeJsParams] = useState<threeJsParams>({ tileSize: initialTileSize, width: 0, height: 0});
   const maxCubes = isMobile ? MAX_CUBES/2 : MAX_CUBES;
+
 
   const {
     computePossibleSize,
