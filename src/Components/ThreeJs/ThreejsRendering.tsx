@@ -4,6 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@react-three/drei';
 import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
+import { InstancedMesh } from 'three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
@@ -11,6 +12,7 @@ import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
 import { isMobile } from 'react-device-detect';
 import { AnimationProvider } from "../../Reducers/generationReducer";
+
 
 interface ThreejsRenderingProps {
   width: number;
@@ -38,11 +40,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
   const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
-
-
-  useEffect(() => {
-    recenterCamera();
-  }, [rubickFaces.length, cameraControlRef.current]);
 
   useEffect(() => {
     apiGroup.start({
@@ -79,18 +76,18 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         }
       });
     }
-  }, [invert])
+  }, [invert]);
 
-
-  function recenterCamera() {
-    if(cameraControlRef && cameraControlRef.current) {
-      // position
-      // target
-      cameraControlRef.current.setLookAt(
-            0, 0, ratio * cameraZ,
-            0,0, 0,
-            true
-          );
+  async function onStart(mesh : InstancedMesh) {
+    if(cameraControlRef.current) {
+      await cameraControlRef.current.setLookAt(
+        0, 0, 1,
+        0,0, 0,
+        false
+      );
+      cameraControlRef.current.fitToBox(mesh, true,
+        { paddingLeft: 1, paddingRight: 1, paddingBottom: 2, paddingTop: 2 }
+      );
     }
   }
 
@@ -136,7 +133,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
             <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
             <Backdrop
-              scale={[width,height/tileSize * 3, 50]}
+              scale={[width,height/tileSize * 3, 100]}
               position={[0, -(height/2/tileSize) -5, -width/tileSize]}
               floor={10}
               segments={20}
@@ -157,6 +154,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   width={width}
                   height={height}
                   animationType="one-by-one"
+                  onStart={onStart}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }
@@ -170,7 +168,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               minAzimuthAngle={-0.55}
               maxAzimuthAngle={0.55}
               makeDefault
-              maxDistance={ratio*cameraZ}
+              maxDistance={ratio * 10}
               ref={cameraControlRef}
             />
           </Suspense>
