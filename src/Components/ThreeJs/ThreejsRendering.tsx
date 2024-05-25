@@ -10,7 +10,6 @@ import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesI
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
-import { isMobile } from 'react-device-detect';
 import { AnimationProvider } from "../../Reducers/generationReducer";
 
 
@@ -32,8 +31,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       toggleFullscreen();
   });
   const ratio = Math.max(width, height)/tileSize;
-  const cameraZ = isMobile ? 3 : 2.5;
-  //console.log(window.screen)
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
     position: [-(width/2/tileSize), (height/2/tileSize), 0],
     rotation: [0, 0, 0],
