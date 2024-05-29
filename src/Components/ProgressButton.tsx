@@ -58,7 +58,12 @@ function ProgressButton({ label, onClick } : ProgressButtonProps) {
     <button className="btn btn-secondary btn-xs flex flex-row justify-start px-0" onClick={handleClick}>
         <div className="bg-primary w-full h-full flex items-center justify-center" style={{width: `${(milliseconds/durationInMs)*100}%`}}>
         </div>
-        <div className="absolute object-center" style={{left: "50%"}}>{label}</div>
+        <div
+          className="absolute object-center"
+          style={{left: "50%", transform: "translate(-50% , 0%)"}}
+        >
+          {label}
+        </div>
     </button>
   );
 }
