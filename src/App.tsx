@@ -40,6 +40,7 @@ function App() {
   // memoize for three js to avoid changes before generation
   const [threeJsParams, setThreeJsParams] = useState<threeJsParams>({ tileSize: initialTileSize, width: 0, height: 0});
   const maxCubes = isMobile ? MAX_CUBES/2 : MAX_CUBES;
+  const goToFinalResultDivRef = useRef<HTMLDivElement>(null)
 
 
   const {
@@ -123,6 +124,9 @@ function App() {
     }
 
     optimizedGenerateImage(contrastedImage, possibleWidth, possibleHeight);
+    if(goToFinalResultDivRef.current) {
+      goToFinalResultDivRef.current.scrollIntoView({behavior: "smooth"});
+    }
   }
 
 
@@ -296,24 +300,26 @@ function App() {
                     toggle={() => setView3d(!view3d)}
                   />
                 }>
+                <div className="w-full h-full" ref={goToFinalResultDivRef}>
                 { view3d ?
-                  <>
-                  <ThreeJsRendering
-                    width={threeJsParams.width}
-                    height={threeJsParams.height}
-                    tileSize={threeJsParams.tileSize}
-                    rubickFaces={rubickFaces}
-                  />
-                  <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
-                  </>
-                  :
-                  <CanvasRendering
-                    width={possibleWidth}
-                    height={possibleHeight}
-                    tileSize={tileSize}
-                    rubickFaces={rubickFaces}
-                  />
+                    <>
+                      <ThreeJsRendering
+                        width={threeJsParams.width}
+                        height={threeJsParams.height}
+                        tileSize={threeJsParams.tileSize}
+                        rubickFaces={rubickFaces}
+                      />
+                      <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
+                    </>
+                    :
+                    <CanvasRendering
+                      width={possibleWidth}
+                      height={possibleHeight}
+                      tileSize={tileSize}
+                      rubickFaces={rubickFaces}
+                    />
                 }
+                </div>
               </SubCard>
             </Card>
           </div>
