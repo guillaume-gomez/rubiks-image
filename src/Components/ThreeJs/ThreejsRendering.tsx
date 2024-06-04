@@ -131,7 +131,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
             <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
             <Backdrop
-              scale={[width,height/tileSize * 3, 100]}
+              scale={[width*1.5,(height/tileSize)*3, 100]}
               position={[0, -(height/2/tileSize) -5, -width/tileSize]}
               floor={10}
               segments={20}
