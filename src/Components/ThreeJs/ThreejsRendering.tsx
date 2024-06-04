@@ -116,6 +116,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       <div
         className="flex flex-col gap-5 w-full h-screen"
         ref={containerCanvasRef}
+        onDoubleClick={toggleFullscreen}
         {...doubleTapEvent}
       >
         <Canvas
