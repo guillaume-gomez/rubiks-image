@@ -1,6 +1,7 @@
 # Rubicks image
 
-turning images into 3d rubiks cube mosaic
+
+Turning images into 3d rubiks cube mosaic and [try it by yourself](https://guillaume-gomez.github.io/rubiks-image/)
 
 
 
