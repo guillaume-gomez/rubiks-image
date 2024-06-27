@@ -32,22 +32,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   });
   const ratio = Math.max(width, height)/tileSize;
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
-    position: [-(width/2/tileSize), (height/2/tileSize), 0],
+    position: [0,0, 0],
     rotation: [0, 0, 0],
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
   const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
-
-  useEffect(() => {
-    apiGroup.start({
-      from: {
-        position: [-(width/2/tileSize), (height/2/tileSize), 0],
-      },
-      to: {
-        position: [-(width/2/tileSize), (height/2/tileSize), 0],
-      }
-    });
-  }, [width, height, tileSize]);
 
   useEffect(() => {
     if(invert) {

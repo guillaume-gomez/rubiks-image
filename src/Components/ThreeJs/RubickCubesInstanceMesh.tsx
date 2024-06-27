@@ -139,7 +139,6 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
 
       params.current.push(randomMoves);
     });
-
     onStart(meshRef.current!);
   }
 
