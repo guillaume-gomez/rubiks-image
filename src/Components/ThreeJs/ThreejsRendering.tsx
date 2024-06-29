@@ -42,22 +42,22 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
     if(invert) {
       apiGroup.start({
         from: {
-         position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          position: [0,0, 0],
           rotation: [0, 0, 0]
         },
         to: {
-          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          position: [(width/tileSize),0, 0],
           rotation: [0, Math.PI, 0]
         }
       });
     } else {
       apiGroup.start({
         to: {
-          position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          position: [0, 0, 0],
           rotation: [0, 0, 0]
         },
         from: {
-          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          position: [(width/tileSize),0, 0],
           rotation: [0, Math.PI, 0]
         }
       });
@@ -121,7 +121,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
             <Backdrop
               scale={[width*1.5,(height/tileSize)*3, 100]}
-              position={[0, -(height/2/tileSize) -5, -width/tileSize]}
+              position={[0, -(height/tileSize) -5, -width/tileSize]}
               floor={10}
               segments={20}
               receiveShadow={true}
