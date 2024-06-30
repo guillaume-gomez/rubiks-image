@@ -30,7 +30,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
   });
-  const ratio = Math.max(width, height)/tileSize;
+  const [maxDistance, setMaxDistance] = useState<number>(500);
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
     position: [-(width/2/tileSize), (height/2/tileSize), 0],
     rotation: [0, 0, 0],
@@ -77,14 +77,18 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
 
   async function onStart(mesh : InstancedMesh) {
     if(cameraControlRef.current) {
+      cameraControlRef.current.maxDistance = 500;
       await cameraControlRef.current.setLookAt(
         0, 0, 1,
         0,0, 0,
         false
       );
-      cameraControlRef.current.fitToBox(mesh, true,
+      await cameraControlRef.current.fitToBox(mesh, true,
         { paddingLeft: 1, paddingRight: 1, paddingBottom: 2, paddingTop: 2 }
       );
+      console.log("camera", cameraControlRef.current._camera.position.z + 2.5);
+      console.log("cameraPos", cameraControlRef.current._camera.position.z);
+      setMaxDistance(cameraControlRef.current._camera.position.z + 2.5);
     }
   }
 
@@ -93,6 +97,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       rubickCubeInstanceMeshActionsRef.current.reset();
     }
   }
+
+  console.log(cameraControlRef.current?._camera?.position.z)
 
   return (
     <AnimationProvider>
@@ -120,7 +126,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         {...doubleTapEvent}
       >
         <Canvas
-          camera={{ position: [0, 0.0, ratio*2], fov: 35, far: 1000 }}
+          camera={{ position: [0, 0, 10], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
@@ -166,7 +172,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               minAzimuthAngle={-0.55}
               maxAzimuthAngle={0.55}
               makeDefault
-              maxDistance={ratio * 10}
+              maxDistance={maxDistance}
               ref={cameraControlRef}
             />
           </Suspense>
