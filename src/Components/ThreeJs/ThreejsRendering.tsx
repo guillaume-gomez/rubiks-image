@@ -86,8 +86,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       await cameraControlRef.current.fitToBox(mesh, true,
         { paddingLeft: 1, paddingRight: 1, paddingBottom: 2, paddingTop: 2 }
       );
-      console.log("camera", cameraControlRef.current._camera.position.z + 2.5);
-      console.log("cameraPos", cameraControlRef.current._camera.position.z);
       setMaxDistance(cameraControlRef.current._camera.position.z + 2.5);
     }
   }
