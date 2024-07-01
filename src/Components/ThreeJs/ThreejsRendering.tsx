@@ -32,43 +32,32 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   });
   const [maxDistance, setMaxDistance] = useState<number>(500);
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
-    position: [-(width/2/tileSize), (height/2/tileSize), 0],
+    position: [0,0, 0],
     rotation: [0, 0, 0],
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
   const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
 
   useEffect(() => {
-    apiGroup.start({
-      from: {
-        position: [-(width/2/tileSize), (height/2/tileSize), 0],
-      },
-      to: {
-        position: [-(width/2/tileSize), (height/2/tileSize), 0],
-      }
-    });
-  }, [width, height, tileSize]);
-
-  useEffect(() => {
     if(invert) {
       apiGroup.start({
         from: {
-         position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          position: [0,0, 0],
           rotation: [0, 0, 0]
         },
         to: {
-          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          position: [(width/tileSize),0, 0],
           rotation: [0, Math.PI, 0]
         }
       });
     } else {
       apiGroup.start({
         to: {
-          position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          position: [0, 0, 0],
           rotation: [0, 0, 0]
         },
         from: {
-          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          position: [(width/tileSize),0, 0],
           rotation: [0, Math.PI, 0]
         }
       });
@@ -136,7 +125,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
             <Backdrop
               scale={[width*1.5,(height/tileSize)*3, 100]}
-              position={[0, -(height/2/tileSize) -5, -width/tileSize]}
+              position={[0, -(height/tileSize) -5, -width/tileSize]}
               floor={10}
               segments={20}
               receiveShadow={true}
