@@ -4,7 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@react-three/drei';
 import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
-import { InstancedMesh } from 'three';
+import { InstancedMesh, Vector3 } from 'three';
 import Toggle from "../Toggle";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
@@ -75,7 +75,9 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       await cameraControlRef.current.fitToBox(mesh, true,
         { paddingLeft: 1, paddingRight: 1, paddingBottom: 2, paddingTop: 2 }
       );
-      setMaxDistance(cameraControlRef.current._camera.position.z + 4.0);
+      let distanceCamera = new Vector3();
+      cameraControlRef.current.getPosition(distanceCamera, false);
+      setMaxDistance(distanceCamera.z + 5.0);
     }
   }
 
