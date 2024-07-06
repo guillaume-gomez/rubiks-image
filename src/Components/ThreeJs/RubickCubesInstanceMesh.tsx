@@ -3,7 +3,7 @@ import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
-import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import { boxGeometry, roundedBoxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
 import {  useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
 
 
@@ -306,7 +306,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
   }
 
   return (
-    <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
+    <instancedMesh receiveShadow={true} ref={meshRef} args={[roundedBoxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
 });
 
