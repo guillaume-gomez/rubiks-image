@@ -18,6 +18,7 @@ interface RubickCubesInstancedMeshProps {
   height: number;
   animationType: animationType;
   onStart: (mesh: InstancedMesh) => void;
+  bestPerformances?: boolean;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -40,7 +41,7 @@ const TRANSITION_DURATION = 200; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationType, onStart }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationType, onStart, bestPerformances = false }, ref) => {
   const dispatchGeneration = useAnimationDispatch();
   const { duration } = useAnimation();
   const meshRef = useRef<InstancedMesh>(null);
@@ -306,7 +307,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
   }
 
   return (
-    <instancedMesh receiveShadow={true} ref={meshRef} args={[roundedBoxGeometry, colorsMaterialsArray, numberOfCubes ]} />
+    <instancedMesh receiveShadow={true} ref={meshRef} args={[bestPerformances ? boxGeometry : roundedBoxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
 });
 
