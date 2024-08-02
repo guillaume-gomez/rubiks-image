@@ -36,7 +36,7 @@ interface ParamsMove {
   currentMove: number;
 }
 
-const TRANSITION_DURATION = 200; //ms
+const TRANSITION_DURATION = 300; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
