@@ -61,7 +61,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       apiGroup.start({
         to: {
           position: [0, 0, 0],
-          rotation: [0, Math.PI/6, 0]
+          rotation: [0, - Math.PI/6, 0]
         },
       });
 
