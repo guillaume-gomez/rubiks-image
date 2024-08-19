@@ -3,7 +3,8 @@ import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
-import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import { roundedBoxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import { useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
 
 
 export interface ExternalActionInterface {
@@ -16,7 +17,8 @@ interface RubickCubesInstancedMeshProps {
   width: number;
   height: number;
   animationType: animationType;
-  animationDuration: number;
+  onStart: (mesh: InstancedMesh) => void;
+  onFinish: (mesh: InstancedMesh) => void;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -35,11 +37,13 @@ interface ParamsMove {
   currentMove: number;
 }
 
-const TRANSITION_DURATION = 200; //ms
+const TRANSITION_DURATION = 300; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationDuration, animationType }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationType, onStart, onFinish }, ref) => {
+  const dispatchGeneration = useAnimationDispatch();
+  const { duration } = useAnimation();
   const meshRef = useRef<InstancedMesh>(null);
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
@@ -58,11 +62,16 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     },
     delay: DELAY_DURATION,
     reset: true,
+    onStart:() => {
+      dispatchGeneration({type: "start"});
+    },
     onRest: () => {
       params.current = params.current.map(param => ({...param, currentMove: param.currentMove + 1}) )
       oldRotation.current = 0.0;
       if(isAnimationFinish()) {
         api.stop();
+        dispatchGeneration({type: "finish"})
+        onFinish(meshRef.current!);
         return;
       }
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
@@ -89,8 +98,20 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
         api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
 
         meshRef.current.instanceMatrix.needsUpdate = true;
-      },
+      }
   }));
+
+  useEffect(() => {
+    if (meshRef == null) return;
+    if (meshRef.current == null) return;
+    if (rubickFaces.length <= 0) return;
+    init();
+
+    oldRotation.current = 0.0;
+    api.start();
+
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [rubickFaces.length]);
 
   function init() {
     pivots.current = [];
@@ -119,7 +140,8 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       const randomMoves = scrambleBeforeRunning(index, generateRandomMoves(x, y, index), 3);
 
       params.current.push(randomMoves);
-    })
+    });
+    onStart(meshRef.current!);
   }
 
 
@@ -138,7 +160,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
   }
 
   function fromDurationToNumberOfMoves() {
-    return Math.ceil((animationDuration) / TRANSITION_DURATION);
+    return Math.ceil((duration) / TRANSITION_DURATION);
   }
 
   function generateWaveRandomMoves(x: number, y: number, invert: boolean) : number {
@@ -287,20 +309,8 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     return animationFinishedArray.length === params.current.length;
   }
 
-  useEffect(() => {
-    if (meshRef == null) return;
-    if (meshRef.current == null) return;
-    if (rubickFaces.length <= 0) return;
-    init();
-
-    oldRotation.current = 0.0;
-    api.start();
-
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [rubickFaces.length]);
-
   return (
-    <instancedMesh receiveShadow={true} ref={meshRef} args={[boxGeometry, colorsMaterialsArray, numberOfCubes ]} />
+    <instancedMesh receiveShadow={true} ref={meshRef} args={[roundedBoxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
 });
 

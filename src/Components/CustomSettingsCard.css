@@ -1,0 +1,33 @@
+/* tweak a little bit the values based on icons*/
+.anim-container {
+    //background: red;
+    height:1.5rem;
+    width:1.5rem;
+    transition:.3s;
+    position:relative;
+    cursor:pointer;
+    }
+
+    .anim-container .icons {
+        transition:.3s;
+        right: -3px;
+        bottom: -3px;
+        position:absolute;
+        font-size:1em !important;
+        height:1.5em;
+        width:1.5em;
+    }
+    .anim-container .plus {
+        transform:rotate(-180deg);
+        opacity:0;
+    }
+    
+.anim-container.morphed {
+    transform:rotate(180deg);
+    }
+    .anim-container.morphed .plus {
+        opacity:1;
+    }
+    .anim-container.morphed .minus {
+        opacity:0;
+    }

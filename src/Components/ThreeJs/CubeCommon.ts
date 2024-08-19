@@ -1,10 +1,11 @@
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { MeshStandardMaterial } from 'three';
+import { MeshStandardMaterial, BoxGeometry } from 'three';
 
 const BORDER_SIZE = 0.1;
 const SIZE = 1 - BORDER_SIZE;
 
-export const boxGeometry = new RoundedBoxGeometry(SIZE, SIZE, SIZE);
+export const roundedBoxGeometry = new RoundedBoxGeometry(SIZE, SIZE, SIZE);
+export const boxGeometry = new BoxGeometry(SIZE, SIZE, SIZE);
 
 const paramsMaterial = { roughness: 0.0, metalness: 0.2, emissive: 0x000000, castShadow: true }
 

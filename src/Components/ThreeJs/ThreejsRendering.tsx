@@ -4,11 +4,15 @@ import { Canvas } from '@react-three/fiber';
 import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@react-three/drei';
 import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
+import { InstancedMesh, Vector3 } from 'three';
 import Toggle from "../Toggle";
 import Select from "../Select";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
+import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
+import { AnimationProvider } from "../../Reducers/generationReducer";
+
 
 interface ThreejsRenderingProps {
   width: number;
@@ -19,78 +23,76 @@ interface ThreejsRenderingProps {
 
 type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one'|'random';
 
+
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
   const [animationType, setAnimationType] = useState<AnimationType>("wave");
-  const [animationDuration] = useState<number>(10000);
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
   });
-  const ratio = Math.max(width, height)/tileSize;
+  const [maxDistance, setMaxDistance] = useState<number>(500);
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
-    position: [-(width/2/tileSize), (height/2/tileSize), 0],
-    rotation: [0, 0, 0],
+    from : {position: [0,0, 0], rotation: [0, 0, 0] },
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
   const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
 
-
-  useEffect(() => {
-    recenterCamera();
-  }, [rubickFaces.length, cameraControlRef.current]);
-
-  useEffect(() => {
-    apiGroup.start({
-      from: {
-        position: [-(width/2/tileSize), (height/2/tileSize), 0],
-      },
-      to: {
-        position: [-(width/2/tileSize), (height/2/tileSize), 0],
-      }
-    });
-  }, [width, height, tileSize]);
-
   useEffect(() => {
     if(invert) {
       apiGroup.start({
-        from: {
-         position: [-(width/2/tileSize), (height/2/tileSize), 0],
-          rotation: [0, 0, 0]
-        },
         to: {
-          position: [(width/2/tileSize), (height/2/tileSize), 0],
+          position: [(width/tileSize),0, 0],
           rotation: [0, Math.PI, 0]
         }
       });
     } else {
       apiGroup.start({
         to: {
-          position: [-(width/2/tileSize), (height/2/tileSize), 0],
+          position: [0, 0, 0],
           rotation: [0, 0, 0]
         },
-        from: {
-          position: [(width/2/tileSize), (height/2/tileSize), 0],
-          rotation: [0, Math.PI, 0]
-        }
       });
     }
-  }, [invert])
+  }, [invert]);
 
+  async function onStart(mesh : InstancedMesh) {
 
-  function recenterCamera() {
-    if(cameraControlRef && cameraControlRef.current) {
-      // position
-      // target
-      cameraControlRef.current.setLookAt(
-            0, 0, ratio * 2,
-            0,0, 0,
-            true
-          );
+    if(cameraControlRef.current) {
+      cameraControlRef.current.maxDistance = 500;
+      await cameraControlRef.current.setLookAt(
+        0, 0, 1,
+        0,0, 0,
+        false
+      );
+
+      await cameraControlRef.current.fitToBox(mesh, true,
+        { paddingLeft: 2, paddingRight: 2, paddingBottom: 3, paddingTop: 3 }
+      );
+
+      apiGroup.start({
+        to: {
+          position: [0, 0, 0],
+          rotation: [0, Math.PI/8, 0]
+        },
+      });
+
+      let distanceCamera = new Vector3();
+      cameraControlRef.current.getPosition(distanceCamera, false);
+      setMaxDistance(distanceCamera.z + 5.0);
     }
+  }
+
+  function onFinish() {
+    apiGroup.start({
+        to: {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0]
+        },
+      });
   }
 
   function resetAnimation() {
@@ -100,7 +102,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   }
 
   return (
-    <>
+    <AnimationProvider>
+      <>
       <Toggle
         label="Hide other faces (improve performances)"
         value={hideOtherFaces}
@@ -112,33 +115,32 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-        <div>
-          <button
-            className="btn btn-secondary btn-xs"
-            onClick={resetAnimation}
-          >
-              Reset Animation
-          </button>
-          <Select
-            label={"Animation type"}
-            value={animationType}
-            onChange={(newAnimationType) => setAnimationType(newAnimationType as AnimationType)}
-            options={[
-              { value: "wave", label: "Wave"},
-              { value: "inverted-wave", label: "Inverted Wave"},
-              { value: "one-by-one", label: "One by one"},
-              { value: "random", label: "Random"},
-            ]}
-          />
-        </div>
+          <>
+            <ProgressButton
+              label="Reset Animation"
+              onClick={resetAnimation}
+            />
+            <Select
+              label={"Animation type"}
+              value={animationType}
+              onChange={(newAnimationType) => setAnimationType(newAnimationType as AnimationType)}
+              options={[
+                { value: "wave", label: "Wave"},
+                { value: "inverted-wave", label: "Inverted Wave"},
+                { value: "one-by-one", label: "One by one"},
+                { value: "random", label: "Random"},
+              ]}
+            />
+          </>
       }
       <div
         className="flex flex-col gap-5 w-full h-screen"
         ref={containerCanvasRef}
+        onDoubleClick={toggleFullscreen}
         {...doubleTapEvent}
       >
         <Canvas
-          camera={{ position: [0, 0.0, ratio*2], fov: 35, far: 1000 }}
+          camera={{ position: [0, 0, 10], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
@@ -149,8 +151,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             <directionalLight color={0xffffff} position={[-5,1, -5]} intensity={1} />
             <directionalLight color={0xffffff} position={[ 5,0, 5 ]} intensity={3} />
             <Backdrop
-              scale={[width,height/tileSize * 3, 50]}
-              position={[0, -(height/2/tileSize) -5, -width/tileSize]}
+              scale={[width*1.5,(height/tileSize)*3, 100]}
+              position={[0, -(height/tileSize) -5, -width/tileSize]}
               floor={10}
               segments={20}
               receiveShadow={true}
@@ -170,7 +172,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   width={width}
                   height={height}
                   animationType={animationType}
-                  animationDuration={animationDuration}
+                  onStart={onStart}
+                  onFinish={onFinish}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }
@@ -184,13 +187,14 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               minAzimuthAngle={-0.55}
               maxAzimuthAngle={0.55}
               makeDefault
-              maxDistance={ratio*2.5}
+              maxDistance={maxDistance}
               ref={cameraControlRef}
             />
           </Suspense>
         </Canvas>
       </div>
-    </>
+      </>
+    </AnimationProvider>
   );
 }
 

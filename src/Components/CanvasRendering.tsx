@@ -3,6 +3,7 @@ import { useFullscreen } from "rooks";
 import { RubickFace } from "../types";
 import Toggle from "./Toggle";
 import { resizeImageCanvas } from "../tools";
+import SaveImageButton from "./SaveImageButton";
 
 
 interface CanvasRenderingProps {
@@ -98,7 +99,7 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <Toggle
         label="has border"
         value={hasBorder}
@@ -124,7 +125,10 @@ const CanvasRendering = forwardRef<ExternalActionInterface, CanvasRenderingProps
           onDoubleClick={toggleFullscreen}
         />
       </div>
-    </>
+      <div className="self-end">
+        <SaveImageButton canvasRef={refCanvas} filename={"rubick-image"} label="Save as image"/>
+      </div>
+    </div>
   );
 });
 
