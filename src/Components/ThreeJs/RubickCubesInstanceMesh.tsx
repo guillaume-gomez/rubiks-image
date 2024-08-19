@@ -3,8 +3,8 @@ import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
-import { boxGeometry, roundedBoxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
-import {  useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
+import { roundedBoxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import { useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
 
 
 export interface ExternalActionInterface {
@@ -17,8 +17,9 @@ interface RubickCubesInstancedMeshProps {
   width: number;
   height: number;
   animationType: animationType;
-  onStart: (mesh: InstancedMesh) => void;
   bestPerformances?: boolean;
+  onStart: (mesh: InstancedMesh) => void;
+  onFinish: (mesh: InstancedMesh) => void;
 }
 
 type axisType = "X"| "Y" | "Z";
@@ -37,11 +38,11 @@ interface ParamsMove {
   currentMove: number;
 }
 
-const TRANSITION_DURATION = 200; //ms
+const TRANSITION_DURATION = 300; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationType, onStart, bestPerformances = false }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationType, onStart, onFinish, bestPerformances = false }, ref) => {
   const dispatchGeneration = useAnimationDispatch();
   const { duration } = useAnimation();
   const meshRef = useRef<InstancedMesh>(null);
@@ -71,6 +72,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
       if(isAnimationFinish()) {
         api.stop();
         dispatchGeneration({type: "finish"})
+        onFinish(meshRef.current!);
         return;
       }
       api.start({from: {rotationStep: 0}, to:{rotationStep: 1}});
