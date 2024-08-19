@@ -32,8 +32,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   });
   const [maxDistance, setMaxDistance] = useState<number>(500);
   const [{ position, rotation }, apiGroup] = useSpring<any>(() =>({
-    position: [0,0, 0],
-    rotation: [0, 0, 0],
+    from : {position: [0,0, 0], rotation: [0, 0, 0] },
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
   const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
@@ -41,10 +40,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   useEffect(() => {
     if(invert) {
       apiGroup.start({
-        from: {
-          position: [0,0, 0],
-          rotation: [0, 0, 0]
-        },
         to: {
           position: [(width/tileSize),0, 0],
           rotation: [0, Math.PI, 0]
@@ -56,15 +51,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
           position: [0, 0, 0],
           rotation: [0, 0, 0]
         },
-        from: {
-          position: [(width/tileSize),0, 0],
-          rotation: [0, Math.PI, 0]
-        }
       });
     }
   }, [invert]);
 
   async function onStart(mesh : InstancedMesh) {
+
     if(cameraControlRef.current) {
       cameraControlRef.current.maxDistance = 500;
       await cameraControlRef.current.setLookAt(
@@ -72,13 +64,31 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         0,0, 0,
         false
       );
+
       await cameraControlRef.current.fitToBox(mesh, true,
-        { paddingLeft: 1, paddingRight: 1, paddingBottom: 2, paddingTop: 2 }
+        { paddingLeft: 2, paddingRight: 2, paddingBottom: 3, paddingTop: 3 }
       );
+
+      apiGroup.start({
+        to: {
+          position: [0, 0, 0],
+          rotation: [0, Math.PI/8, 0]
+        },
+      });
+
       let distanceCamera = new Vector3();
       cameraControlRef.current.getPosition(distanceCamera, false);
       setMaxDistance(distanceCamera.z + 5.0);
     }
+  }
+
+  function onFinish() {
+    apiGroup.start({
+        to: {
+          position: [0, 0, 0],
+          rotation: [0, 0, 0]
+        },
+      });
   }
 
   function resetAnimation() {
@@ -146,6 +156,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   height={height}
                   animationType="wave"
                   onStart={onStart}
+                  onFinish={onFinish}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }
