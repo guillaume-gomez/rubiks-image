@@ -294,7 +294,7 @@ function App() {
           <div className="xl:w-9/12 w-full h-full">
             <Card title="Result">
               <SubCard title={
-                <div role="tablist" className="tabs tabs-bordered">
+                <div role="tablist" className="tabs tabs-boxed font-bold bg-base-300">
                   <a
                     role="tab"
                     className={`tab ${view3d ? "tab-active" : ""}`}
