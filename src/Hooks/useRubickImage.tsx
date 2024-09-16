@@ -3,6 +3,7 @@ import minBy from "lodash/minBy";
 import sample from "lodash/sample";
 import { getOffscreenContext, colorDistance, resizeImageCanvas } from "../tools";
 import { RubickFace } from "../types";
+import { compressRubickCubeData } from "../compress";
 
 interface Color {
   red: number;
@@ -105,6 +106,7 @@ export default function useRubickImage({ initialTileSize = tileSizeDefault } : R
           newRubicksPixels.push(rubickFace);
         }
       }
+      console.log(compressRubickCubeData(newRubicksPixels, expectedWidth));
       setRubickFaces(newRubicksPixels);
   }
 
