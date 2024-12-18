@@ -157,6 +157,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   animationType="wave"
                   onStart={onStart}
                   onFinish={onFinish}
+                  bestPerformances={(rubickFaces.length * 9) > 5000}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }
