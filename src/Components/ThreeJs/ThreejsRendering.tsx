@@ -62,6 +62,13 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   async function onStart(mesh : InstancedMesh) {
 
     if(cameraControlRef.current) {
+      apiGroup.start({
+        to: {
+          position: [0, 0, 0],
+          rotation: [0, - Math.PI/6, 0]
+        },
+      });
+
       cameraControlRef.current.maxDistance = 500;
       await cameraControlRef.current.setLookAt(
         0, 0, 1,
@@ -72,13 +79,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       await cameraControlRef.current.fitToBox(mesh, true,
         { paddingLeft: 2, paddingRight: 2, paddingBottom: 3, paddingTop: 3 }
       );
-
-      apiGroup.start({
-        to: {
-          position: [0, 0, 0],
-          rotation: [0, Math.PI/8, 0]
-        },
-      });
 
       let distanceCamera = new Vector3();
       cameraControlRef.current.getPosition(distanceCamera, false);

@@ -294,11 +294,22 @@ function App() {
           <div className="xl:w-9/12 w-full h-full">
             <Card title="Result">
               <SubCard title={
-                <Toggle
-                    label="3D views"
-                    value={view3d}
-                    toggle={() => setView3d(!view3d)}
-                  />
+                <div role="tablist" className="tabs tabs-boxed font-bold bg-base-300">
+                  <a
+                    role="tab"
+                    className={`tab ${view3d ? "tab-active" : ""}`}
+                    onClick={() => setView3d(true)}
+                  >
+                    3D view
+                  </a>
+                  <a
+                    role="tab"
+                    className={`tab ${!view3d ? "tab-active" : ""}`}
+                    onClick={() => setView3d(false)}
+                  >
+                    2D view
+                  </a>
+                </div>
                 }>
                 <div className="w-full h-full" ref={goToFinalResultDivRef}>
                 { view3d ?
