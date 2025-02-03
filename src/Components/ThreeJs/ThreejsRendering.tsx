@@ -6,6 +6,7 @@ import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
 import { InstancedMesh, Vector3 } from 'three';
 import Toggle from "../Toggle";
+import Select from "../Select";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
@@ -20,12 +21,15 @@ interface ThreejsRenderingProps {
   rubickFaces: RubickFace[];
 }
 
+type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one'|'random';
+
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const containerCanvasRef = useRef<HTMLDivElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
+  const [animationType, setAnimationType] = useState<AnimationType>("wave");
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
@@ -111,10 +115,23 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-          <ProgressButton
-            label="Reset Animation"
-            onClick={resetAnimation}
-          />
+          <>
+            <ProgressButton
+              label="Reset Animation"
+              onClick={resetAnimation}
+            />
+            <Select
+              label={"Animation type"}
+              value={animationType}
+              onChange={(newAnimationType) => setAnimationType(newAnimationType as AnimationType)}
+              options={[
+                { value: "wave", label: "Wave"},
+                { value: "inverted-wave", label: "Inverted Wave"},
+                { value: "one-by-one", label: "One by one"},
+                { value: "random", label: "Random"},
+              ]}
+            />
+          </>
       }
       <div
         className="flex flex-col gap-5 w-full h-screen"
@@ -154,7 +171,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   rubickFaces={rubickFaces}
                   width={width}
                   height={height}
-                  animationType="wave"
+                  animationType={animationType}
                   onStart={onStart}
                   onFinish={onFinish}
                   ref={rubickCubeInstanceMeshActionsRef}
