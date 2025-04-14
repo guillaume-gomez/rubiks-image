@@ -12,6 +12,7 @@ import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
 import { AnimationProvider } from "../../Reducers/generationReducer";
+import RecordScene from "../RecordScene";
 
 
 interface ThreejsRenderingProps {
@@ -27,6 +28,7 @@ type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one'|'random';
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const containerCanvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
   const [animationType, setAnimationType] = useState<AnimationType>("wave");
@@ -133,6 +135,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             />
           </>
       }
+      <RecordScene canvasRef={canvasRef} />
       <div
         className="flex flex-col gap-5 w-full h-screen"
         ref={containerCanvasRef}
@@ -142,6 +145,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         <Canvas
           camera={{ position: [0, 0, 10], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
+          ref={canvasRef}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
             <color attach="background" args={['#c0d6e9']} />
