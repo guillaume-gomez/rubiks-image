@@ -18,7 +18,7 @@ function Select({ label, value, onChange, options } : SelectProps) {
     >
       <option className="bg-neutral" disabled>{label}</option>
       {
-          options.map(({value, label}) => <option value={value}>{label}</option> )
+          options.map(({value, label}) => <option key={value} value={value}>{label}</option> )
       }
     </select>
   );
