@@ -64,3 +64,6 @@ https://github.com/guillaume-gomez/rubiks-image/assets/5362875/073e9475-841a-44d
 
     
 </table>
+
+# Icons
+https://iconmonstr.com
