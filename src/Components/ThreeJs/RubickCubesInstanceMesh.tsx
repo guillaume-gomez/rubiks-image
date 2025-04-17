@@ -111,7 +111,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     api.start();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [rubickFaces.length]);
+  }, [rubickFaces.length, animationType]);
 
   function init() {
     pivots.current = [];

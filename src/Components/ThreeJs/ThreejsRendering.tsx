@@ -79,7 +79,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       );
 
       await cameraControlRef.current.fitToBox(mesh, true,
-        { paddingLeft: 2, paddingRight: 2, paddingBottom: 3, paddingTop: 3 }
+        { paddingLeft: 10, paddingRight: 10, paddingBottom: 10, paddingTop: 10 }
       );
 
       let distanceCamera = new Vector3();
@@ -117,11 +117,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-          <>
-            <ProgressButton
-              label="Reset Animation"
-              onClick={resetAnimation}
-            />
+        <div className="flex flex-col gap-2">
+          <ProgressButton
+            label="Reset Animation"
+            onClick={resetAnimation}
+          />
+          <div className="flex flex-row gap-2 items-center justify-between">  
             <Select
               label={"Animation type"}
               value={animationType}
@@ -133,9 +134,10 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                 { value: "random", label: "Random"},
               ]}
             />
-          </>
+            <RecordScene canvasRef={canvasRef} />
+          </div>
+        </div>
       }
-      <RecordScene canvasRef={canvasRef} />
       <div
         className="flex flex-col gap-5 w-full h-screen"
         ref={containerCanvasRef}
