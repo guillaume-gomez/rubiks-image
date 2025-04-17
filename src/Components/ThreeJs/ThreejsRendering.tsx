@@ -12,6 +12,7 @@ import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
 import { AnimationProvider } from "../../Reducers/generationReducer";
+import RecordScene from "../RecordScene";
 
 
 interface ThreejsRenderingProps {
@@ -27,6 +28,7 @@ type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one'|'random';
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const containerCanvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
   const [animationType, setAnimationType] = useState<AnimationType>("wave");
@@ -77,7 +79,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       );
 
       await cameraControlRef.current.fitToBox(mesh, true,
-        { paddingLeft: 2, paddingRight: 2, paddingBottom: 3, paddingTop: 3 }
+        { paddingLeft: 10, paddingRight: 10, paddingBottom: 10, paddingTop: 10 }
       );
 
       let distanceCamera = new Vector3();
@@ -115,11 +117,12 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
-          <>
-            <ProgressButton
-              label="Reset Animation"
-              onClick={resetAnimation}
-            />
+        <div className="flex flex-col gap-2">
+          <ProgressButton
+            label="Reset Animation"
+            onClick={resetAnimation}
+          />
+          <div className="flex flex-row gap-2 items-center justify-between">  
             <Select
               label={"Animation type"}
               value={animationType}
@@ -131,7 +134,9 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                 { value: "random", label: "Random"},
               ]}
             />
-          </>
+            <RecordScene canvasRef={canvasRef} />
+          </div>
+        </div>
       }
       <div
         className="flex flex-col gap-5 w-full h-screen"
@@ -142,6 +147,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         <Canvas
           camera={{ position: [0, 0, 10], fov: 35, far: 1000 }}
           dpr={window.devicePixelRatio}
+          ref={canvasRef}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
             <color attach="background" args={['#c0d6e9']} />
