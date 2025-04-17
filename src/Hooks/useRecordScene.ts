@@ -1,4 +1,4 @@
-import { RefObject, useRef } from "react";
+import { RefObject, useRef, useState } from "react";
 
 
 interface useRecordSceneParams {
@@ -10,25 +10,25 @@ export default function useRecordScene ({canvasRef,  videoRef} : useRecordSceneP
   const recordedBlobs = useRef<Blob[]>([]);
   const mediaRecorder = useRef<MediaRecorder>();
   const stream = useRef<MediaStream>();
-  const recording = useRef<boolean>(false)
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   
   
 	function startRecord() {
-    if(!canvasRef.current || !mediaRecorder.current) {
+    if(!canvasRef.current) {
       return;
     }
-		recordedBlobs.current = [];
-		try {
+
+    recordedBlobs.current = [];
+    try {
       stream.current = canvasRef.current.captureStream();
-		  mediaRecorder.current = new MediaRecorder(stream.current, {mimeType: 'video/webm'});
-		} catch (e0) {
+      mediaRecorder.current = new MediaRecorder(stream.current, {mimeType: 'video/webm'});
+      mediaRecorder.current.onstop = handleStop;
+      mediaRecorder.current.ondataavailable = handleDataAvailable;
+      mediaRecorder.current.start(100); // collect 100ms of data
+      setIsRecording(true);
+    } catch (e0) {
       console.error('Unable to create MediaRecorder with options Object: ', e0);
     }
-
-    mediaRecorder.current.onstop = handleStop;
-    mediaRecorder.current.ondataavailable = handleDataAvailable;
-    mediaRecorder.current.start(100); // collect 100ms of data
-    recording.current = true;
 	}
 
   function handleStop() {
@@ -43,9 +43,9 @@ export default function useRecordScene ({canvasRef,  videoRef} : useRecordSceneP
       return;
     }
     mediaRecorder.current.stop();
-    recording.current = false;
+    setIsRecording(false);
     if(videoRef && videoRef.current) {
-    	videoRef.current.controls = true;
+      videoRef.current.controls = true;
     }
   }
 
@@ -70,5 +70,5 @@ function download() {
     }, 100);
 	}
 
-  return { stopRecord, startRecord, download, isRecording: recording.current };
+  return { stopRecord, startRecord, download, isRecording };
 }
