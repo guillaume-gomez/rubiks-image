@@ -4,7 +4,7 @@ function Header() {
   return (
     <div className="navbar bg-primary text-primary-content items-center justify-between">
       <div>
-        <img src={logo} alt="logo of Rubick image" width="64px"/>
+        <img src={logo} alt="logo of Rubick image" width="56px"/>
         <a className="btn btn-ghost normal-case text-xl">Rubick's Image</a>
       </div>
       <div>
