@@ -5,7 +5,7 @@ import { getOffscreenContext } from "../tools";
 
 
 function useImageContrast() {
-  const [contrastedImage, setcontrastedImage] = useState<HTMLImageElement>();
+  const [contrastedImage, setContrastedImage] = useState<HTMLImageElement>();
 
   function positionToDataIndex(x: number, y: number, width: number) : number {
     // data is arranged as [R, G, B, A, R, G, B, A, ...]
@@ -125,7 +125,7 @@ function useImageContrast() {
   async function computeImage(image: HTMLImageElement, refOutput : HTMLCanvasElement) {
     const base64Image = histogramEqualization(image, refOutput);
     const newcontrastedImage = await loadImage(base64Image);
-    setcontrastedImage(newcontrastedImage);
+    setContrastedImage(newcontrastedImage);
   }
 
 

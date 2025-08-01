@@ -112,6 +112,9 @@ function RegularView() {
 
     if(!chooseContrastedImage) {
       optimizedGenerateImage(image, possibleWidth, possibleHeight);
+      if(goToFinalResultDivRef.current) {
+        goToFinalResultDivRef.current.scrollIntoView({behavior: "smooth"});
+      }
       return
     }
 

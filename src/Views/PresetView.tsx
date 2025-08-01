@@ -4,20 +4,11 @@ import { isMobile } from 'react-device-detect';
 
 import useImageSizes from "../Hooks/useImageSizes";
 import useRubickImage from "../Hooks/useRubickImage";
-import useImageContrast from "../Hooks/useImageContrast";
 
 import Card from "../Components/Card";
-import SubCard from "../Components/SubCard";
-import CustomSettingsCard from "../Components/CustomSettingsCard";
-import InputFileWithPreview from "../Components/InputFileWithPreview";
-import Toggle from "../Components/Toggle";
-import Range from "../Components/Range";
 import Error from "../Components/Error";
-import CanvasRendering from "../Components/CanvasRendering";
 import ThreeJsRendering from "../Components/ThreeJs/ThreejsRendering";
 
-
-import logo from '/logo.svg';
 import eiffel from "/Tour_Eiffel_Wikimedia_Commons.jpg";
 
 
@@ -34,10 +25,8 @@ const MAX_CUBES = 5000
 function PresetView() {
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
-  const [chooseContrastedImage, setChooseContrastedImage] = useState<boolean>(false);
   // memoize for three js to avoid changes before generation
   const [threeJsParams, setThreeJsParams] = useState<threeJsParams>({ tileSize: initialTileSize, width: 0, height: 0});
-  const maxCubes = isMobile ? MAX_CUBES/2 : MAX_CUBES;
   const goToFinalResultDivRef = useRef<HTMLDivElement>(null)
 
 
@@ -45,10 +34,7 @@ function PresetView() {
     computePossibleSize,
     possibleWidth,
     possibleHeight,
-    ratio,
     setRatio,
-    maxRatio,
-    bestProportion,
     setBestProportion,
     setTileSize
   } = useImageSizes({ initialTileSize });
@@ -56,19 +42,19 @@ function PresetView() {
   const {
     optimizedGenerateImage,
     setOption,
-    noise,
     tileSize,
     rubickFaces
   } = useRubickImage({ initialTileSize });
 
-  const { contrastedImage, computeImage } = useImageContrast();
-
-
-  const refOutput = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+   uploadImage();
+  }, []);
 
   useEffect(() => {
-   uploadImage()
-  }, []);
+    if(image) {
+      generateImagesInImage();
+    }
+  }, [image]);
 
   function findBestTileSize(width: number, height: number, isMobile: boolean) {
     const threshold = isMobile ? MAX_CUBES/2 : MAX_CUBES;
@@ -84,7 +70,7 @@ function PresetView() {
     const newImage = new Image();
     newImage.src = eiffel;
     newImage.onload = () => {
-      //setImage(newImage);
+      setImage(newImage);
       console.log("newImage ", newImage.width, ": ", newImage.height)
 
       const [width, height] = computePossibleSize(newImage.width, newImage.height, isMobile);
@@ -104,36 +90,21 @@ function PresetView() {
       else {
         setError("");
       }
-
-
-
-      console.log("fhjdhfjd")
-
-      generateImagesInImage(newImage);
     }
     
   }
 
-  function generateImagesInImage(newImage : HTMLImageElement) {
+  function generateImagesInImage() {
     // update the params
     setThreeJsParams({tileSize, width: possibleWidth, height: possibleHeight});
-    if(!newImage) {
+    
+    if(!image) {
       setError("Error! Please upload an image");
       return;
     }
 
-    if(!chooseContrastedImage) {
-      console.log("fdjkfjdfjd", possibleWidth, possibleHeight)
-      optimizedGenerateImage(image, possibleWidth, possibleHeight);
-      return
-    }
-
-    if(!contrastedImage) {
-      setError("Contrasted image is not fully generated");
-      return;
-    }
-
-    optimizedGenerateImage(contrastedImage, possibleWidth, possibleHeight);
+    optimizedGenerateImage(image, possibleWidth, possibleHeight);
+    
     if(goToFinalResultDivRef.current) {
       goToFinalResultDivRef.current.scrollIntoView({behavior: "smooth"});
     }
@@ -142,17 +113,19 @@ function PresetView() {
   return (
     <div className="flex flex-col">
       <div className="w-full h-full">
-         {
-                  error !== "" && <Error errorMessage={error} />
-                }
+        {
+          error !== "" && <Error errorMessage={error} />
+        }
         <Card title="Result">
-          <ThreeJsRendering
-            width={threeJsParams.width}
-            height={threeJsParams.height}
-            tileSize={threeJsParams.tileSize}
-            rubickFaces={rubickFaces}
-          />
-          <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
+          <div ref={goToFinalResultDivRef} className="w-full h-full flex flex-col gap-1">
+            <ThreeJsRendering
+              width={threeJsParams.width}
+              height={threeJsParams.height}
+              tileSize={threeJsParams.tileSize}
+              rubickFaces={rubickFaces}
+            />
+            <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
+          </div>
         </Card>
       </div>
     </div>     

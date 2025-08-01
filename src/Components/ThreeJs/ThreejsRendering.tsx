@@ -118,10 +118,6 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       />
       { !hideOtherFaces &&
         <div className="flex flex-col gap-2">
-          <ProgressButton
-            label="Reset Animation"
-            onClick={resetAnimation}
-          />
           <div className="flex flex-col md:flex-row gap-2 items-center justify-between">  
             <Select
               label={"Animation type"}
@@ -136,6 +132,10 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             />
             <RecordScene canvasRef={canvasRef} />
           </div>
+          <ProgressButton
+            label="Reset Animation"
+            onClick={resetAnimation}
+          />
         </div>
       }
       <div
