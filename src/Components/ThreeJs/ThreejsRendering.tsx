@@ -122,7 +122,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             label="Reset Animation"
             onClick={resetAnimation}
           />
-          <div className="flex flex-row gap-2 items-center justify-between">  
+          <div className="flex flex-col md:flex-row gap-2 items-center justify-between">  
             <Select
               label={"Animation type"}
               value={animationType}
