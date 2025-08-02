@@ -36,10 +36,11 @@ export function useAnimationDispatch() {
 
 interface AnimationProviderProps {
     children: ReactElement;
+    duration?: number;
 }
 
-export function AnimationProvider({ children } : AnimationProviderProps ) {
-    const [generation, dispatch] = useReducer(animationReducer,{duration: 10000, started: false});
+export function AnimationProvider({ children, duration = 10000 } : AnimationProviderProps ) {
+    const [generation, dispatch] = useReducer(animationReducer,{duration: duration, started: false});
 
     return (
         <AnimationReducerContext.Provider value={generation}>

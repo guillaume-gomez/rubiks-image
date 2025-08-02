@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 
 import { isMobile } from 'react-device-detect';
+import { AnimationProvider } from "../Reducers/generationReducer";
 
 import useImageSizes from "../Hooks/useImageSizes";
 import useRubickImage from "../Hooks/useRubickImage";
 
 import Card from "../Components/Card";
 import Error from "../Components/Error";
-import ThreeJsRendering from "../Components/ThreeJs/ThreejsRendering";
+import ThreeJsRendering from "../Components/ThreeJs/ThreeJsRendering";
 
-import eiffel from "/Tour_Eiffel_Wikimedia_Commons.jpg";
+import { useDoubleTap } from 'use-double-tap';
+import { useFullscreen } from "rooks";
 
 
 interface threeJsParams {
@@ -22,13 +24,22 @@ const initialTileSize = 32;
 
 const MAX_CUBES = 5000
 
-function PresetView() {
+interface PresetViewProps {
+  path: string;
+}
+
+function PresetView({ path } : PresetViewProps) {
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
   // memoize for three js to avoid changes before generation
   const [threeJsParams, setThreeJsParams] = useState<threeJsParams>({ tileSize: initialTileSize, width: 0, height: 0});
-  const goToFinalResultDivRef = useRef<HTMLDivElement>(null)
-
+  const goToFinalResultDivRef = useRef<HTMLDivElement>(null);
+  const containerCanvasRef = useRef<HTMLDivElement>(null);
+  const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
+  const doubleTapEvent = useDoubleTap(() => {
+      toggleFullscreen();
+  });
 
   const {
     computePossibleSize,
@@ -68,7 +79,7 @@ function PresetView() {
 
   function uploadImage() {
     const newImage = new Image();
-    newImage.src = eiffel;
+    newImage.src = path;
     newImage.onload = () => {
       setImage(newImage);
       console.log("newImage ", newImage.width, ": ", newImage.height)
@@ -117,15 +128,28 @@ function PresetView() {
           error !== "" && <Error errorMessage={error} />
         }
         <Card title="Result">
-          <div ref={goToFinalResultDivRef} className="w-full h-full flex flex-col gap-1">
-            <ThreeJsRendering
-              width={threeJsParams.width}
-              height={threeJsParams.height}
-              tileSize={threeJsParams.tileSize}
-              rubickFaces={rubickFaces}
-            />
-            <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
-          </div>
+            <div ref={goToFinalResultDivRef} className="w-full h-full flex flex-col gap-1">
+              <AnimationProvider duration={30000}>
+                <div
+                  className="flex flex-col gap-5 w-full h-screen"
+                  ref={containerCanvasRef}
+                  onDoubleClick={toggleFullscreen}
+                  {...doubleTapEvent}
+                >
+                  <ThreeJsRendering
+                    width={threeJsParams.width}
+                    height={threeJsParams.height}
+                    tileSize={threeJsParams.tileSize}
+                    rubickFaces={rubickFaces}
+                    hideOtherFaces={false}
+                    invert={false}
+                    animationType={'wave'}
+                    onFinishCallback={}
+                  />
+                </div>
+              </AnimationProvider>
+              <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
+            </div>
         </Card>
       </div>
     </div>     

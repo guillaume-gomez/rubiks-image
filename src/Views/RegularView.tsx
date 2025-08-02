@@ -14,7 +14,7 @@ import Toggle from "../Components/Toggle";
 import Range from "../Components/Range";
 import Error from "../Components/Error";
 import CanvasRendering from "../Components/CanvasRendering";
-import ThreeJsRendering from "../Components/ThreeJs/ThreejsRendering";
+import ThreeJsRenderingManager from "../Components/ThreeJs/ThreeJsRenderingManager";
 
 
 import logo from '/logo.svg';
@@ -311,7 +311,7 @@ function RegularView() {
             <div className="w-full h-full" ref={goToFinalResultDivRef}>
             { view3d ?
                 <>
-                  <ThreeJsRendering
+                  <ThreeJsRenderingManager
                     width={threeJsParams.width}
                     height={threeJsParams.height}
                     tileSize={threeJsParams.tileSize}
