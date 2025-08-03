@@ -921,9 +921,9 @@ color-convert@^2.0.1:
     color-name "~1.1.4"
 
 color-convert@^2.0.3:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-3.0.1.tgz#c0d327fd53cb93dfac3ba60fb04f2f8069638d6f"
-  integrity sha512-5kQah2eolfQV7HCrxtsBBArPfT5dwaKYMCXeMQsdRO7ihTO/cuNLGjd50ITCDn+ZU/YbS0Go64SjP9154eopxg==
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-3.1.0.tgz#ce16ebb832f9d7522649ed9e11bc0ccb9433a524"
+  integrity sha512-TVoqAq8ZDIpK5lsQY874DDnu65CSsc9vzq0wLpNQ6UMBq81GSZocVazPiBbYGzngzBOIRahpkTzCLVe2at4MfA==
   dependencies:
     color-name "^2.0.0"
 
@@ -2502,6 +2502,13 @@ use-sync-external-store@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
   integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
+
+usehooks-ts@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/usehooks-ts/-/usehooks-ts-3.1.1.tgz#0bb7f38f36f8219ee4509cc5e944ae610fb97656"
+  integrity sha512-I4diPp9Cq6ieSUH2wu+fDAVQO43xwtulo+fKEidHUwZPnYImbtkTjzIJYcDcJqxgmX31GVqNFURodvcgHcW0pA==
+  dependencies:
+    lodash.debounce "^4.0.8"
 
 util-deprecate@^1.0.2:
   version "1.0.2"

@@ -31,7 +31,9 @@ function ThreejsRendering({
   rubickFaces,
   hideOtherFaces,
   invert,
-  animationType
+  animationType,
+  onFinishCallback,
+  onStartCallback
 } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
