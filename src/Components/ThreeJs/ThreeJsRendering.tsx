@@ -1,4 +1,4 @@
-import { useRef , useState, useEffect, Suspense } from 'react';
+import { useRef , useState, useEffect, Suspense, Ref } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { CameraControls, Stats, GizmoHelper, GizmoViewport, Backdrop } from '@react-three/drei';
 import { RubickFace } from "../../types";
@@ -20,6 +20,7 @@ interface ThreejsRenderingProps {
   animationType: AnimationType;
   onFinishCallback? : () => void;
   onStartCallback? : () => void;
+  rubickCubeInstanceMeshActionsRef : Ref<ExternalActionInterface> | undefined; 
 }
 
 
@@ -33,7 +34,8 @@ function ThreejsRendering({
   invert,
   animationType,
   onFinishCallback,
-  onStartCallback
+  onStartCallback,
+  rubickCubeInstanceMeshActionsRef
 } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,8 +44,7 @@ function ThreejsRendering({
     from : {position: [0,0, 0], rotation: [0, 0, 0] },
     config: { mass: 5, tension: 500, friction: 150, precision: 0.0001 }
   }));
-  const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
-
+  
   useEffect(() => {
     if(invert) {
       apiGroup.start({
@@ -106,12 +107,7 @@ function ThreejsRendering({
     }
   }
 
-  function resetAnimation() {
-    if(rubickCubeInstanceMeshActionsRef && rubickCubeInstanceMeshActionsRef.current) {
-      rubickCubeInstanceMeshActionsRef.current.reset();
-    }
-  }
-
+  
   return (
     <Canvas
       camera={{ position: [0, 0, 10], fov: 35, far: 1000 }}

@@ -8,8 +8,11 @@ import useRubickImage from "../Hooks/useRubickImage";
 
 import Card from "../Components/Card";
 import Error from "../Components/Error";
-import CopyToClipboard from "../Components/CopyToClipboard";
 import ThreeJsRendering from "../Components/ThreeJs/ThreeJsRendering";
+import  { ExternalActionInterface } from "../Components/ThreeJs/RubickCubesInstanceMesh";
+import ProgressButton from "../Components/ProgressButton";
+import ShareModal from "../Components/ShareModal";
+
 
 import { useDoubleTap } from 'use-double-tap';
 import { useFullscreen } from "rooks";
@@ -30,6 +33,7 @@ interface PresetViewProps {
 }
 
 function PresetView({ path } : PresetViewProps) {
+  const [firstRender, setFirstRender] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [image, setImage] = useState<HTMLImageElement>();
@@ -41,6 +45,8 @@ function PresetView({ path } : PresetViewProps) {
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
   });
+  const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
+
 
   const {
     computePossibleSize,
@@ -122,30 +128,39 @@ function PresetView({ path } : PresetViewProps) {
     }
   }
 
-  console.log(openModal)
+  function resetAnimation() {
+    if(rubickCubeInstanceMeshActionsRef && rubickCubeInstanceMeshActionsRef.current) {
+      rubickCubeInstanceMeshActionsRef.current.reset();
+    }
+  }
+
+  function onFinishCallback() {
+    if(!firstRender) {
+      setFirstRender(true);
+      setOpenModal(true);
+    }
+  }
 
   return (
     <div className="flex flex-col">
-      <dialog id="my_modal_5" onCancel={() => setOpenModal(false)} className={`modal ${openModal && "modal-open"}`}>
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Did you enjoy ?</h3>
-          <p className="py-4">Share with your friends</p>
-          <CopyToClipboard initialLabel={"Copy"}/>
-          <div className="modal-action">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button className="btn" onClick={() => setOpenModal(false)}>Close</button>
-            </form>
-          </div>
-        </div>
-      </dialog>
+      <ShareModal
+        visible={openModal}
+        onClose={() => setOpenModal(false)}
+        encodeMessage={`Try by yourself ${document.location.href}`}
+      />
       <div className="w-full h-full">
         {
           error !== "" && <Error errorMessage={error} />
         }
         <Card title="Result">
-            <div ref={goToFinalResultDivRef} className="w-full h-full flex flex-col gap-1">
-              <AnimationProvider duration={30000}>
+            
+            <AnimationProvider duration={20000}>
+              <>
+              <ProgressButton
+                label="Reset Animation"
+                onClick={resetAnimation}
+               />
+              <div ref={goToFinalResultDivRef} className="w-full h-full flex flex-col gap-1">
                 <div
                   className="flex flex-col gap-5 w-full h-screen"
                   ref={containerCanvasRef}
@@ -160,12 +175,14 @@ function PresetView({ path } : PresetViewProps) {
                     hideOtherFaces={false}
                     invert={false}
                     animationType={'wave'}
-                    onFinishCallback={() => setOpenModal(true)}
+                    onFinishCallback={onFinishCallback}
+                    rubickCubeInstanceMeshActionsRef={rubickCubeInstanceMeshActionsRef}
                   />
                 </div>
-              </AnimationProvider>
               <p className="text-xs italic">Double click/tap on the canvas to go full screen</p>
             </div>
+            </>
+          </AnimationProvider>
         </Card>
       </div>
     </div>     

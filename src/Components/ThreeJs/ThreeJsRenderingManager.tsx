@@ -31,6 +31,7 @@ function ThreejsRenderingManager({ width, height, tileSize, rubickFaces } : Thre
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
   });
+
   const rubickCubeInstanceMeshActionsRef = useRef<ExternalActionInterface| null>(null);
 
   function resetAnimation() {
@@ -88,6 +89,7 @@ function ThreejsRenderingManager({ width, height, tileSize, rubickFaces } : Thre
             hideOtherFaces={hideOtherFaces}
             invert={invert}
             animationType={animationType}
+            rubickCubeInstanceMeshActionsRef={rubickCubeInstanceMeshActionsRef}
           />
         </div>
       </>

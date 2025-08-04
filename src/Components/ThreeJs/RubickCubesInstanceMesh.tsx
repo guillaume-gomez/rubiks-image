@@ -48,7 +48,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
   const origin = useRef<Vector3>(new Vector3());
   const pivots = useRef<Vector3[]>([]);
   const oldRotation = useRef<number>(0.0);
-  const params= useRef<ParamsMove[]>([]);
+  const params = useRef<ParamsMove[]>([]);
   const numberOfCubes =  rubickFaces.length * 9 * 3;
   const middleDistances = useMemo(() => ({ x: width/2, y: height/2 }), [width, height]);
 
