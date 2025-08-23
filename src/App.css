@@ -1,3 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "rubicks";
+  default: true;
+  prefersdark: false;
+  color-scheme: "dark";
+  --color-base-100: oklch(30.8577% .023243 264.149498);
+  --color-base-200: oklch(33% .023243 264.149498);
+  --color-base-300: oklch(36% .023243 264.149498);
+  --color-base-content: oklch(96% 0.001 286.375);
+  --color-primary: #eecf4e;
+  --color-primary-content: oklch(0% 0 0);
+  --color-secondary: #01b15f;
+  --color-secondary-content: oklch(0% 0 0);
+  --color-accent: #ec702d;
+  --color-accent-content: oklch(0% 0 0);
+  --color-neutral: #2c5da6;
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(60% 0.126 221.723);
+  --color-info-content: oklch(98% 0.019 200.873);
+  --color-success: oklch(62% 0.194 149.214);
+  --color-success-content: oklch(98% 0.018 155.826);
+  --color-warning: #FBBD23;
+  --color-warning-content: oklch(98% 0.016 73.684);
+  --color-error: #F87272;
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 0;
+  --noise: 0;
+}
+

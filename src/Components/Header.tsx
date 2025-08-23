@@ -3,9 +3,9 @@ import logo from '/logo.svg';
 function Header() {
   return (
     <div className="navbar bg-primary text-primary-content items-center justify-between">
-      <div>
+      <div className="flex flex-row gap-1 items-center">
         <img src={logo} alt="logo of Rubick image" width="56px"/>
-        <a className="btn btn-ghost normal-case text-xl">Rubick's Image</a>
+        <a className="btn btn-ghost btn-accent normal-case text-xl">Rubick's Image</a>
       </div>
       <div>
         <a

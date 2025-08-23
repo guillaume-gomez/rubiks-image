@@ -297,14 +297,14 @@ function App() {
                 <div role="tablist" className="tabs tabs-boxed font-bold bg-base-300">
                   <a
                     role="tab"
-                    className={`tab ${view3d ? "tab-active" : ""}`}
+                    className={`hover:text-grey w-1/2 tab ${view3d ? "tab-active bg-primary text-black hover:text-black" : ""}`}
                     onClick={() => setView3d(true)}
                   >
                     3D view
                   </a>
                   <a
                     role="tab"
-                    className={`tab ${!view3d ? "tab-active" : ""}`}
+                    className={`w-1/2 tab ${!view3d ? "tab-active bg-primary text-black hover:text-black" : ""}`}
                     onClick={() => setView3d(false)}
                   >
                     2D view
