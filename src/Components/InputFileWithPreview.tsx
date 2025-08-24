@@ -17,7 +17,7 @@ function InputFileWithPreview({onChange, value} : InputFileWithPreviewProps) {
 
   return (
     <div className="flex gap-3">
-      <label className="w-full flex flex-col justify-center items-center bg-white text-primary shadow-lg uppercase border-2 border-primary transition duration-300 ease-in-out bg-opacity-40 cursor-pointer hover:bg-primary hover:text-white">
+      <label className="w-full flex flex-col justify-center items-center bg-white/40 text-primary shadow-lg uppercase border-2 border-primary transition duration-300 ease-in-out cursor-pointer hover:bg-primary hover:text-white">
         <svg
           className="w-8 h-8"
           fill="currentColor"
