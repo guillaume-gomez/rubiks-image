@@ -19,7 +19,7 @@ https://github.com/guillaume-gomez/rubiks-image/assets/5362875/073e9475-841a-44d
 <table>
     <tr>
         <th>Original Image</th>
-        <th>3D Output</th
+        <th>3D Output</th>
     </tr>
     <tr>
         <td>
