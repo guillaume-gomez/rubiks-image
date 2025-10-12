@@ -47,6 +47,14 @@ https://github.com/guillaume-gomez/rubiks-image/assets/5362875/073e9475-841a-44d
     </tr>
     <tr>
         <td>
+            <img src="https://github.com/user-attachments/assets/cdd5526f-21ad-4b3c-a11d-fba2c949276a" width="50%"/>
+        </td>
+        <td>
+           <img width="970" height="694" alt="ryan-gosling" src="https://github.com/user-attachments/assets/c8547670-ab6d-4af7-893e-12a21f41298e" />
+        </td>
+    </tr>
+    <tr>
+        <td>
             <img src="/examples/raphael-quenard.jpeg" width="50%"/>
         </td>
         <td>
