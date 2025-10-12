@@ -53,6 +53,14 @@ https://github.com/guillaume-gomez/rubiks-image/assets/5362875/073e9475-841a-44d
            <img width="970" height="694" alt="ryan-gosling" src="https://github.com/user-attachments/assets/c8547670-ab6d-4af7-893e-12a21f41298e" />
         </td>
     </tr>
+     <tr>
+        <td>
+            <img src="https://github.com/user-attachments/assets/7f228652-a71b-4441-89f4-937e5aa2c0a0" width="50%"/>
+        </td>
+        <td>
+           <img width="526" height="724" alt="bauhaus" src="https://github.com/user-attachments/assets/ec6aa4c2-497c-4401-bbd5-06742ec390a3" />
+        </td>
+    </tr>
     <tr>
         <td>
             <img src="/examples/raphael-quenard.jpeg" width="50%"/>
