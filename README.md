@@ -55,6 +55,14 @@ https://github.com/guillaume-gomez/rubiks-image/assets/5362875/073e9475-841a-44d
     </tr>
     <tr>
         <td>
+            <img src="https://github.com/user-attachments/assets/eb221b95-fb4e-4c21-a3f4-43759305633d" width="50%"/>
+        </td>
+        <td>
+            <img width="789" height="796" alt="daria" src="https://github.com/user-attachments/assets/374286ae-53d2-4fa3-9438-78507afc5c20" />
+        </td>
+    </tr>
+    <tr>
+        <td>
             <img src="/examples/paul-Mescal.webp" width="50%"/>
         </td>
         <td>
