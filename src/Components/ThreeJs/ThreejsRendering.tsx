@@ -180,6 +180,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
                   animationType={animationType}
                   onStart={onStart}
                   onFinish={onFinish}
+                  bestPerformances={(rubickFaces.length * 9) > 5000}
                   ref={rubickCubeInstanceMeshActionsRef}
                 />
               }
