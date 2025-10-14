@@ -171,7 +171,11 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
             >
               {
                 hideOtherFaces ?
-                <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
+                <CubesSingleLayerInstanceMesh
+                  tileSize={tileSize}
+                  rubickFaces={rubickFaces}
+                  onStart={onStart}
+                />
                 : <RubickCubesInstanceMesh
                   tileSize={tileSize}
                   rubickFaces={rubickFaces}
