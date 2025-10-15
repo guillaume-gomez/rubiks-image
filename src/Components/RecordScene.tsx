@@ -12,7 +12,7 @@ function RecordScene({ canvasRef }: RecordSceneProps) {
   const { stopRecord, startRecord, download, isRecording } = useRecordScene({ canvasRef });
 
 	return (
-			<div className="join">
+			<div className="flex items-center gap-1">
 				<button
 					className={`btn-sm btn btn-outline join-item ${isRecording ? 'btn-accent' : 'btn-primary'} `}
 					onClick={ !isRecording ? startRecord : stopRecord }

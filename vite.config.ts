@@ -22,7 +22,7 @@ export default defineConfig({
   plugins: [
       tailwindcss(),
       react(),
-      checker({typescript: true}),
+      checker({ typescript: { tsconfigPath: "./tsconfig.app.json" } }),
       splitVendorChunkPlugin(),
       //visualizer({ filename: 'bundle-analysis.html', open: true }) as PluginOption,
   ]
