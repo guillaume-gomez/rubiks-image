@@ -37,7 +37,16 @@ function InputFileWithPreview({onChange, value} : InputFileWithPreviewProps) {
       {
         value ?
         <img src={value.src} style={{ minWidth: "64px", maxWidth: "100px"}}/> :
-        <span>Nothing to render</span>
+        <span
+          className="text-center"
+          style={{ 
+            minWidth: "64px",
+            maxWidth: "100px",
+            border: "2px dashed white"
+          }}
+        >
+            Nothing to render
+        </span>
 
       }
     </div>
