@@ -71,6 +71,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         },
       });
 
+      cameraControlRef.current.minDistance = 3;
       cameraControlRef.current.maxDistance = 500;
       await cameraControlRef.current.setLookAt(
         0, 0, 1,
@@ -198,6 +199,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               maxAzimuthAngle={0.55}
               makeDefault
               maxDistance={maxDistance}
+              minDistance={3}
               ref={cameraControlRef}
             />
           </Suspense>
