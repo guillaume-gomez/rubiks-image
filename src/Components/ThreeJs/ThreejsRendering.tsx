@@ -6,11 +6,13 @@ import { RubickFace } from "../../types";
 import { useSpring, animated } from '@react-spring/three';
 import { InstancedMesh, Vector3 } from 'three';
 import Toggle from "../Toggle";
+import Select from "../Select";
 import RubickCubesInstanceMesh, { ExternalActionInterface } from "./RubickCubesInstanceMesh";
 import CubesSingleLayerInstanceMesh from "./CubesSingleLayerInstanceMesh";
 import ProgressButton from "../ProgressButton";
 import { useDoubleTap } from 'use-double-tap';
 import { AnimationProvider } from "../../Reducers/generationReducer";
+import RecordScene from "../RecordScene";
 
 
 interface ThreejsRenderingProps {
@@ -20,14 +22,18 @@ interface ThreejsRenderingProps {
   rubickFaces: RubickFace[];
 }
 
+type AnimationType = 'wave'| 'inverted-wave'| 'one-by-one'|'random';
+
 
 function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRenderingProps) {
   const cameraControlRef = useRef<CameraControls|null>(null);
   const containerCanvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hideOtherFaces, setHideOtherFaces] = useState<boolean>(false);
   const [invert, setInvert] = useState<boolean>(false);
   const [dpr, setDpr] = useState<number>(1);
   const [bestPerformances, setBestPerformances] = useState<boolean>(false);
+  const [animationType, setAnimationType] = useState<AnimationType>("wave");
   const { toggleFullscreen } = useFullscreen({ target: containerCanvasRef });
   const doubleTapEvent = useDoubleTap(() => {
       toggleFullscreen();
@@ -60,6 +66,14 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
   async function onStart(mesh : InstancedMesh) {
 
     if(cameraControlRef.current) {
+      apiGroup.start({
+        to: {
+          position: [0, 0, 0],
+          rotation: [0, - Math.PI/6, 0]
+        },
+      });
+
+      cameraControlRef.current.minDistance = 3;
       cameraControlRef.current.maxDistance = 500;
       await cameraControlRef.current.setLookAt(
         0, 0, 1,
@@ -68,15 +82,8 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
       );
 
       await cameraControlRef.current.fitToBox(mesh, true,
-        { paddingLeft: 2, paddingRight: 2, paddingBottom: 3, paddingTop: 3 }
+        { paddingLeft: 10, paddingRight: 10, paddingBottom: 10, paddingTop: 10 }
       );
-
-      apiGroup.start({
-        to: {
-          position: [0, 0, 0],
-          rotation: [0, Math.PI/8, 0]
-        },
-      });
 
       let distanceCamera = new Vector3();
       cameraControlRef.current.getPosition(distanceCamera, false);
@@ -113,10 +120,26 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         toggle={() => setInvert(!invert)}
       />
       { !hideOtherFaces &&
+        <div className="flex flex-col gap-2">
           <ProgressButton
             label="Reset Animation"
             onClick={resetAnimation}
           />
+          <div className="flex flex-col md:flex-row gap-2 items-center justify-between">  
+            <Select
+              label={"Animation type"}
+              value={animationType}
+              onChange={(newAnimationType) => setAnimationType(newAnimationType as AnimationType)}
+              options={[
+                { value: "wave", label: "Wave"},
+                { value: "inverted-wave", label: "Inverted Wave"},
+                { value: "one-by-one", label: "One by one"},
+                { value: "random", label: "Random"},
+              ]}
+            />
+            <RecordScene canvasRef={canvasRef} />
+          </div>
+        </div>
       }
       <div
         className="flex flex-col gap-5 w-full h-screen"
@@ -127,6 +150,7 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
         <Canvas
           camera={{ position: [0, 0, 10], fov: 35, far: 1000 }}
           dpr={Math.max(dpr, window.devicePixelRatio)}
+          ref={canvasRef}
         >
           <Suspense fallback={<span className="loading loading-dots loading-lg"></span>}>
             <PerformanceMonitor
@@ -163,13 +187,13 @@ function ThreejsRendering({ width, height, tileSize, rubickFaces } : ThreejsRend
               >
                 {
                   hideOtherFaces ?
-                  <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} />
+                  <CubesSingleLayerInstanceMesh tileSize={tileSize} rubickFaces={rubickFaces} onStart={onStart} />
                   : <RubickCubesInstanceMesh
                     tileSize={tileSize}
                     rubickFaces={rubickFaces}
                     width={width}
                     height={height}
-                    animationType="wave"
+                    animationType={animationType}
                     onStart={onStart}
                     onFinish={onFinish}
                     bestPerformances={bestPerformances || (rubickFaces.length * 9) > 5000}

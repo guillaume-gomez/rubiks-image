@@ -24,7 +24,7 @@ interface RubickCubesInstancedMeshProps {
 
 type axisType = "X"| "Y" | "Z";
 type faceType = 0 | 1 | 2;
-type animationType = "wave" | "inverted-wave" | "one-by-one";
+type animationType = "wave" | "inverted-wave" | "one-by-one"|"random";
 
 interface Move {
   axis: axisType;
@@ -112,7 +112,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
     api.start();
 
     meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [rubickFaces.length]);
+  }, [rubickFaces.length, animationType]);
 
   function init() {
     pivots.current = [];
@@ -155,6 +155,8 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
         return generateWaveRandomMoves(x, y, true);
       case "one-by-one":
         return (position / rubickFaces.length ) * fromDurationToNumberOfMoves();
+      case "random":
+        return Math.floor(Math.random() * fromDurationToNumberOfMoves());
     }
   }
 

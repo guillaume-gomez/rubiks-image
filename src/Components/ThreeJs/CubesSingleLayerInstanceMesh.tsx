@@ -6,9 +6,10 @@ import { boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCo
 interface CubesSingleLayerInstanceMeshProps {
   tileSize: number;
   rubickFaces: RubickFace[];
+  onStart: (mesh: InstancedMesh) => void;
 }
 
-function CubesSingleLayerInstanceMesh({ tileSize, rubickFaces } : CubesSingleLayerInstanceMeshProps) {
+function CubesSingleLayerInstanceMesh({ tileSize, rubickFaces, onStart } : CubesSingleLayerInstanceMeshProps) {
   const meshRef = useRef<InstancedMesh>(null);
   const numberOfCubesSingleLayerInstanceMesh =  rubickFaces.length * 9;
 
@@ -33,6 +34,7 @@ function CubesSingleLayerInstanceMesh({ tileSize, rubickFaces } : CubesSingleLay
     if (rubickFaces.length <= 0) return;
 
     init();
+    onStart(meshRef.current!);
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [rubickFaces]);
 

@@ -54,6 +54,8 @@ function ProgressButton({ label, onClick } : ProgressButtonProps) {
     }
   }
 
+  const progressPercentage = (milliseconds/durationInMs)*100;
+
   return (
     <button
       className="btn btn-secondary btn-xs flex flex-row justify-start px-0 w-full"
@@ -61,14 +63,14 @@ function ProgressButton({ label, onClick } : ProgressButtonProps) {
     >
         <div
           className="bg-primary w-full h-full flex items-center justify-center"
-          style={{width: `${(milliseconds/durationInMs)*100}%`}}
+          style={{width: `${progressPercentage}%`}}
         >
         </div>
         <div
           className="absolute object-center"
           style={{left: "50%", transform: "translate(-50% , 0%)"}}
         >
-          { milliseconds === 0 ? label : ""}
+          { milliseconds === 0 ? label : `${Math.trunc(progressPercentage)}%` }
         </div>
     </button>
   );
