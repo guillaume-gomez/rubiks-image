@@ -3,7 +3,7 @@ import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
-import { roundedBoxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import { roundedBoxGeometry, boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
 import { useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
 
 

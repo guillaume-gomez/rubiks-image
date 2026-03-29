@@ -84,7 +84,7 @@ function App() {
   function uploadImage(newImage: HTMLImageElement) {
     setImage(newImage);
 
-    console.log("newImage ", newImage.width, ": ", newImage.height)
+    //console.log("newImage ", newImage.width, ": ", newImage.height)
 
     const [width, height] = computePossibleSize(newImage.width, newImage.height, isMobile);
     findBestTileSize(width, height, isMobile);
