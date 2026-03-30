@@ -3,7 +3,7 @@ import sample from "lodash/sample";
 import { useSpring, useSpringRef} from '@react-spring/web';
 import { Object3D, Matrix4, Vector3, InstancedMesh, Euler } from 'three';
 import { RubickFace } from "../../types";
-import { roundedBoxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
+import { roundedBoxGeometry, boxGeometry, colorsMaterialsArray, fromColorToRotation } from "./CubeCommon";
 import { useAnimationDispatch, useAnimation } from "../../Reducers/generationReducer";
 
 
@@ -17,6 +17,7 @@ interface RubickCubesInstancedMeshProps {
   width: number;
   height: number;
   animationType: animationType;
+  bestPerformances?: boolean;
   onStart: (mesh: InstancedMesh) => void;
   onFinish: (mesh: InstancedMesh) => void;
 }
@@ -41,7 +42,7 @@ const TRANSITION_DURATION = 300; //ms
 const DELAY_DURATION = 500; //ms
 
 const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubesInstancedMeshProps>
-  (({ tileSize, rubickFaces, width, height, animationType, onStart, onFinish }, ref) => {
+  (({ tileSize, rubickFaces, width, height, animationType, onStart, onFinish, bestPerformances = false }, ref) => {
   const dispatchGeneration = useAnimationDispatch();
   const { duration } = useAnimation();
   const meshRef = useRef<InstancedMesh>(null);
@@ -310,7 +311,7 @@ const RubickCubesInstancedMesh = forwardRef<ExternalActionInterface, RubickCubes
   }
 
   return (
-    <instancedMesh receiveShadow={true} ref={meshRef} args={[roundedBoxGeometry, colorsMaterialsArray, numberOfCubes ]} />
+    <instancedMesh receiveShadow={true} ref={meshRef} args={[bestPerformances ? boxGeometry : roundedBoxGeometry, colorsMaterialsArray, numberOfCubes ]} />
   );
 });
 
